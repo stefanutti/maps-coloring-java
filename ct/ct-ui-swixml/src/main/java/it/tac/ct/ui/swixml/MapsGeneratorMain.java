@@ -51,6 +51,7 @@ import it.tac.ct.core.MapsGenerator;
  *          </p>
  *          <p>
  *          TODO:
+ *          <li>Review the code after the migration to sourceforge (07/02/2011)
  *          <li>Make the user interface more compact and write an introduction (all before publishing it)
  *          <li>Transformations:
  *          <li>- Starting from a displayed map remove the last inserted face (not considering the Ocean) and create another view for compare coloring
