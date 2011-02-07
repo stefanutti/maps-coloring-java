@@ -57,9 +57,9 @@ import it.tac.ct.core.MapsGenerator;
  *          <li>- Starting from a displayed map remove the last inserted face (not considering the Ocean) and create another view for compare coloring
  *          <li>- Transform a map that does'nt have an F5 ocean into a map with an F5 ocean (from plane back to sphere and hole an F5)
  *          <li>Extend the list to be stored also on disk when memory is a problem (see if ehcache is good)
- *          <li>Show the use of memory (heap)
- *          <li>Add a tool that from the picture of a graph or a map (to upload), transform it into a simplified map
- *          <li>Try to think to an highly distributed architecture using a grid of computers to distribute job and increase memory available
+ *          <li>Show the use of memory directly on the UI (heap)
+ *          <li>Add a tool that from the picture of a graph or of a map (to upload), transform it into a simplified map
+ *          <li>Try to think to an highly distributed architecture using a grid of computers to distribute jobs and increase memory available
  *          <li>Add a flag to not filter (remove) any map, not even if a not reach-able face has cardinality = 2
  *          <li>Add the coloring method based on the arbitrary choice the three color for central face, ocean + another face adjoining the other two
  *          <li>Add a map serching tool: for example "find a map with 13 faces" or "find a map with second face with at least two F6 faces" or ...
@@ -68,9 +68,9 @@ import it.tac.ct.core.MapsGenerator;
  *          <li>Save and restore maps on disk (single and groups). Each map can be saved as a string that represents the "sequence of coordinates"
  *          <li>Add timing statistics
  *          <li>Remove from F the variables: x, y, w, h and startRadius, stopRadius, ...
- *          <li>Create the object Ocean to color it, through mouse selection as any other face and in automatic coloring
+ *          <li>Create the object Ocean to color it, through mouse selection as any other face
  *          <li>Clean the code: Review the indexes used for array and similar. Some begin from 0 and some from 1
- *          <li>Clean the code: Styles are created also when not needed (create 4 styles and use the same style for more objects)
+ *          <li>Clean the code: Verify is styles are created also when not needed (create 4 styles and use the same style for more objects)
  *          <li>Clean the code: When coloring the map, do not recreate it every time but change only the styles
  *          <li>Clean the code: refactor all
  *          <li>Color all maps (silent without visualization + progress bar)
@@ -79,7 +79,7 @@ import it.tac.ct.core.MapsGenerator;
  *          <li>Permit zoom or color mode or find a way to have both at the same time (different buttons?)
  *          <li>Save all images found (if list is small or +- 10 maps respect the current one)
  *          <li>3D mode: navigable in all directions + all angles (like google earth)
- *          <li>Bug: if method == F and maxNumber < 7 and automatic filter is set --> computation does not produce maps (only the basic one)
+ *          <li>Bug?: if method == F and maxNumber < 7 and automatic filter is set --> computation does not produce maps (only the basic one)
  *          </p>
  *          <p>
  *          DONE:
