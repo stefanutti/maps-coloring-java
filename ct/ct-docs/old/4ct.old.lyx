@@ -1,0 +1,1006 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass amsart
+\begin_preamble
+
+\usepackage{amssymb,latexsym}
+%\usepackage{cite} % to get Refs. [1,2,3] typeset as [1--3] automatically
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem{example}{Example}
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\language english
+\inputencoding auto
+\font_roman bookman
+\font_sans default
+\font_typewriter default
+\font_default_family rmdefault
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize 8
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\leftmargin 1.2cm
+\topmargin 1.2cm
+\rightmargin 1.2cm
+\bottommargin 1.2cm
+\headheight 1cm
+\headsep 0.8cm
+\footskip 0.2cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\bullet 0 0 17 -1
+\bullet 1 0 17 -1
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Four Color Theorem: pencil and paper proof
+\end_layout
+
+\begin_layout Author
+Mario Stefanutti
+\end_layout
+
+\begin_layout Address
+Mario Stefanutti - Via delle Egadi, 5 - 00145 Rome - Italy
+\end_layout
+
+\begin_layout Abstract
+This is a 
+\series bold
+\emph on
+pencil and paper proof
+\series default
+\emph default
+ of the four color problem
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename historical-map-roman-empire.bmp
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+How many colors in the sky of this beautiful dotted night?
+\end_layout
+
+\begin_layout Standard
+\align center
+For a good start, I think I’ll color the eye of the Dragon in White!
+\end_layout
+
+\begin_layout Standard
+\align center
+and maybe, I will choose a sleeping Big Cat to make it Blue and Red!
+\end_layout
+
+\begin_layout Standard
+\align center
+then, if I’m lucky I’ll find a Green Meadow too!
+\end_layout
+
+\begin_layout Standard
+\align center
+To finally lie down and enjoy what I’ve made!
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction to the 4ct
+\end_layout
+
+\begin_layout Standard
+There are many introduction useful to understand this problem, some of them
+ more formal then other, but all can contribute to give an idea about the
+ problem we are discussing.
+ I've chosen the following introduction, but there are others that can be
+ found in the reference section: 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Wikipedia,MacTutor,MathWorld"
+
+\end_inset
+
+:
+\begin_inset Newline newline
+\end_inset
+
+
+\series bold
+\emph on
+
+\begin_inset Newline newline
+\end_inset
+
+From 
+\begin_inset Quotes erd
+\end_inset
+
+What is Mathematics
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WhatIsMathematics"
+
+\end_inset
+
+:
+\series default
+ 
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+In coloring geographical map it is customary to give different colors to
+ any two countries that have a portion of their boundary in common.
+ It has been found empirically that any map, no matter how many countries
+ it contains nor how they are situated, can be so colored by using only
+ four different colors.
+ ...
+ The fact that no map has yet been found whose coloring requires more than
+ four colors suggests the following mathematical theorem: For any subdivision
+ of the plane into non-overlapping regions, it is always possible to mark
+ the regions with one of the numbers 1, 2, 3, 4 (ndr: or with the colors
+ red, green, blue, white) in such a way that no two adjacent (whole segment
+ of boundary in common) regions receive the same number (ndr: or color).
+ ...
+ In the four color problem the maps may be drawn either in the plane or
+ on the surface of a sphere.
+ The two cases are equivalent: any map on the sphere may be represented
+ on the plane by boring a small hole trough the interior of one of the regions
+ (named Region-A) and deforming the resulting surface (imagined made of
+ thin rubber) until it stretches out flat on the plan.
+ The resulting map in the plane will be that of an island consisting of
+ the remaining regions, surrounded by a sea consisting of the region Region-A.
+ Conversely, by a reversal of this process ...
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Natural language considerations
+\end_layout
+
+\begin_layout Standard
+Formal proofs require a well defined environment to be written.
+ Theoretically, a proof may be entirely written in formal mathematical language:
+ stating axioms, logical steps and very few other things.
+ Since it is much easier to use a 
+\begin_inset Quotes erd
+\end_inset
+
+natural language
+\begin_inset Quotes erd
+\end_inset
+
+ (such as English, Italian, etc.) to explain some ideas and logical passages,
+ this proof will use it whenever the validity of the proof won't be diminished.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Here are some basic vocabulary with examples of their use throughout this
+ paper:
+\end_layout
+
+\begin_layout Itemize
+F = Face; State; Region; Country; The states of a map; The regions of a
+ map
+\end_layout
+
+\begin_layout Itemize
+E = Edge, Boundary of a face; Border of a region
+\end_layout
+
+\begin_layout Itemize
+V = Vertex; Meeting point of the edges of different regions
+\end_layout
+
+\begin_layout Standard
+Examples using natural language: A map is made of regions.
+ A map on the sphere can be regarded as a world with only one continent
+ surrounded by the ocean (or sea), as for example Pangaea about 250 million
+ years ago on earth.
+ In the process of transforming a map on the sphere into a map on the plane,
+ the face represented by the ocean can be holed and the sphere (imagined
+ made of rubber) deformed to appear flat.
+ In a map there are states that have direct access to the ocean (facing
+ the ocean) and states that don't, as for example Egypt and Chad in Africa.
+\end_layout
+
+\begin_layout Subsection
+Preliminary considerations about the formal proof
+\end_layout
+
+\begin_layout Standard
+Part of this proof is based on results that can be achieved from the elaboration
+ of the Euler's formula for simple polyhedron 
+\begin_inset Formula $V-E+F=2$
+\end_inset
+
+.
+ To be able to use this formula as a starting point, we need to give a more
+ precise definition of the maps that will be addressed.
+ We know (see the book 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WhatIsMathematics"
+
+\end_inset
+
+ - Introduction of the four color problem) that is equivalent to consider
+ maps on the plane and maps drawn on a sphere.
+ Since the Euler's formula can be applied to simple polyhedron, which can
+ be deformed continuously into the shape of a sphere, we will consider only
+ maps drawn on the sphere.
+ We can also suppose that exactly three Edges meet at each Vertex.
+ Such maps will be called 
+\begin_inset Quotes erd
+\end_inset
+
+regular maps
+\begin_inset Quotes erd
+\end_inset
+
+ (again, see the book 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WhatIsMathematics"
+
+\end_inset
+
+ - proof of the five color theorem, for further explanation).
+ Each region must also be contiguous: that is, it may not have exclaves
+ like some real countries: such as Angola, Azerbaijan, or the United States
+ (see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Wikipedia"
+
+\end_inset
+
+ - definition of the four color theorem).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Four color theorem proof
+\end_layout
+
+\begin_layout Standard
+Theorem: Every regular map is four color-able.
+ Or: For any subdivision of the plane into non-overlapping regions, it is
+ always possible to mark the regions with one of the color red, green, blue
+ and white (or any other four colors) in such a way that no two adjacent
+ (whole segment of boundary in common) regions receive the same color.
+\end_layout
+
+\begin_layout Subsection
+Abstract of proof
+\end_layout
+
+\begin_layout Standard
+Instead of considering maps that can be really different in shape one from
+ the other, this proof simplify and transform the map into a more manageable
+ form.
+ The proof is split into these three parts:
+\end_layout
+
+\begin_layout Itemize
+All maps can be simplified by removing all faces with less than five edges,
+ without affecting the search and the validity of the proof
+\end_layout
+
+\begin_layout Itemize
+All maps can be deformed into circular maps or represented as rectangular
+ maps to make it easier to handle them
+\end_layout
+
+\begin_layout Itemize
+TBF
+\end_layout
+
+\begin_layout Subsection
+Simplify the map: only faces with 5 edges or more have to remain
+\end_layout
+
+\begin_layout Standard
+Following more or less the same path used in the book 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "WhatIsMathematics"
+
+\end_inset
+
+ (expanded to remove also F4 faces), it is easy to show that we can consider
+ only maps with faces that have only 5 edges or more.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Starting from a given map, we can proceed creating a chain of logical steps,
+ composed of one or more of these statements:
+\end_layout
+
+\begin_layout Itemize
+If the maps has a face with 2 edges
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+remove an edge of this face, and if the new map is 4 colorable, then the
+ old map is also 4 colorable (see Proof_Simplify_F2)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+If the maps has a face with 3 edges
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+remove an edge of this face, and if the new map is 4 colorable, then the
+ old map is also 4 colorable (see Proof_Simplify_F3)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+If the maps has a face with 4 edges
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+remove two opposite edges of this face, and if the new map is 4 colorable,
+ then the old map is also 4 colorable (see Proof_Simplify_F4)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+After that the chain of these logical steps has been created, you may end
+ up in one of these two cases: the map has only four faces (easily four
+ color-able) or the map still has many faces (for the Euler equation: 
+\begin_inset Formula $F5+0F6=12+1F7+2F8+3F9+...$
+\end_inset
+
+ these have to be at least 12).
+ For both these cases if you find a proof for the simplified map (at one
+ end of the chain), you can walk back (logically) to the original map (the
+ other end of the chain), fully proving the four color theorem.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Note:
+\end_layout
+
+\begin_layout Itemize
+For the second case, if you find a proof for the simplified map ...
+ 
+\series bold
+let me know, because I'm looking for it too!
+\series default
+ It would prove the 4ct, the way I'd like ...
+ pencil and paper!
+\end_layout
+
+\begin_layout Subsubsection
+Proof_Simplify_F2
+\end_layout
+
+\begin_layout Standard
+To simplify the map, you can remove an edge of an F2.
+ If you can color the map from which you removed the F2, when you place
+ back the removed face (restoring its edge), it will be always possible
+ to find a color for it, since the restored face will be surrounded by only
+ two colors (two neighbors).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename simplify-map-F2.bmp
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Proof_Simplify_F3
+\end_layout
+
+\begin_layout Standard
+To simplify the map, you can remove an edge of an F3.
+ If you can color the map from which you removed the F3, when you place
+ back the removed face (restoring its edge), it will be always possible
+ to find a color for it, since the restored face will be surrounded by only
+ three colors (three neighbors).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename simplify-map-F3.bmp
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Proof_Simplify_F4
+\end_layout
+
+\begin_layout Standard
+To simplify the map, you can remove two edges (not touching each other)
+ of an F4.
+ Since the two other faces corresponding to the removed edges may actually
+ be the same face (if it goes around one of other two neighbors of the F4),
+ take care not to select such edges and select for removing the other two.
+ If you can color the map from which you removed the F4, when you place
+ back the removed face (restoring its edges), it will be always possible
+ to find a color for it, since the restored face will be surrounded by only
+ three colors (four neighbors).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename simplify-map-F4.bmp
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Deform the map into a circular map (darts maps)
+\end_layout
+
+\begin_layout Standard
+It is straightforward to consider a map as a jigsaw puzzle, if we imagine
+ that the faces that compose the map are the pieces of the puzzle itself.
+ This way to consider maps has the important advantage to show the process
+ of construction as made of consecutive steps (piece after piece construction),
+ as anyone would do with a real jigsaw puzzle.
+ This method can be useful to show how maps can be visualized (or transformed)
+ in other ways, such as 
+\begin_inset Quotes erd
+\end_inset
+
+circular maps
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes erd
+\end_inset
+
+rectangular maps
+\begin_inset Quotes erd
+\end_inset
+
+ (next chapter), to make it easier to handle them and to use a computer
+ to create complex maps that have a large number of faces.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+I also found on Internet that it is actually possible to find such jigsaw
+ puzzles for real, with pieces shaped like countries.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Now consider this construction process: start from a region facing the ocean
+ (this is actually more important for rectangular maps) and rebuild the
+ puzzle piece by piece, following these rules:
+\end_layout
+
+\begin_layout Enumerate
+Always get a piece (a face) confining with one of the pieces already chosen
+ (that are forming the partial map)
+\end_layout
+
+\begin_layout Enumerate
+During the process of rebuilding the entire map, never make holes in the
+ partial map created
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+It is always possible to avoid this situation, since instead of selecting
+ a face that will generate the hole, you can select a face that is in the
+ hole (the hole itself is infact composed by one or more faces), and that
+ respect the first rule
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Insert the ocean as the last piece (this is also forced by the second rule)
+\end_layout
+
+\begin_layout Standard
+For each chosen F (considering also the first one) we can deform the face
+ the way we wish, as long as all the topological property of the face and
+ of the map being created (confining states, order of appearance of neighbors
+ along the edges, etc.) are respected.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Using this building technique, each F can be inserted as a ring (TBF: Use
+ another term instead of ring) at a different concentric circle.
+ An example of this process along with the original map is shown in this
+ sequence:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename to-circular-maps.bmp
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Deform the map into a rectangular map (New York skyline maps)
+\end_layout
+
+\begin_layout Standard
+Following the same procedure explained for circular maps, we can create
+ rectangular maps.
+ This kind of maps can also be created starting from circular maps.
+ Actually it was the way I found rectangular maps! Since, for circular maps,
+ you started from a state facing the ocean, the inner circle (representing
+ the first chosen piece of the jigsaw puzzle) touches the ocean (which is
+ the last chosen piece).
+ Therefore, there is always a path (that doesn't touch other faces) that
+ can be drawn from the center of the circular map to the ocean.
+ If we cut the circular map along this path, we can easily deform the circular
+ map into a rectangular map.
+ An example of this process is represented here:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename to-rectangular-maps.bmp
+	scale 50
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With a little imagination, these kind of maps seem:
+\end_layout
+
+\begin_layout Itemize
+Rectangular pieces of paper, layered one over the other overlapping
+\end_layout
+
+\begin_layout Itemize
+The skyline of a city made of skyscrapers, constructed in order of height,
+ one behind the other.
+ The sea is right below all the buildings (turn the above picture upside
+ down).
+ Around the city there is nothing else (the new york mode of the program
+ I created is based on this idea)
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename new-york-city-skyline.bmp
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Core of the proof
+\end_layout
+
+\begin_layout Standard
+TBF
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Notes
+\end_layout
+
+\begin_layout Subsection
+Clusters of F5 (TBF)
+\end_layout
+
+\begin_layout Standard
+If you simplify maps by removing all faces with less than five edges, to
+ balance the Euler formula: 
+\begin_inset Formula $F5+0F6=12+1F7+2F8+3F9+...$
+\end_inset
+
+, many F5 have to exist and they form clusters.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Algorithm:
+\end_layout
+
+\begin_layout Itemize
+All maps can be simplified by removing all faces with less than five edges,
+ without affecting the search and the validity of the proof
+\end_layout
+
+\begin_layout Itemize
+Maps with only F5 and more, always have F5 in clusters: meaning F5 that
+ are surrounded only by other F5
+\end_layout
+
+\begin_layout Itemize
+loop (until there are clusters of F5 in the map)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Remove the central F5 of F5 clusters (TBV: So far I did not find and way
+ to do this)
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Maps without F5 clusters and without F2, F3 or F4, have very few Faces and,
+ for this reason, are easily four colorable
+\end_layout
+
+\begin_layout Standard
+Additional notes:
+\end_layout
+
+\begin_layout Itemize
+Clusters may actually be formed by F5 and F6 (see the Euler formula).
+ It should be considered
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename F5-cluster.bmp
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+F6 seams not to be part of this problem.
+ Why?
+\end_layout
+
+\begin_layout Standard
+From the following formula:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula $4F2+3F3+2F4+1F5+0F6-1F7-2F8-3F9+...=12$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+By this equation (and therefore its equilibrium) faces and their numerosity
+ seem to be bound together.
+ But what about the F6? The equilibrium seems not to be touched by faces
+ with 6 edges).
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Why? Does it hide a bigger secret? Is it special for this theorem?
+\end_layout
+
+\begin_layout Subsection
+Relation about maps and graphs
+\end_layout
+
+\begin_layout Standard
+\align left
+How can the following map be represented using graphs?
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename maps-and-graphs.bmp
+	scale 50
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+To prove the problem of coloring maps, it is adequate to consider planar
+ graph that are simple, connected, non crossing, without loops and without
+ multiple edges (Wikipedia: 
+\begin_inset Quotes eld
+\end_inset
+
+In graph theory, multiple edges (also called parallel edges or a multi-edge),
+ are two or more edges that are incident to the same two vertices.
+ A simple graph has no multiple edges.
+\begin_inset Quotes erd
+\end_inset
+
+).
+ But, if you need to use graphs to visualize the process of building maps
+ (adding faces to previous sub-maps), it may be better to consider graphs
+ with multiple edges (still without loops and all the rest).
+ For example, considering the graph in the picture, without multiple edges,
+ you would have not noticed that the face number 2 was actually unreachable.
+ In other words: if two faces of a map have 2 edges in common the vertices
+ of the related graph have to be connected with one or two edges? It does
+ not count when coloring graphs but it is important when adding vertices
+ to an existing graph.
+\end_layout
+
+\begin_layout Subsection
+Counting maps (welcome to the room of mirrors)
+\end_layout
+
+\begin_layout Standard
+How many topologically different regular maps can be created with a given
+ number of faces? Two maps are regarded as topologically equivalent if these
+ can be deformed (following topological deformation rules) into each other.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+A long time after I started analyzing the four color problem, I found a
+ formula which I believed to be the right one to count maps and which I
+ liked it.
+ It was not compact and after a while I realized it wasn't correct either.
+ The problem is that I saw that there were many duplications in it due to
+ mirroring (symmetry).
+ The formula is:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula \[
+2\sum_{x_{n}=2n+1}^{x_{n+1}}...\,\sum_{x_{3}=7}^{x_{4}}\,\sum_{x_{2}=5}^{x_{3}}\,\sum_{x_{1}=3}^{x_{2}}x_{1}(x_{1}-1)(x_{2}-3)(x_{3}-5)...(x_{n}-(2n-1))\]
+
+\end_inset
+
+ 
+\begin_inset Newline newline
+\end_inset
+
+Can someone help me out with this computation?
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "WhatIsMathematics"
+key "WhatIsMathematics"
+
+\end_inset
+
+
+\series bold
+What Is Mathematics?
+\series default
+ 
+\series bold
+An Elementary Approach to Ideas and Methods
+\series default
+ by Richard Courant, Herbert Robbins, Ian Stewart
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "Wikipedia"
+key "Wikipedia"
+
+\end_inset
+
+Wikipedia definition of the problem: 
+\series bold
+http://en.wikipedia.org/wiki/Four-color_theorem
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "MathWorld"
+key "MathWorld"
+
+\end_inset
+
+Wolfram MathWorld about the problem: 
+\series bold
+http://mathworld.wolfram.com/Four-ColorTheorem.html
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "MacTutor"
+key "MacTutor"
+
+\end_inset
+
+MacTutor: 
+\series bold
+http://www-groups.dcs.st-and.ac.uk/~history/HistTopics/The_four_colour_theorem.html
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Class-Path: bsh-2.0b4.jar commons-fileupload-1.2.1.jar commons-logging
+ -1.1.1.jar zcommon-5.0.5.jar zcommons-el-1.1.0.jar zhtml-5.0.5.jar zk
+ -5.0.5.jar zkplus-5.0.5.jar zul-5.0.5.jar zweb-5.0.5.jar
+

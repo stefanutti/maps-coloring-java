@@ -1,0 +1,172 @@
+<zk xmlns:w="http://www.zkoss.org/2005/zk/client">
+<?script src="js/jsxgraph/jsxgraphcore.js" type="text/javascript" ?>
+
+<!-- Lo stile non funziona se nel documento c'è il tag html -->
+<style dynamic="false">
+.myStyle2 tr.z-row td.z-row-inner, tr.z-row .z-cell, div.z-grid {
+	border: none; overflow: hidden; zoom: 1; background: white; border-top: none; border-left: none; border-right: none; border-bottom: none;
+}
+</style>
+
+    <script type="text/javascript">
+        <![CDATA[
+            function drawTheMap() {
+                var drawingArea = JXG.JSXGraph.initBoard('drawingArea', {boundingbox: [-1, 1, 1, -1], axis:true});
+
+                drawingArea.createElement('circle', [[0,0], 1]);
+            }
+        ]]>
+    </script>
+
+	<window title="Parameters" border="normal" mode="overlapped"
+		width="500px" height="700px" sizable="true">
+		<borderlayout>
+			<center autoscroll="true">
+                <grid sclass="myStyle2">
+                    <columns>
+                        <column width="30%"></column>
+                        <column width="70%"></column>
+                    </columns>
+                    <rows>
+                        <!-- group label="Maps generation parameters" / -->
+                        <row>
+                            <label value=" " />
+                            <checkbox label="randomElaboration" />
+                        </row>
+                        <row>
+                            <label value=" " />
+                            <checkbox label="processAllTodoMaps" />
+                        </row>
+                        <row>
+                            Max method
+                            <combobox value="FixedMapsLen" readonly="true">
+                                <comboitem label="FixedMapsLen" />
+                                <comboitem label="Maps" />
+                                <comboitem label="F" />
+                            </combobox>
+                        </row>
+                        <row>
+                            Max number
+                            <intbox constraint="no negative" value="10000" width="100%" />
+                        </row>
+
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- group label="Drawing parameters" / -->
+                        <row>
+                            <label value="Draw method" />
+                            <combobox value="CIRCLES" readonly="true">
+                                <comboitem label="CIRCLES" />
+                                <comboitem label="RECTANGLES" />
+                                <comboitem label="RECTANGLES_NEW_YORK" />
+                            </combobox>
+                        </row>
+                        <row>
+                            <label value="transparency" />
+                            <div>
+                                <slider curpos="70" maxpos="100" width="98%"/>
+                            </div>
+                        </row>
+                        <row>
+                            <label value=" " />
+                            <checkbox label="showFaceCardinality" />
+                        </row>
+
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- group label="Generation and browsing" / -->
+                        <row>
+                            Generate commands
+                            <div>
+                                <button label="&gt;" onClick="" />
+                                <button label="||" onClick="" />
+                                <button label="^4" onClick="" />
+                                <button label="^5" onClick="" />
+                                <button label=".|." onClick="" />
+                                <button label="reset" onClick="" />
+                            </div>
+                        </row>
+                        <row>
+                            Browsing
+                            <div>
+                                <button label="|&lt;" onClick="" />
+                                <button label="&lt;" onClick="" />
+                                <button label="@" w:onClick="drawTheMap()" />
+                                <button label="&gt;" onClick="" />
+                                <button label="|&gt;" onClick="" />
+                            </div>
+                        </row>
+
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- group label="Coloring" / -->
+                        <row>
+                            Select a color
+                            <radiogroup>
+                                <radio label="R" checked="true" />
+                                <radio label="G" />
+                                <radio label="B" />
+                                <radio label="W" />
+                            </radiogroup>
+                        </row>
+                        <row>
+                            <label value=" " />
+                            <button label="autoColorTheMap" onClick="" />
+                        </row>
+
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- group label="Debugging" / -->
+                        <row>
+                            Slowdown (ms)
+                            <intbox constraint="no negative" value="0" width="100%" />
+                        </row>
+
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- group label="Exports" / -->
+                        <row>
+                            <label value=" " />
+                            <button label="exportCurrentMapToGif" onClick="" />
+                        </row>
+                        <row>
+                            <label value=" " />
+                            <button label="exportAllMapsToGif" onClick="" />
+                        </row>
+
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- ****** -->
+                        <!-- group label="Statistics" / -->
+                        <row>
+                            <label value=" " />
+                            <button label="refreshInfo" onClick="" />
+                        </row>
+                        <row>
+                            Maps created
+                            <intbox constraint="no negative" value="0" width="100%" readonly="true" />
+                        </row>
+                        <row>
+                            Maps removed
+                            <intbox constraint="no negative" value="0" width="100%" readonly="true" />
+                        </row>
+                        <row>
+                            Todo maps len
+                            <intbox constraint="no negative" value="0" width="100%" readonly="true" />
+                        </row>
+                    </rows>
+                </grid>
+			</center>
+		</borderlayout>
+	</window>
+    <window title="Drawing area" border="normal" mode="overlapped" sizable="false" position="left,top">
+        <!-- html>
+            <![CDATA[ <div id="drawingArea" style="width: 100px; height: 100px;"/> ]]>
+        </html -->
+    </window>
+</zk>

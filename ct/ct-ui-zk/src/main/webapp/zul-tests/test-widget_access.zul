@@ -1,0 +1,40 @@
+<?page title="new page title" contentType="text/html;charset=UTF-8"?>
+<zk>
+<window id="win" title="HELLO" border="normal" width="400px" height="500px">
+         <window id="hello" sizable="true" border="normal" width="150px" height="100px" minwidth="10"> 
+         Resize Me!
+          </window>
+          
+          <label id="lb" value="0"/>
+</window>
+
+<script type="text/javascript">
+    zk.afterMount(function() {
+    
+    		var startx = 0;
+     		var pressed = 0;
+     		
+              function zk$( widgetId ){
+                        return zk.Widget.$(jq("$"+widgetId));
+              }
+
+              jq("$win").mousemove(function(e){
+                      if(pressed==1){
+                      zk$("lb").setValue(e.pageX-startx);
+                      }
+             });
+             
+             jq("$win").mousedown(function(e){
+             	pressed = 1;
+             	startx = e.pageX;
+             	zk$("lb").setValue(0);
+             });
+             
+              jq("$win").mouseup(function(e){
+             	pressed = 0;
+             });
+
+
+    });
+</script>
+</zk>

@@ -1,0 +1,187 @@
+<zk xmlns:w="http://www.zkoss.org/2005/zk/client">
+	<?script src="js/jsxgraph/jsxgraphcore.js" type="text/javascript" ?>
+
+	<style dynamic="true">.GridWithNoBorders tr.z-row td.z-row-inner, tr.z-row .z-cell, div.z-grid { border: none; overflow: hidden; zoom: 1; background: white; border-top: none; border-left: none; border-right: none; border-bottom: none; }</style>
+
+	<script type="text/javascript">
+		<![CDATA[
+			function getWidgetById(widgetId) { return zk.Widget.$(jq("$" + widgetId)); }
+			function drawTheMap() { var drawingAreaX = JXG.JSXGraph.initBoard(getWidgetById("drawingArea").uuid, {boundingbox: [-1, 1, 1, -1], axis:true}); drawingAreaX.createElement('circle', [[0,0], 1]); }
+		]]>
+    </script>
+
+	<window title="Parameters" border="normal" mode="overlapped" width="500px" height="700px" sizable="true" apply="it.tac.ct.ui.zk.UIMainController">
+		<borderlayout>
+			<center autoscroll="true">
+				<grid sclass="GridWithNoBorders" droppable="true">
+					<columns>
+						<column width="30%"></column>
+						<column width="70%"></column>
+					</columns>
+					<rows>
+						<!-- group label="Maps generation parameters" / -->
+						<row>
+							<label value=" " />
+							<checkbox id="randomElaborationCheckbox" label="randomElaboration" />
+						</row>
+						<row>
+							<label value=" " />
+							<checkbox id="processAllTodoMapsCheckbox" label="processAllTodoMaps " />
+						</row>
+						<row>
+							Max method
+							<combobox id="maxMethodCombobox" value="FixedMapsLen" readonly="true">
+								<comboitem label="FIXED_MAPS_LEN" />
+								<comboitem label="MAPS" />
+								<comboitem label="F" />
+							</combobox>
+						</row>
+						<row>
+							Max number
+							<intbox id="maxNumberIntbox" constraint="no negative" value="10000" width="100%" />
+						</row>
+
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- group label="Drawing parameters" / -->
+						<row spans="2">
+							<separator width="100%" bar="true" />
+						</row>
+						<row>
+							<label value="Draw method" />
+							<combobox id="drawMethodCheckbox" value="CIRCLES" readonly="true">
+								<comboitem label="CIRCLES" />
+								<comboitem label="RECTANGLES" />
+								<comboitem label="RECTANGLES_NEW_YORK" />
+							</combobox>
+						</row>
+						<row>
+							<label value="transparency" />
+							<div>
+								<slider id="transparencySlider" curpos="70" maxpos="100" width="98%" />
+							</div>
+						</row>
+						<row>
+							<label value=" " />
+							<checkbox id="showFaceCardinalityCheckbox" label="showFaceCardinality" />
+						</row>
+
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- group label="Generation and browsing" / -->
+						<row spans="2">
+							<separator width="100%" bar="true" />
+						</row>
+						<row>
+							Generate commands
+							<div>
+								<button id="startElaborationButton" label="&gt;" />
+								<button id="pauseElaborationButton" label="||" />
+								<button id="filterLessThanFourElaborationButton" label="^4" />
+								<button id="filterLessThanFiveElaborationButton" label="^5" />
+								<button id="filterLessThanFFacesElaborationButton" label="^F" />
+								<button id="copyMapsToTodoElaborationButton" label=".|." />
+								<button id="resetElaborationButton" label="reset" />
+							</div>
+						</row>
+						<row>
+							Browsing
+							<div>
+								<button id="goStartButton" label="|&lt;" />
+								<button id="goPreviousButton" label="&lt;" />
+								<button id="goRandomButton" label="@" w:onClick="drawTheMap()" />
+								<button id="goNextButton" label="&gt;" />
+								<button id="goEndButton" label="|&gt;" />
+							</div>
+						</row>
+
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- group label="Coloring" / -->
+						<row spans="2">
+							<separator width="100%" bar="true" />
+						</row>
+						<row>
+							Select a color
+							<radiogroup id="selectedColorRadiogroup">
+								<radio label="R" checked="true" />
+								<radio label="G" />
+								<radio label="B" />
+								<radio label="W" />
+							</radiogroup>
+						</row>
+						<row>
+							<label value=" " />
+							<button id="autoColorTheMapButton" label="autoColorTheMap" />
+						</row>
+
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- group label="Debugging" / -->
+						<row spans="2">
+							<separator width="100%" bar="true" />
+						</row>
+						<row>
+							Slowdown (ms)
+							<intbox id="slowdownMillisecIntbox" constraint="no negative" value="0" width="100%" />
+						</row>
+						<row>
+							<label value=" " />
+							<checkbox id="debugEnabledCheckbox" label="debugEnabled" />
+						</row>
+
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- group label="Exports" / -->
+						<row spans="2">
+							<separator width="100%" bar="true" />
+						</row>
+						<row>
+							<label value=" " />
+							<button id="exportCurrentMapToGifButton" label="exportCurrentMapToGif" />
+						</row>
+						<row>
+							<label value=" " />
+							<button id="exportAllMapsToGifButton" label="exportAllMapsToGif" />
+						</row>
+
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- ****** -->
+						<!-- group label="Statistics" / -->
+						<row spans="2">
+							<separator width="100%" bar="true" />
+						</row>
+						<row>
+							<label value=" " />
+							<button id="refreshInfoButton" label="refreshInfo" />
+						</row>
+						<row>
+							Maps created
+							<intbox id="numberOfMapsCreatedIntbox" constraint="no negative" value="0" width="100%" readonly="true" />
+						</row>
+						<row>
+							Maps removed
+							<intbox id="numberOfMapsRemovedIntbox" constraint="no negative" value="0" width="100%" readonly="true" />
+						</row>
+						<row>
+							Todo maps len
+							<intbox id="numberOfTodoMapsIntbox" constraint="no negative" value="0" width="100%" readonly="true" />
+						</row>
+					</rows>
+				</grid>
+			</center>
+		</borderlayout>
+	</window>
+	<window title="Drawing area" border="normal" mode="overlapped" sizable="false">
+		<div id="drawingArea" width="600px" height="600px" />
+	</window>
+	<window title="Logo" border="normal" mode="overlapped" sizable="false">
+		<image src="./images/4ct.png" />
+	</window>
+</zk>
