@@ -1,8 +1,8 @@
 Latex doc (see also 4coloring.wordpress.com):
-- ct-ui-docs
+- ct-docs
 
 Projects:
-- ct-ui-core
+- ct-core
   - Core java library to generate circular maps
 - ct-ui-swixml
   - Swixml UI version (depends on G and swixml)
