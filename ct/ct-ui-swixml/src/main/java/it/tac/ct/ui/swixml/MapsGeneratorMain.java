@@ -1,3 +1,6 @@
+/*
+ * Copyright 2011 by Mario Stefanutti, released under GPLv3.
+ */
 package it.tac.ct.ui.swixml;
 
 import java.awt.BorderLayout;
