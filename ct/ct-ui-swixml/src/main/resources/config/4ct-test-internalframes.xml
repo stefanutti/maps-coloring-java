@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<frame name="frame" minimumSize="1100,750" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe" resizable="false">
-	<menubar>
-		<menu text="File">
-			<menuitem text="To be implemented" />
-			<separator />
-			<menuitem text="To be implemented" />
-		</menu>
-	</menubar>
-	<panel preferredSize="1100,750" layout="BorderLayout">
-		<panel preferredSize="350,750" constraints="BorderLayout.WEST" layout="BorderLayout">
-			<scrollpane constraints="BorderLayout.CENTER">
+<frame name="frame" minimumSize="1072,742" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
+	<desktoppane>
+		<internalframe title="Parameters" bounds="2,2,350,700" visible="true" resizable="true">
+			<scrollpane>
 				<panel border="EmptyBorder(10,10,10,10)">
 					<layout type="FormLayout" columns="right:max(40dlu;pref), 3dlu, d:grow, 3dlu, d:grow, 3dlu, d:grow" rows="10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu, 2dlu, 10dlu" />
 
@@ -66,8 +59,12 @@
 					<button constraints="3,71,5,1" text="colorIt" action="colorItAction" />
 				</panel>
 			</scrollpane>
-		</panel>
-		<panel layout="BorderLayout" constraints="BorderLayout.CENTER" id="mapExplorer">
-		</panel>
-	</panel>
+		</internalframe>
+
+		<internalframe title="Map Explorer" bounds="354,2,700,700" visible="true" resizable="true" id="mapExplorerFrame">
+			<panel border="EmptyBorder(10,10,10,10)" id="mapExplorer">
+				<layout type="BorderLayout" />
+			</panel>
+		</internalframe>
+	</desktoppane>
 </frame>

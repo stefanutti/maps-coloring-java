@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<frame name="frame" minimumSize="1100,700" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe" resizable="false">
+	<menubar>
+		<menu text="File">
+			<menuitem text="Aaa" />
+			<separator />
+			<menuitem text="Quit" id="quit" />
+		</menu>
+		<menu text="Edit">
+			<menuitem text="Cut" accelerator="meta X" />
+		</menu>
+	</menubar>
+	<panel preferredSize="1050,700" layout="BorderLayout">
+		<panel preferredSize="350,700" constraints="BorderLayout.WEST" layout="BorderLayout">
+			<scrollpane constraints="BorderLayout.CENTER">
+				<vbox border="EmptyBorder(10,10,10,10)">
+					<titledseparator maximumSize="350,5" />
+					<hbox>
+						<label maximumSize="100,30" text="slowdownMillisec" />
+						<textfield maximumSize="250,20" text="0" id="slowdownMillisec" />
+					</hbox>
+					<hbox>
+						<label maximumSize="100,30" text="." />
+						<checkbox maximumSize="250,30" text="logWhilePopulate" selected="false" id="logWhilePopulate" />
+					</hbox>
+					<hbox>
+						<label maximumSize="100,30" text="." />
+						<checkbox maximumSize="250,30" text="randomElaboration" selected="true" id="randomElaboration" />
+					</hbox>
+					<hbox>
+						<label maximumSize="100,30" text="." />
+						<checkbox constraints="3,9" text="processAll" selected="true" id="processAll" />
+					</hbox>
+					<hbox>
+						<label maximumSize="100,30" text="maxMethod" />
+						<combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxMaxMethod" constraints="3,11,5,1" id="maxMethod" />
+					</hbox>
+					<hbox>
+						<label maximumSize="100,30" text="maxNumber" />
+						<textfield maximumSize="250,20" text="10000" id="maxNumber" />
+					</hbox>
+				</vbox>
+			</scrollpane>
+			<panel preferredSize="350,100" constraints="BorderLayout.SOUTH" id="logo">
+			</panel>
+		</panel>
+		<panel layout="BorderLayout" constraints="BorderLayout.CENTER" id="mapExplorer">
+		</panel>
+	</panel>
+</frame>

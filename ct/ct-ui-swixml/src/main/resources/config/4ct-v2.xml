@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<frame name="frame" minimumSize="1100,750" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe" resizable="false">
+    <menubar>
+        <menu text="File">
+            <menuitem text="To be implemented" />
+            <separator />
+            <menuitem text="To be implemented" />
+        </menu>
+    </menubar>
+    <panel preferredSize="1100,750" layout="BorderLayout">
+        <panel preferredSize="350,750" constraints="BorderLayout.WEST" layout="BorderLayout">
+            <scrollpane constraints="BorderLayout.CENTER">
+                <vbox border="EmptyBorder(10,10,10,10)">
+                    <titledseparator maximumSize="350,10" />
+                    <hbox>
+                        <label maximumSize="100,20" text="slowdownMillisec" />
+                        <textfield maximumSize="250,20" text="0" id="slowdownMillisec" />
+                    </hbox>
+                    <hbox>
+                        <label maximumSize="100,20" text="." />
+                        <checkbox alignmentX="1" maximumSize="250,20" text="logWhilePopulate" selected="false" id="logWhilePopulate" />
+                    </hbox>
+                    <hbox>
+                        <label maximumSize="100,20" text="." />
+                        <checkbox alignmentX="0" maximumSize="250,20" text="randomElaboration" selected="true" id="randomElaboration" />
+                    </hbox>
+                    <hbox>
+                        <label maximumSize="100,20" text="." />
+                        <checkbox alignmentX="0.5" maximumSize="250,20" text="processAll" selected="true" id="processAll" />
+                    </hbox>
+                    <hbox>
+                        <label maximumSize="100,20" text="maxMethod" />
+                        <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxMaxMethod" maximumSize="250,20" id="maxMethod" />
+                    </hbox>
+                    <hbox>
+                        <label maximumSize="100,20" text="maxNumber" />
+                        <textfield maximumSize="250,20" text="10000" id="maxNumber" />
+                    </hbox>
+                </vbox>
+            </scrollpane>
+        </panel>
+        <panel layout="BorderLayout" constraints="BorderLayout.CENTER" id="mapExplorer">
+        </panel>
+    </panel>
+</frame>
