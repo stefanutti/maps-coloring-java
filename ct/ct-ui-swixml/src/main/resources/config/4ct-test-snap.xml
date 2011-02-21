@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<frame name="frame2" size="200,200" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
+</frame>
+<frame name="frame" size="1150,750" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
+    <menubar>
+        <menu text="File">
+            <menuitem text="Load skin (to be implemented)" />
+            <separator />
+            <menuitem text="Quit (to be implemented)" />
+        </menu>
+    </menubar>
+
+    <tabbedpane>
+        <panel name="bbb" layout="borderLayout">
+            <splitpane oneTouchExpandable="false" dividerLocation="200" orientation="VERTICAL" constraints="BorderLayout.CENTER">
+                <splitpane oneTouchExpandable="true" dividerLocation="140" orientation="HORIZONTAL">
+                    <scrollPane background="blue">
+                        <tree name="tree" />
+                    </scrollPane>
+                    <panel layout="borderlayout">
+                        <scrollPane constraints="BorderLayout.CENTER">
+                            <table name="table" />
+                        </scrollPane>
+                    </panel>
+                </splitpane>
+
+                <panel name="preview" border="LoweredBevelBorder">
+                    <textarea name="ta" />
+                </panel>
+            </splitpane>
+        </panel>
+        <panel name="aaa" layout="borderlayout">
+        </panel>
+    </tabbedpane>
+</frame>

@@ -7,13 +7,12 @@ package it.tac.ct.core;
  * @author Mario Stefanutti
  * @version September 2010
  *          <p>
- *          Four colors for the theorem + WHITE for screen background
+ *          Four colors for the theorem
  *          </p>
  */
 public enum COLORS {
 
-    // White is used ad a default value = not colored = background
-    // The four colors for the theorem are RGB + Gray
+    // The four color is usually the ocean's color
     //
-    WHITE, RED, GREEN, BLUE, GRAY
+    UNCOLORED, ONE, TWO, THREE, FOUR
 }

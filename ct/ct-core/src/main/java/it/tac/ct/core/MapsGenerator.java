@@ -6,6 +6,8 @@ package it.tac.ct.core;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
+
 /**
  * @author Mario Stefanutti
  *         <p>
@@ -55,8 +57,8 @@ public class MapsGenerator {
 
         // Add this map to the things to do.
         // This map is not added to the calculated maps because I'm looking for maps without F2 and F3 (and also F4)
-        maps.add(map);
         //
+        maps.add(map);
         todoList.add(map);
     }
 
@@ -118,16 +120,6 @@ public class MapsGenerator {
                     //
                     int removeCase = 0;
                     int facesToTheEnd = maxNumber - (fNumberToAdd + 1);
-
-                    // if (newMap.hasUnreachableFWithCardinalityLessThanFive() == true) {
-                    // removeCase = 1;
-                    // } else if ((maxMethod == MAX_METHOD.F) && ((newMap.numberOfFWithGivenCardinality(2) * 3) > (facesToTheEnd * 2))) {
-                    // removeCase = 2;
-                    // } else if ((maxMethod == MAX_METHOD.F) && (maxNumber >= 12) && ((newMap.numberOfFWithGivenCardinalityEqualOrLessThan(3) * 2) > (facesToTheEnd * 2))) {
-                    // removeCase = 3;
-                    // } else if ((maxMethod == MAX_METHOD.F) && (maxNumber >= 12) && ((newMap.numberOfFWithGivenCardinalityEqualOrLessThan(4) * 1) > (facesToTheEnd * 2))) {
-                    // removeCase = 4;
-                    // }
 
                     if (newMap.hasUnreachableFWithCardinalityLessThanFive() == true) {
                         removeCase = 1;
@@ -350,12 +342,90 @@ public class MapsGenerator {
         }
 
         for (int i = 0; i < mapToProcess.faces.size(); i++) {
-            mapToProcess.faces.get(i).color = COLORS.WHITE;
+            mapToProcess.faces.get(i).color = COLORS.UNCOLORED;
         }
 
         // Return the map to process
         //
         return mapToProcess;
+    }
+
+    /**
+     * Create a new map from the text representation
+     * XXX to be finished
+     * 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
+     */
+    public void createMapFromTextRepresentation(String mapTextRepresentation) {
+
+    	// Create an empty (almost) map (default is 2 faces + the ocean = 3 faces)
+        //
+        Map4CT newMap = new Map4CT();
+
+        // Analyze the input string to understand how many faces I need to create
+        //
+        String[] tokensOfTheMapTextRepresentation = mapTextRepresentation.split(", ");
+        int numberOfFaces = tokensOfTheMapTextRepresentation.length / 2;
+
+        // Loops all faces
+        //
+        for (int faceNumber = 3; faceNumber <= numberOfFaces; faceNumber++) {
+        	
+        	// Compute insertPoint and numberOfEToTouch
+        	//
+        	int tokenNumber = 0;
+        	int beginInsertPoint = 0;
+        	int numberOfEToTouch = 1;
+        	boolean beginFound = false;
+        	boolean endFound = false;
+
+        	// Loop all tokens to search insertPoint, filtering out faces not yet to insert
+        	//
+        	for (tokenNumber = 0; (tokenNumber < tokensOfTheMapTextRepresentation.length) && (beginFound == false); tokenNumber++) {
+
+        		String preParsing = tokensOfTheMapTextRepresentation[tokenNumber].substring(0,tokensOfTheMapTextRepresentation[tokenNumber].length() - 2);
+            	int faceAnalyzed = Integer.parseInt(preParsing,10);
+        		if (faceAnalyzed < faceNumber) {
+        			for (int iSequence = 0; iSequence < newMap.sequenceOfCoordinates.sequence.size(); iSequence++)
+        			{
+        				// if (newMap.sequenceOfCoordinates.sequence.get(iSequence).isVisible
+        			}
+        			beginInsertPoint++;
+        		}
+        		if (tokensOfTheMapTextRepresentation[tokenNumber].startsWith("" + faceNumber + "b")) {
+        			beginFound = true;
+        		}
+        	}
+
+        	// Continue the loop with a different check, to search numberOfEToTouch, filtering out faces not yet to insert
+        	//
+        	for (; (tokenNumber < tokensOfTheMapTextRepresentation.length) && (endFound == false); tokenNumber++) {
+
+            	String preParsing = tokensOfTheMapTextRepresentation[tokenNumber].substring(0,tokensOfTheMapTextRepresentation[tokenNumber].length() - 2);
+            	int faceAnalyzed = Integer.parseInt(preParsing,10);
+        		if (faceAnalyzed < faceNumber) {
+        			if ((!tokensOfTheMapTextRepresentation[tokenNumber].startsWith("" + faceAnalyzed + "b-")) && (!tokensOfTheMapTextRepresentation[tokenNumber].startsWith("" + faceAnalyzed + "e-"))) {
+            			numberOfEToTouch++;
+        			}
+        			else if ((faceAnalyzed == (faceNumber -1)) && (tokensOfTheMapTextRepresentation[tokenNumber].startsWith("" + faceAnalyzed + "b-") || tokensOfTheMapTextRepresentation[tokenNumber].startsWith("" + faceAnalyzed + "e-"))) {
+            			numberOfEToTouch++;
+        			}
+        		}
+        		if (tokensOfTheMapTextRepresentation[tokenNumber].startsWith("" + faceNumber + "e")) {
+        			endFound = true;
+        		}
+        	}
+
+    		System.out.println("DEBUG: faceNumber = " + faceNumber + " beginInsertPoint = " + beginInsertPoint + " numberOfEToTouch = " + numberOfEToTouch);
+
+        	// Insert the face in the new map
+        	//
+            newMap.insertF(faceNumber, beginInsertPoint, numberOfEToTouch);
+        }
+
+        // Update the map list and the todoList
+        //
+        maps.add(newMap);
+        todoList.add(newMap);
     }
 
     /**

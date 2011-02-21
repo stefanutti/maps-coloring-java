@@ -19,6 +19,6 @@ public class SwixmlComboboxColors extends DefaultComboBoxModel {
      * Constructor.
      */
     public SwixmlComboboxColors() {
-        super(new Object[] { "RED", "GREEN", "BLUE", "GRAY" });
+        super(new Object[] { "ONE", "TWO", "THREE", "FOUR" });
     }
 };

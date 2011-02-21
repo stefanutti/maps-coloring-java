@@ -14,36 +14,35 @@ import java.util.Stack;
  */
 public class ColorPalette {
 
-    public Stack<COLORS> palette = new Stack<COLORS>();
+	public Stack<COLORS> palette = new Stack<COLORS>();
 
-    /**
-     * @param isPreconfigured
-     *            preconfigured with 4 colors?
-     */
-    public ColorPalette(boolean isPreconfigured) {
-        if (isPreconfigured) {
-            resetToFull();
-        }
-        else {
-            resetToEmpty();
-        }
-    }
+	/**
+	 * @param isPreconfigured
+	 *            preconfigured with 4 colors?
+	 */
+	public ColorPalette(boolean isPreconfigured) {
+		if (isPreconfigured) {
+			resetToFull();
+		} else {
+			resetToEmpty();
+		}
+	}
 
-    /**
-     * Reset the palette of colors
-     */
-    public void resetToFull() {
-        palette.removeAllElements();
-        palette.push(COLORS.GRAY);
-        palette.push(COLORS.BLUE);
-        palette.push(COLORS.GREEN);
-        palette.push(COLORS.RED);
-    }
+	/**
+	 * Reset the palette of colors
+	 */
+	public void resetToFull() {
+		palette.removeAllElements();
+		palette.push(COLORS.FOUR);
+		palette.push(COLORS.THREE);
+		palette.push(COLORS.TWO);
+		palette.push(COLORS.ONE);
+	}
 
-    /**
-     * Reset the palette of colors
-     */
-    public void resetToEmpty() {
-        palette.removeAllElements();
-    }
+	/**
+	 * Reset the palette of colors
+	 */
+	public void resetToEmpty() {
+		palette.removeAllElements();
+	}
 }

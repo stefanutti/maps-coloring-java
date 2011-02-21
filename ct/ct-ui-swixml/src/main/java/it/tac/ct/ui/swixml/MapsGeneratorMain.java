@@ -55,34 +55,36 @@ import it.tac.ct.core.MapsGenerator;
  *          <p>
  *          TODO:
  *          <li>Review the code after the migration to sourceforge (07/02/2011)
- *          <li>Make the user interface more compact and write an introduction (all before publishing it)
- *          <li>Transformations:
- *          <li>- Starting from a displayed map remove the last inserted face (not considering the Ocean) and create another view for compare coloring
- *          <li>- Transform a map that does'nt have an F5 ocean into a map with an F5 ocean (from plane back to sphere and hole an F5)
- *          <li>Extend the list to be stored also on disk when memory is a problem (see if ehcache is good)
- *          <li>Show the use of memory directly on the UI (heap)
- *          <li>Add a tool that from the picture of a graph or of a map (to upload), transform it into a simplified map
- *          <li>Try to think to an highly distributed architecture using a grid of computers to distribute jobs and increase memory available
- *          <li>Add a flag to not filter (remove) any map, not even if a not reach-able face has cardinality = 2
- *          <li>Add the coloring method based on the arbitrary choice the three color for central face, ocean + another face adjoining the other two
- *          <li>Add a map serching tool: for example "find a map with 13 faces" or "find a map with second face with at least two F6 faces" or ...
- *          <li>Set a map manually (using the string that represents the "sequence of coordinates")
- *          <li>Filter maps that have less than N faces
- *          <li>Save and restore maps on disk (single and groups). Each map can be saved as a string that represents the "sequence of coordinates"
- *          <li>Add timing statistics
  *          <li>Remove from F the variables: x, y, w, h and startRadius, stopRadius, ...
- *          <li>Create the object Ocean to color it, through mouse selection as any other face
  *          <li>Clean the code: Review the indexes used for array and similar. Some begin from 0 and some from 1
  *          <li>Clean the code: Verify is styles are created also when not needed (create 4 styles and use the same style for more objects)
  *          <li>Clean the code: When coloring the map, do not recreate it every time but change only the styles
  *          <li>Clean the code: refactor all
- *          <li>Color all maps (silent without visualization + progress bar)
- *          <li>Add a grid to easily understand each face which face it is (or mouse over)
+ *          <li>Transformations:
+ *          <li>- Starting from a displayed map remove the last inserted face (not considering the Ocean) and create another view for compare coloring
+ *          <li>- Transform a map that does'nt have an F5 ocean into a map with an F5 ocean (from plane back to sphere and hole an F5)
+ *          <li>Try to think to an highly distributed architecture using a grid of computers to distribute jobs and increase memory available
+ *          <li>Add the coloring method based on the arbitrary choice the three color for central face, ocean + another face adjoining the other two
+ *          <li>Add a map serching tool: for example "find a map with 13 faces" or "find a map with with at least two F6 faces confining" or ...
+ *          <li>Filter maps that have less than N faces
+ *          <li>Create the object Ocean to color it, through mouse selection as any other face
  *          <li>Create a pause button (separated thread) for the automatic color algorithm with the possibility to manually modify the map
  *          <li>Permit zoom or color mode or find a way to have both at the same time (different buttons?)
- *          <li>Save all images found (if list is small or +- 10 maps respect the current one)
  *          <li>3D mode: navigable in all directions + all angles (like google earth)
- *          <li>Bug?: if method == F and maxNumber < 7 and automatic filter is set --> computation does not produce maps (only the basic one)
+ *          <li>Bug?: if method == F and maxNumber < 7 and automatic filter is active --> computation does not produce maps (only the basic one)
+ *          </p>
+ *          <p>
+ *          MOVED TO SOURCEFORGE TRACKER:
+ *          <li>Set a map manually (using the string that represents the "sequence of coordinates" as in logging on stdout)
+ *          <li>Add a flag to not filter (remove) any map, not even if a not reach-able face has cardinality = 2
+ *          <li>Add timing statistics
+ *          <li>Color all maps (silent without visualization + progress bar)
+ *          <li>Add a grid to easily understand each face which face it is (or mouse over)
+ *          <li>Add a tool that from the picture of a graph or of a map (to upload), transform it into a simplified map
+ *          <li>Make the user interface more compact and write an introduction (all before publishing it) - skins
+ *          <li>Save and restore maps on disk (single and groups). Each map can be saved as a string that represents the "sequence of coordinates"
+ *          <li>Save all images found (if list is small or +- 10 maps respect the current one)
+ *          <li>Show the use of memory directly on the UI (heap)
  *          </p>
  *          <p>
  *          DONE:
@@ -149,6 +151,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JButton filterLessThanFacesElaboration = null;
     private final JButton copyMapsToTodoElaboration = null;
     private final JButton resetElaboration = null;
+    private final JTextField mapTextRepresentation = null;
     private final JTextField mapsSize = null;
     private final JTextField mapsRemoved = null;
     private final JTextField todoListSize = null;
@@ -156,10 +159,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private Enum<DRAW_METHOD> drawMethodValue = DRAW_METHOD.CIRCLES;
     private final JComboBox color = null;
     private final JSlider transparency = null;
-    private int transparencyValue = 200; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
+    private int transparencyValue = 255; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
     private final JPanel mapExplorer = null;
     private final JCheckBox showFaceCardinality = null;
-
+    
     // Some graphical properties
     //
     public static final int LINE_WIDTH = 1;
@@ -180,14 +183,14 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         try {
 
             SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
-            URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct.xml");
+            URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-v2.xml");
             engine.render(configFileURL).setVisible(true);
 
             // G lib initialization (link window canvas to JPanel)
             //
             window = new GWindow();
             scene = new GScene(window);
-            mapExplorer.add(window.getCanvas(), BorderLayout.CENTER);
+            mapExplorer.add(window.getCanvas());
 
             // Use a normalized world extent (adding a safety border)
             //
@@ -200,8 +203,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
             // Set interaction
             //
-            window.startInteraction(new ZoomInteraction(scene));
-            // window.startInteraction(this);
+            // window.startInteraction(new ZoomInteraction(scene));
+            window.startInteraction(this);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -267,8 +270,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         @Override
         public void draw() {
 
-            // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+,
-            // 2e+, 1e+
+            // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
             //
             // x = Position in the list (index)
             // y = Number of the F - 1
@@ -376,9 +378,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         @Override
         public void draw() {
 
-            // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+,
-            // 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+,
-            // 2e+, 1e+
+            // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
             //
             // Everything has to be normalized [0, 1]
             //
@@ -390,8 +390,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 graphicalObjectCoordinates.add(new GraphicalObjectCoordinate());
             }
 
-            // Computes graphical coordinates for all other Fs (not considering
-            // the first one)
+            // Computes graphical coordinates for all other Fs (not considering the first one)
             //
             GraphicalObjectCoordinate g = null;
             for (int i = 1; i < map4CT.sequenceOfCoordinates.sequence.size() - 1; i++) {
@@ -510,14 +509,20 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
     // EVENTS EVENTS EVENTS ...
     //
+    public Action logWhilePopulateAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            mapsGenerator.logWhilePopulate = logWhilePopulate.isSelected();
+        }
+    };
+
     public Action startElaborationAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
             // Read parameters set by user (User Interface)
             //
             mapsGenerator.slowdownMillisec = Integer.parseInt(slowdownMillisec.getText());
-            mapsGenerator.logWhilePopulate = logWhilePopulate.isSelected();
             mapsGenerator.randomElaboration = randomElaboration.isSelected();
+            mapsGenerator.logWhilePopulate = logWhilePopulate.isSelected();
             mapsGenerator.processAll = processAll.isSelected();
 
             if (maxMethod.getSelectedIndex() == 0) {
@@ -630,6 +635,18 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 map4CTCurrentIndex = -1;
                 drawCurrentMap();
             }
+        }
+    };
+
+    // XXX
+    public Action createMapFromTextRepresentationAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+//            mapsGenerator.createMapFromTextRepresentation(mapTextRepresentation.getText());
+//            map4CTCurrentIndex = mapsGenerator.maps.size();
+//            map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex - 1);
+//
+//            refreshRuntimeInfo();
+//            drawCurrentMap();
         }
     };
 
@@ -782,7 +799,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     /**
      * Utility class to run the generate() method of the MapsGenerator
      */
-    private final Runnable runnableColorIt = new Runnable() {
+    private final Runnable runnableAutoColorIt = new Runnable() {
         public void run() {
 
             // Local variables
@@ -803,7 +820,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 //
                 for (int i = 0; i < map4CTCurrent.faces.size(); i++) {
                     mapsPalette.add(new ColorPalette(true));
-                    map4CTCurrent.faces.get(i).color = COLORS.WHITE;
+                    map4CTCurrent.faces.get(i).color = COLORS.UNCOLORED;
                 }
 
                 // Draw the map
@@ -835,7 +852,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                             //
                             moveBackOneFace = true;
                             mapsPalette.get(currentFaceIndex).resetToFull();
-                            faceToAnalyze.color = COLORS.WHITE;
+                            faceToAnalyze.color = COLORS.UNCOLORED;
                             if (map4CTCurrent.isFaceFacingTheOcean(currentFaceIndex + 1) == true) {
                                 colorsFacingTheOcean.palette.pop(); // Throw away the last color inserted
                             }
@@ -887,12 +904,12 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    public Action colorItAction = new AbstractAction() {
+    public Action autoColorItAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
             // Execute the thread
             //
-            new Thread(runnableColorIt).start();
+            new Thread(runnableAutoColorIt).start();
         }
     };
 
@@ -920,7 +937,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             drawMethodValue = DRAW_METHOD.RECTANGLES_NEW_YORK;
         }
 
-        // If a map was already shown, I need to redraw it
+		// If a map was already shown, I need to redraw it
         //
         if (map4CTCurrent != null) {
 
@@ -948,6 +965,12 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             // After "add" a container has to be validated
             //
             mapExplorer.validate();
+
+            // Log the details of the map
+            //
+    		if (mapsGenerator.logWhilePopulate) {
+                Map4CT.printDetailedMap(map4CTCurrent);
+    		}
         } else {
             scene.removeAll();
             scene.refresh();
@@ -967,16 +990,21 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
         // Read the color to use
         //
-        if (face.color == COLORS.WHITE) {
+        // ONE = tomato1 = 255, 99, 71
+        // TWO = limegreen = 50, 205, 50
+        // THREE = yellow 2 = 238, 238, 0
+        // FOUR = lightsteelblue = 176, 196, 222
+        //
+        if (face.color == COLORS.UNCOLORED) {
             colorToUse = new Color(255, 255, 255, transparency.getValue());
-        } else if (face.color == COLORS.RED) {
-            colorToUse = new Color(255, 0, 0, transparency.getValue());
-        } else if (face.color == COLORS.GREEN) {
-            colorToUse = new Color(0, 255, 0, transparency.getValue());
-        } else if (face.color == COLORS.BLUE) {
-            colorToUse = new Color(0, 0, 255, transparency.getValue());
-        } else if (face.color == COLORS.GRAY) {
-            colorToUse = new Color(128, 128, 128, transparency.getValue());
+        } else if (face.color == COLORS.ONE) {
+            colorToUse = new Color(255, 99, 71, transparency.getValue());
+        } else if (face.color == COLORS.TWO) {
+            colorToUse = new Color(50, 205, 50, transparency.getValue());
+        } else if (face.color == COLORS.THREE) {
+            colorToUse = new Color(238, 238, 0, transparency.getValue());
+        } else if (face.color == COLORS.FOUR) {
+            colorToUse = new Color(176, 196, 222, transparency.getValue());
         }
 
         // Set the style of this object
@@ -1016,19 +1044,19 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 F face = (F)interactionSegment.getUserData();
 
                 if (color.getSelectedIndex() == 0) {
-                    colorToUse = new Color(255, 0, 0, transparency.getValue());
-                    face.color = COLORS.RED;
+                    colorToUse = new Color(255, 99, 71, transparency.getValue());
+                    face.color = COLORS.ONE;
                 } else if (color.getSelectedIndex() == 1) {
-                    colorToUse = new Color(0, 255, 0, transparency.getValue());
-                    face.color = COLORS.GREEN;
+                    colorToUse = new Color(50, 205, 50, transparency.getValue());
+                    face.color = COLORS.TWO;
                 } else if (color.getSelectedIndex() == 2) {
-                    colorToUse = new Color(0, 0, 255, transparency.getValue());
-                    face.color = COLORS.BLUE;
+                    colorToUse = new Color(238, 238, 0, transparency.getValue());
+                    face.color = COLORS.THREE;
                 } else if (color.getSelectedIndex() == 3) {
-                    colorToUse = new Color(128, 128, 128, transparency.getValue());
-                    face.color = COLORS.GRAY;
+                    colorToUse = new Color(176, 196, 222, transparency.getValue());
+                    face.color = COLORS.FOUR;
                 }
-
+                
                 // Set the style of this object
                 //
                 GStyle style = new GStyle();

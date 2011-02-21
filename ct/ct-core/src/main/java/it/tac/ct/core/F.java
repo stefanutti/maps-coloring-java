@@ -25,7 +25,7 @@ public class F implements Cloneable {
 
     // Used for coloring maps
     //
-    public COLORS color = COLORS.WHITE; // Default for no color selected
+    public COLORS color = COLORS.UNCOLORED; // Default for no color selected
 
     // List of neighbors of the previous levels
     //
