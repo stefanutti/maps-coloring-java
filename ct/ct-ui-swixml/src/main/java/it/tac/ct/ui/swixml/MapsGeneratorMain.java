@@ -966,12 +966,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 			// After "add" a container has to be validated
 			//
 			mapExplorer.validate();
-
-			// Log the details of the map
-			//
-			if (mapsGenerator.logWhilePopulate) {
-				Map4CT.printDetailedMap(map4CTCurrent);
-			}
 		} else {
 			scene.removeAll();
 			scene.refresh();

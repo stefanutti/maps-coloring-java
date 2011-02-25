@@ -20,8 +20,8 @@ public class MapsGenerator {
 
 	// Control parameters
 	//
-	public int slowdownMillisec = 0; // May be needed to slow down the process (what for, I don't know)
-	public boolean logWhilePopulate = true;
+	public int slowdownMillisec = 0; // May be needed to slow down the process (what for? I don't know)
+	public boolean logWhilePopulate = false;
 	public boolean randomElaboration = false;
 	public boolean processAll = true;
 	public Enum<MAX_METHOD> maxMethod = MAX_METHOD.MAPS;
@@ -351,23 +351,32 @@ public class MapsGenerator {
 	 */
 	public void createMapFromTextRepresentationTemp(String mapTextRepresentation) {
 
-		// Create an empty (almost) map (default is 2 faces + the ocean = 3 faces)
-		//
 		Map4CT newMap = new Map4CT();
 
-		newMap.insertF(3, 2, 2);
-		newMap.insertF(4, 3, 2);
+		// Tutte's map
+		//
+		newMap.insertF(3, 1, 2);
+		newMap.insertF(4, 1, 2);
 		newMap.insertF(5, 3, 2);
-		// System.out.println("DEBUG: " + newMap.sequenceOfCoordinates.sequence);
-		// for (int i = 1; i < newMap.sequenceOfCoordinates.sequence.size(); i++) {
-		// System.out.println("DEBUG: fNumberAtIndex = " + i + " is: " + newMap.sequenceOfCoordinates.fNumberAtIndex(i, 0));
-		// }
-		// System.out.println("DEBUG: numberOfVisibleEdgesAtBorders = " + newMap.sequenceOfCoordinates.numberOfVisibleEdgesAtBorders());
-		newMap.insertF(6, 5, 2); // Error
-		// System.out.println("DEBUG: " + newMap.sequenceOfCoordinates.sequence);
-		newMap.insertF(7, 4, 3);
-		newMap.insertF(8, 2, 4);
-		newMap.insertF(9, 2, 4);
+		newMap.insertF(6, 2, 3);
+		newMap.insertF(7, 2, 2);
+		newMap.insertF(8, 1, 3);
+		newMap.insertF(9, 2, 1);
+		newMap.insertF(10, 3, 2);
+		newMap.insertF(11, 3, 2);
+		newMap.insertF(12, 4, 3);
+		newMap.insertF(13, 4, 2);
+		newMap.insertF(14, 5, 3);
+		newMap.insertF(15, 3, 3);
+		newMap.insertF(16, 4, 4);
+		newMap.insertF(17, 5, 6);
+		newMap.insertF(18, 5, 2);
+		newMap.insertF(19, 6, 2);
+		newMap.insertF(20, 5, 3);
+		newMap.insertF(21, 6, 2);
+		newMap.insertF(22, 5, 3);
+		newMap.insertF(23, 7, 3);
+		newMap.insertF(24, 5, 4);
 
 		// Update the map list and the todoList
 		//
