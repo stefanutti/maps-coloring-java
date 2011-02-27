@@ -72,8 +72,11 @@
 
 \size largest
 Four color theorem: searching for a pencil and paper proof
-\size default
+\end_layout
 
+\begin_layout Standard
+\align center
+(outdated)
 \begin_inset Newline newline
 \end_inset
 
