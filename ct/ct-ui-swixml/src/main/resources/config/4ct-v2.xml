@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<frame name="frame" size="900,550" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
+<frame name="frame" size="1000,650" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
     <menubar>
         <menu text="File">
             <menuitem text="Load skin (to be implemented)" />
             <separator />
-            <menuitem text="Quit (to be implemented)" />
+            <menuitem text="Quit" action="quitAction" />
         </menu>
         <menu text="Help">
             <menuitem text="How to use it (to be implemented)" />
@@ -15,15 +15,15 @@
 
     <tabbedpane>
         <panel name="Map Generator" layout="BorderLayout">
-            <panel  preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout">
+            <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout">
                 <scrollpane>
                     <panel>
-                        <layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
+                        <layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
 
                         <titledseparator constraints="1,1,3,1" />
                         <label constraints="1,3" text="slowdownMillisec" />
                         <textfield constraints="3,3,1,1" toolTipText="Slowdown the generation of maps" text="0" id="slowdownMillisec" />
-                        <checkbox constraints="3,5" toolTipText="Log debugging info to stdout" text="logWhilePopulate" selected="false" id="logWhilePopulate" action="logWhilePopulateAction"/>
+                        <checkbox constraints="3,5" toolTipText="Log debugging info to stdout" text="logWhilePopulate" selected="false" id="logWhilePopulate" action="logWhilePopulateAction" />
                         <checkbox constraints="3,7" toolTipText="Random generation of maps" text="randomElaboration" selected="true" id="randomElaboration" />
                         <checkbox constraints="3,9" toolTipText="Process all maps" text="processAll" selected="true" id="processAll" />
                         <label constraints="1,11" text="maxMethod" />
@@ -49,12 +49,11 @@
                             <button text="@" toolTipText="Random map" action="drawRandomMapAction" />
                             <button text="&gt;" toolTipText="Next map" action="drawNextMapAction" />
                             <button text="&gt;|" toolTipText="Last map" action="drawLastMapAction" />
-                            <box.glue />
                         </hbox>
                         <label constraints="1,21" text="createMap" />
                         <hbox constraints="3,21,1,1">
                             <textfield text="1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+" id="mapTextRepresentation" />
-                            <button toolTipText="Create a map from its text representation (see logging)" text="go" enabled="true" action="createMapFromTextRepresentationAction" id="createMapFromTextRepresentation"/>
+                            <button toolTipText="Create a map from its text representation (see logging)" text="go" enabled="true" action="createMapFromTextRepresentationAction" id="createMapFromTextRepresentation" />
                         </hbox>
 
                         <titledseparator constraints="1,23,3,1" />
@@ -72,18 +71,55 @@
 
                         <titledseparator constraints="1,33,3,1" />
                         <button constraints="3,35,1,1" text="refreshRuntimeInfo" action="refreshRuntimeInfoAction" />
-                        <label constraints="1,37" text="mapsSize" />
-                        <textfield constraints="3,37,1,1" text="0" editable="false" id="mapsSize" />
-                        <label constraints="1,39" text="mapsRemoved" />
-                        <textfield constraints="3,39,1,1" text="0" editable="false" id="mapsRemoved" />
-                        <label constraints="1,41" text="todoListSize" />
-                        <textfield constraints="3,41,1,1" text="1" editable="false" id="todoListSize" />
+                        <hbox constraints="3,37,1,1">
+                            <textfield text="0" toolTipText="Size of the list of created maps" editable="false" id="mapsSize" />
+                            <textfield text="0" toolTipText="Maps removed" editable="false" id="mapsRemoved" />
+                            <textfield text="1" toolTipText="Sile of the list of maps to elaborate" editable="false" id="todoListSize" />
+                        </hbox>
 
+                        <titledseparator constraints="1,39,3,1" />
+                        <checkbox constraints="3,41" toolTipText="Turn on/off the sound while coloring" text="soundWhileColoring" selected="false" id="soundWhileColoring" />
+                        <label constraints="1,43" text="ONE" />
+                        <hbox constraints="3,43,1,1">
+                            <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorOneInstrument" />
+                            <textfield text="60" toolTipText="Starting note" id="colorOneBaseNote" />
+                            <textfield text="30" toolTipText="Duration" id="colorOneBaseDuration" />
+                            <textfield text="100" toolTipText="Velocity" id="colorOneBaseVelocity" />
+                        </hbox>
+                        <label constraints="1,45" text="TWO" />
+                        <hbox constraints="3,45,1,1">
+                            <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorTwoInstrument" />
+                            <textfield text="60" toolTipText="Starting note" id="colorTwoBaseNote" />
+                            <textfield text="30" toolTipText="Duration" id="colorTwoBaseDuration" />
+                            <textfield text="100" toolTipText="Velocity" id="colorTwoBaseVelocity" />
+                        </hbox>
+                        <label constraints="1,47" text="THREE" />
+                        <hbox constraints="3,47,1,1">
+                            <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorThreeInstrument" />
+                            <textfield text="60" toolTipText="Starting note" id="colorThreeBaseNote" />
+                            <textfield text="30" toolTipText="Duration" id="colorThreeBaseDuration" />
+                            <textfield text="100" toolTipText="Velocity" id="colorThreeBaseVelocity" />
+                        </hbox>
+                        <label constraints="1,49" text="TWO" />
+                        <hbox constraints="3,49,1,1">
+                            <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorFourInstrument" />
+                            <textfield text="60" toolTipText="Starting note" id="colorFourBaseNote" />
+                            <textfield text="30" toolTipText="Duration" id="colorFourBaseDuration" />
+                            <textfield text="100" toolTipText="Velocity" id="colorFourBaseVelocity" />
+                        </hbox>
+
+                        <titledseparator constraints="1,51,3,1" />
+                        <label constraints="1,53" text="assignColors" />
+                        <hbox constraints="3,53,1,1">
+                            <button text="ONE" action="selectColorOneAction" id="selectColorOne" />
+                            <button text="TWO" action="selectColorTwoAction" id="selectColorTwo" />
+                            <button text="THREE" action="selectColorThreeAction" id="selectColorThree" />
+                            <button text="FOUR" action="selectColorFourAction" id="selectColorFour" />
+                        </hbox>
                     </panel>
                 </scrollpane>
             </panel>
-            <!-- background = OCEAN = COLOR.FOUR = lightsteelblue = rgb (176,196,222) -->
-            <panel layout="BorderLayout" background="176,196,222" constraints="BorderLayout.CENTER" id="mapExplorer">
+            <panel layout="borderLayout" constraints="BorderLayout.CENTER" id="mapExplorer">
             </panel>
         </panel>
         <panel name="Manual creation" layout="borderLayout">
