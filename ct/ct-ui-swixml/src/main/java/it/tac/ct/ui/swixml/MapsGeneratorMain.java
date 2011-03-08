@@ -39,6 +39,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.RepaintManager;
 
 import no.geosoft.cc.geometry.Geometry;
 import no.geosoft.cc.graphics.GInteraction;
@@ -87,7 +88,7 @@ import org.swixml.SwingEngine;
  *          <li>When F mode is activated and while generating maps, filter "closed" maps that have reached F faces (only if >= 12)
  *          <li>Filter maps with less than F faces (considering the ocean)
  *          <li>Change the transparent slider to text and add an action to it (open a swixml2 BUG for sliders not handling actions)
- *          <li>Use 64bits JVM to use more memory
+ *          <li>CANCELLED: Use 64 bits JVM to use more memory. 64 bits JVM has many bugs
  *          <li>If the list of maps gets empty (after a filtering) also clean the screen with the visualized map
  *          <li>LinkedList have been changed to ArrayList to free memory (CPU is sacrificed)
  *          <li>Clean the code: Adjust the automatic coloring algorithm and then find some enhancement + some others + some others
@@ -136,6 +137,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
     // Variables automatically initialized to form object (swixml)
     //
+    private final JFrame mainframe = null;
     private final JTextField slowdownMillisec = null;
     private final JCheckBox logWhilePopulate = null;
     private final JCheckBox randomElaboration = null;
@@ -157,6 +159,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JComboBox drawMethod = null;
     private Enum<DRAW_METHOD> drawMethodValue = DRAW_METHOD.CIRCLES;
     private final JComboBox color = null;
+    private final JButton stopAutoColorIt = null;
     private final JSlider transparency = null;
     private int transparencyValue = 255; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
     private final JPanel mapExplorer = null;
@@ -199,6 +202,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private Color colorThree = null;
     private Color colorFour = null;
 
+    private boolean stopAutoColorRequested = false;
+
     // Some graphical properties
     //
     public static final int LINE_WIDTH = 1;
@@ -215,61 +220,63 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     /**
      * Constructor
      */
-    private MapsGeneratorMain() {
-        try {
+    private MapsGeneratorMain() throws Exception {
 
-            // Initialize the sound system and load all instruments
-            //
-            URL soundbankURL = this.getClass().getClassLoader().getResource("config/soundbank-deluxe.gm");
-            if (soundbankURL.getProtocol().equals("jar")) {
-                soundbank = MidiSystem.getSoundbank(soundbankURL);
-            } else {
-                File soundbankFile = new File(soundbankURL.toURI());
-                soundbank = MidiSystem.getSoundbank(soundbankFile);
-            }
-            synthesizer = MidiSystem.getSynthesizer();
-            synthesizer.open();
-            synthesizer.loadAllInstruments(soundbank);
-            instruments = synthesizer.getLoadedInstruments();
-            midiChannels = synthesizer.getChannels();
-
-            // Initialize Swixml
-            //
-            SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
-            URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-v2.xml");
-            engine.render(configFileURL).setVisible(false); // Has to become visible at the end
-
-            // Set instruments for the combos (I wasn't able to do it through JComboBox's constructor, because soundbanks cannot be closed and then re-opened
-            //
-            setInstruments(colorOneInstrument, instruments);
-            setInstruments(colorTwoInstrument, instruments);
-            setInstruments(colorThreeInstrument, instruments);
-            setInstruments(colorFourInstrument, instruments);
-
-            // Initialize colors xxx to default
-            //
-            colorOne = new Color(255, 99, 71);
-            colorTwo = new Color(50, 205, 50);
-            colorThree = new Color(238, 238, 0);
-            colorFour = new Color(176, 196, 222);
-
-            selectColorOne.setForeground(colorOne);
-            selectColorTwo.setForeground(colorTwo);
-            selectColorThree.setForeground(colorThree);
-            selectColorFour.setForeground(colorFour);
-
-            // Get visible
-            //
-            initGCanvas();
-
-            // Get visible
-            //
-            validate();
-            setVisible(true);
-
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        // Initialize the sound system and load all instruments
+        //
+        URL soundbankURL = this.getClass().getClassLoader().getResource("config/soundbank-deluxe.gm");
+        if (soundbankURL.getProtocol().equals("jar")) {
+            soundbank = MidiSystem.getSoundbank(soundbankURL);
+        } else {
+            File soundbankFile = new File(soundbankURL.toURI());
+            soundbank = MidiSystem.getSoundbank(soundbankFile);
         }
+        synthesizer = MidiSystem.getSynthesizer();
+        synthesizer.open();
+        synthesizer.loadAllInstruments(soundbank);
+        instruments = synthesizer.getLoadedInstruments();
+        midiChannels = synthesizer.getChannels();
+
+        // Initialize Swixml
+        //
+        SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
+        URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-v2.xml");
+        engine.render(configFileURL).setVisible(false); // Has to become visible at the end
+
+        // Set instruments for the combos (I wasn't able to do it through JComboBox's constructor, because soundbanks cannot be closed and then re-opened
+        //
+        setInstruments(colorOneInstrument, instruments);
+        setInstruments(colorTwoInstrument, instruments);
+        setInstruments(colorThreeInstrument, instruments);
+        setInstruments(colorFourInstrument, instruments);
+
+        // Initialize colors
+        //
+        colorOne = new Color(255, 99, 71);
+        colorTwo = new Color(50, 205, 50);
+        colorThree = new Color(238, 238, 0);
+        colorFour = new Color(176, 196, 222);
+
+        selectColorOne.setForeground(colorOne);
+        selectColorTwo.setForeground(colorTwo);
+        selectColorThree.setForeground(colorThree);
+        selectColorFour.setForeground(colorFour);
+
+        // Get visible
+        //
+        initMapExplorerForGraphic();
+
+        // Bug fixed: flickering
+        //
+        // When GCanvas from geosoft gets mixed with swing code, it causes flickering of objects
+        // I found this solution (re-enabling double buffering) and I hape it does not have counter effects. I didn't find any
+        //
+        RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
+
+        // Get visible
+        //
+        validate();
+        setVisible(true);
     }
 
     public void setInstruments(JComboBox jComboBox, Instrument[] instruments) {
@@ -278,7 +285,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     }
 
-    public void initGCanvas() {
+    public void initMapExplorerForGraphic() {
 
         // G lib initialization (link window canvas to JPanel)
         //
@@ -286,6 +293,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         scene = new GScene(window);
         mapExplorer.removeAll();
         mapExplorer.add(window.getCanvas());
+
+        mapExplorer.setDoubleBuffered(false); // xxx
 
         // Use a normalized world extent (adding a safety border)
         //
@@ -938,7 +947,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             // Re-init graphic
             // It did not repaint (even using repaint()). I had to recreate everything. It maybe AWT and SWING mixed together
             //
-            initGCanvas();
+            initMapExplorerForGraphic();
         }
     };
 
@@ -986,7 +995,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
                 // While not end of job (loop all faces)
                 //
-                while (!endOfJob) {
+                while (!endOfJob && !stopAutoColorRequested) {
 
                     // Reset colorFound and moveBackOneFace
                     //
@@ -1052,7 +1061,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                                 midiChannels[0].noteOn(note, Integer.parseInt(colorOneBaseVelocity.getText()));
                                 try {
                                     Thread.sleep(Integer.parseInt(colorOneBaseDuration.getText()));
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException interruptedException) {
+                                    interruptedException.printStackTrace();
                                 }
                                 midiChannels[0].noteOff(note);
                             } else if (faceToAnalyze.color == COLORS.TWO) {
@@ -1063,7 +1073,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                                 midiChannels[1].noteOn(note, Integer.parseInt(colorTwoBaseVelocity.getText()));
                                 try {
                                     Thread.sleep(Integer.parseInt(colorTwoBaseDuration.getText()));
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException interruptedException) {
+                                    interruptedException.printStackTrace();
                                 }
                                 midiChannels[1].noteOff(note);
                             } else if (faceToAnalyze.color == COLORS.THREE) {
@@ -1071,7 +1082,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                                 midiChannels[2].noteOn(note, Integer.parseInt(colorThreeBaseVelocity.getText()));
                                 try {
                                     Thread.sleep(Integer.parseInt(colorThreeBaseDuration.getText()));
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException interruptedException) {
+                                    interruptedException.printStackTrace();
                                 }
                                 midiChannels[2].noteOff(note);
                             } else if (faceToAnalyze.color == COLORS.FOUR) {
@@ -1079,7 +1091,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                                 midiChannels[3].noteOn(note, Integer.parseInt(colorFourBaseVelocity.getText()));
                                 try {
                                     Thread.sleep(Integer.parseInt(colorFourBaseDuration.getText()));
-                                } catch (InterruptedException e) {
+                                } catch (InterruptedException interruptedException) {
+                                    interruptedException.printStackTrace();
                                 }
                                 midiChannels[3].noteOff(note);
                             }
@@ -1105,9 +1118,28 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     public Action autoColorItAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
+            // Reset the stop auto color it request ("X" button)
+            //
+            stopAutoColorRequested = true;
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+
+            // Reset the stop auto color it request ("X" button)
+            //
+            stopAutoColorRequested = false;
+
             // Execute the thread
             //
             new Thread(runnableAutoColorIt).start();
+        }
+    };
+
+    public Action stopAutoColorItAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            stopAutoColorRequested = true;
         }
     };
 
@@ -1132,7 +1164,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     /**
      * Draw current map
      */
-    public void drawCurrentMap() {
+    public synchronized void drawCurrentMap() {
 
         // Read the draw method
         //

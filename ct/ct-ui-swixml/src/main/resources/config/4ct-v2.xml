@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<frame name="frame" size="1000,650" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
+<frame name="frame"  size="1000,650" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
     <menubar>
         <menu text="File">
             <menuitem text="Load skin (to be implemented)" />
@@ -13,9 +13,9 @@
         </menu>
     </menubar>
 
-    <tabbedpane>
-        <panel name="Map Generator" layout="BorderLayout">
-            <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout">
+    <tabbedpane  doubleBuffered="false">
+        <panel name="Map Generator" layout="BorderLayout" >
+            <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout" >
                 <scrollpane>
                     <panel>
                         <layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
@@ -66,6 +66,7 @@
                         <hbox constraints="3,31,1,1">
                             <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxColors" id="color" />
                             <button text="autoColorIt" action="autoColorItAction" />
+                            <button text="X" toolTipText="Stop auto coloring" action="stopAutoColorItAction" id="stopAutoColorIt" />
                             <button text="saveMapToGif" action="saveMapToGifAction" />
                         </hbox>
 
