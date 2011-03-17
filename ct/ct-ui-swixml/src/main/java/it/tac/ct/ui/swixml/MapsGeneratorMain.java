@@ -156,10 +156,12 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JTextField mapsSize = null;
     private final JTextField mapsRemoved = null;
     private final JTextField todoListSize = null;
+    private final JTextField totalMemory = null;
+    private final JTextField maxMemory = null;
+    private final JTextField freeMemory = null;
     private final JComboBox drawMethod = null;
     private Enum<DRAW_METHOD> drawMethodValue = DRAW_METHOD.CIRCLES;
     private final JComboBox color = null;
-    private final JButton stopAutoColorIt = null;
     private final JSlider transparency = null;
     private int transparencyValue = 255; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
     private final JPanel mapExplorer = null;
@@ -203,6 +205,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private Color colorFour = null;
 
     private boolean stopAutoColorRequested = false;
+    private Thread autoColorItThread = null;
 
     // Some graphical properties
     //
@@ -262,6 +265,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         selectColorThree.setForeground(colorThree);
         selectColorFour.setForeground(colorFour);
 
+        // StartUp refresh manager (Runtime info, memory, etc.)
+        //
+        new Thread(refreshManager).start();
+
         // Get visible
         //
         initMapExplorerForGraphic();
@@ -314,6 +321,26 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     /**
      * Utility class to run the generate() method of the MapsGenerator
      */
+    private final Runnable refreshManager = new Runnable() {
+        public void run() {
+
+            while (true) {
+
+                refreshInfo();
+                refreshMemoryInfo();
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+            }
+        }
+    };
+
+    /**
+     * Utility class to run the generate() method of the MapsGenerator
+     */
     private final Runnable runnableGenerate = new Runnable() {
         public void run() {
             try {
@@ -329,7 +356,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 filterLessThanFacesElaboration.setEnabled(true);
                 copyMapsToTodoElaboration.setEnabled(true);
                 createMapFromTextRepresentation.setEnabled(true);
-                refreshRuntimeInfo();
+                refreshInfo();
             }
         }
     };
@@ -672,7 +699,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     public Action filterLessThanFourElaborationAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             mapsGenerator.removeMapsWithCardinalityLessThanFour();
-            refreshRuntimeInfo();
+            refreshInfo();
 
             // Reset graph if necessary
             //
@@ -687,7 +714,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     public Action filterLessThanFiveElaborationAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             mapsGenerator.removeMapsWithCardinalityLessThanFive();
-            refreshRuntimeInfo();
+            refreshInfo();
 
             // Reset graph if necessary
             //
@@ -702,7 +729,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     public Action filterLessThanFacesElaborationAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             mapsGenerator.removeMapsWithLessThanFFaces(Integer.parseInt(maxNumber.getText()));
-            refreshRuntimeInfo();
+            refreshInfo();
 
             // Reset graph if necessary
             //
@@ -721,14 +748,19 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             if (mapsGenerator.todoList.size() != 0) {
                 startElaboration.setEnabled(true);
             }
-            refreshRuntimeInfo();
+            refreshInfo();
         }
     };
 
     public Action resetElaborationAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
+
+            // Creates a brend new generator
+            //
             mapsGenerator = new MapsGenerator();
 
+            // Reset buttons
+            //
             startElaboration.setEnabled(true);
             pauseElaboration.setEnabled(false);
             resetElaboration.setEnabled(false);
@@ -738,15 +770,13 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             copyMapsToTodoElaboration.setEnabled(false);
             createMapFromTextRepresentation.setEnabled(true);
 
-            refreshRuntimeInfo();
+            refreshInfo();
 
-            // Reset graph if necessary
+            // Reset graph
             //
-            if (mapsGenerator.maps.size() == 0) {
-                map4CTCurrent = null;
-                map4CTCurrentIndex = -1;
-                drawCurrentMap();
-            }
+            map4CTCurrent = null;
+            map4CTCurrentIndex = -1;
+            drawCurrentMap();
         }
     };
 
@@ -756,14 +786,25 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             map4CTCurrentIndex = mapsGenerator.maps.size();
             map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex - 1);
 
-            refreshRuntimeInfo();
+            // It behaves as the play (generation) action - At the end of the generation thread
+            //
+            startElaboration.setEnabled(!(mapsGenerator.todoList.size() == 0));
+            pauseElaboration.setEnabled(false);
+            resetElaboration.setEnabled(true);
+            filterLessThanFourElaboration.setEnabled(true);
+            filterLessThanFiveElaboration.setEnabled(true);
+            filterLessThanFacesElaboration.setEnabled(true);
+            copyMapsToTodoElaboration.setEnabled(true);
+            createMapFromTextRepresentation.setEnabled(true);
+
+            refreshInfo();
             drawCurrentMap();
         }
     };
 
-    public Action refreshRuntimeInfoAction = new AbstractAction() {
+    public Action refreshInfoAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
-            refreshRuntimeInfo();
+            refreshInfo();
         }
     };
 
@@ -978,12 +1019,12 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 midiChannels[2].programChange(colorThreeInstrument.getSelectedIndex());
                 midiChannels[3].programChange(colorFourInstrument.getSelectedIndex());
 
-                // Prepare and reset the palette for all faces and redraw it
+                // Prepare and reset palette for all faces and redraw it
                 //
                 for (int i = 0; i < map4CTCurrent.faces.size(); i++) {
                     mapsPalette.add(new ColorPalette(true));
-                    map4CTCurrent.faces.get(i).color = COLORS.UNCOLORED;
                 }
+                map4CTCurrent.resetColors();
 
                 // Draw the map
                 //
@@ -1118,7 +1159,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     public Action autoColorItAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
-            // Reset the stop auto color it request ("X" button)
+            // Stop auto coloring if running. It waits few millesec to be sure the thread understands the request
             //
             stopAutoColorRequested = true;
             try {
@@ -1131,28 +1172,69 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             //
             stopAutoColorRequested = false;
 
-            // Execute the thread
+            // Create the thread ... if not created
+            // Execute the thread ... if not already running
             //
-            new Thread(runnableAutoColorIt).start();
+            // Note: A java thread cannot be reused ... even if it terminated correctly
+            //
+            if (autoColorItThread == null) {
+                autoColorItThread = new Thread(runnableAutoColorIt);
+                autoColorItThread.start();
+            } else if (autoColorItThread.isAlive() == false) {
+                autoColorItThread = new Thread(runnableAutoColorIt);
+                autoColorItThread.start();
+            }
         }
     };
 
     public Action stopAutoColorItAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
+
+            // Stop auto coloring if running. It waits few millesec to be sure the thread understands the request
+            //
             stopAutoColorRequested = true;
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+
+            // Reset coloring of the map
+            // If a map was already shown, I need to redraw it
+            //
+            if (map4CTCurrent != null) {
+                map4CTCurrent.resetColors();
+                drawCurrentMap();
+            }
         }
     };
 
     /**
      * Refresh runtime info
      */
-    public void refreshRuntimeInfo() {
+    public synchronized void refreshInfo() {
         mapsSize.setText("" + mapsGenerator.maps.size());
         mapsRemoved.setText("" + mapsGenerator.removed);
         todoListSize.setText("" + mapsGenerator.todoList.size());
     }
 
-    protected Color chooseNewColor(Color currentColor) {
+    /**
+     * Refresh runtime info
+     */
+    public synchronized void refreshMemoryInfo() {
+
+        // Sets:
+        //
+        // Get current size of heap in bytes
+        // Get maximum size of heap in bytes. The heap cannot grow beyond this size. Any attempt will result in an OutOfMemoryException
+        // Get amount of free memory within the heap in bytes. This size will increase after garbage collection and decrease as new objects are created.
+        //
+        totalMemory.setText("" + (Runtime.getRuntime().totalMemory() / 1024 / 1024) + " Mb");
+        maxMemory.setText("" + (Runtime.getRuntime().maxMemory() / 1024 / 1024) + " Mb");
+        freeMemory.setText("" + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + " Mb");
+    }
+
+    public Color chooseNewColor(Color currentColor) {
         Color newColor = JColorChooser.showDialog(null, "Change color", currentColor);
         if (newColor == null) {
             newColor = currentColor;
@@ -1162,7 +1244,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     }
 
     /**
-     * Draw current map
+     * Draw current map (or reset graph if map4CTCurrent is null)
      */
     public synchronized void drawCurrentMap() {
 
@@ -1194,7 +1276,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 GMap4CTCircles gMap4CTCirlces = new GMap4CTCircles(map4CTCurrent);
                 scene.add(gMap4CTCirlces);
                 gMap4CTCirlces.draw();
-
             }
 
             // Draw & Refresh

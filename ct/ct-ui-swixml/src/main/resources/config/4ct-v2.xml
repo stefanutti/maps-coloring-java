@@ -58,24 +58,37 @@
 
                         <titledseparator constraints="1,23,3,1" />
                         <label constraints="1,25" text="drawMethod" />
-                        <combobox constraints="3,25,1,1" initclass="it.tac.ct.ui.swixml.SwixmlComboboxDrawMethod" action="drawMethodAction" id="drawMethod" />
-                        <label constraints="1,27" text="transparency" />
-                        <slider constraints="3,27,1,1" minimum="0" maximum="255" value="255" bindWith="transparencyValue" action="transparencyAction" id="transparency" />
+                        <hbox constraints="3,25,1,1">
+                            <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxDrawMethod" action="drawMethodAction" id="drawMethod" />
+                            <slider minimum="0" maximum="255" value="255" toolTipText="tansparency" bindWith="transparencyValue" action="transparencyAction" id="transparency" />
+                        </hbox>
+                        <label constraints="1,27" text="assignColors" />
+                        <hbox constraints="3,27,1,1">
+                            <button text="ONE" action="selectColorOneAction" id="selectColorOne" />
+                            <button text="TWO" action="selectColorTwoAction" id="selectColorTwo" />
+                            <button text="THREE" action="selectColorThreeAction" id="selectColorThree" />
+                            <button text="FOUR" action="selectColorFourAction" id="selectColorFour" />
+                        </hbox>
                         <checkbox constraints="3,29" text="showFaceCardinality" selected="false" action="showFaceCardinalityAction" id="showFaceCardinality" />
                         <label constraints="1,31" text="color" />
                         <hbox constraints="3,31,1,1">
                             <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxColors" id="color" />
                             <button text="autoColorIt" action="autoColorItAction" />
-                            <button text="X" toolTipText="Stop auto coloring" action="stopAutoColorItAction" id="stopAutoColorIt" />
+                            <button text="X" toolTipText="Stop auto coloring" action="stopAutoColorItAction" />
                             <button text="saveMapToGif" action="saveMapToGifAction" />
                         </hbox>
 
                         <titledseparator constraints="1,33,3,1" />
-                        <button constraints="3,35,1,1" text="refreshRuntimeInfo" action="refreshRuntimeInfoAction" />
-                        <hbox constraints="3,37,1,1">
+                        <button constraints="1,35,1,1" text="refreshInfo" action="refreshInfoAction" />
+                        <hbox constraints="3,35,1,1">
                             <textfield text="0" toolTipText="Size of the list of created maps" editable="false" id="mapsSize" />
                             <textfield text="0" toolTipText="Maps removed" editable="false" id="mapsRemoved" />
                             <textfield text="1" toolTipText="Sile of the list of maps to elaborate" editable="false" id="todoListSize" />
+                        </hbox>
+                        <hbox constraints="3,37,1,1">
+                            <textfield text="0" toolTipText="totalMemory" editable="false" id="totalMemory" />
+                            <textfield text="0" toolTipText="maxMemory" editable="false" id="maxMemory" />
+                            <textfield text="0" toolTipText="freeMemory" editable="false" id="freeMemory" />
                         </hbox>
 
                         <titledseparator constraints="1,39,3,1" />
@@ -110,13 +123,6 @@
                         </hbox>
 
                         <titledseparator constraints="1,51,3,1" />
-                        <label constraints="1,53" text="assignColors" />
-                        <hbox constraints="3,53,1,1">
-                            <button text="ONE" action="selectColorOneAction" id="selectColorOne" />
-                            <button text="TWO" action="selectColorTwoAction" id="selectColorTwo" />
-                            <button text="THREE" action="selectColorThreeAction" id="selectColorThree" />
-                            <button text="FOUR" action="selectColorFourAction" id="selectColorFour" />
-                        </hbox>
                     </panel>
                 </scrollpane>
             </panel>
