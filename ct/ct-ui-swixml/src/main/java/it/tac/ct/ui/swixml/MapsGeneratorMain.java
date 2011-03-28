@@ -154,6 +154,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JButton createMapFromTextRepresentation = null;
     private final JTextField mapTextRepresentation = null;
     private final JTextField mapsSize = null;
+    private final JTextField currentMap = null;
     private final JTextField mapsRemoved = null;
     private final JTextField todoListSize = null;
     private final JTextField totalMemory = null;
@@ -161,7 +162,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JTextField freeMemory = null;
     private final JComboBox drawMethod = null;
     private Enum<DRAW_METHOD> drawMethodValue = DRAW_METHOD.CIRCLES;
-    private final JComboBox color = null;
     private final JSlider transparency = null;
     private int transparencyValue = 255; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
     private final JPanel mapExplorer = null;
@@ -204,8 +204,9 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private Color colorThree = null;
     private Color colorFour = null;
 
-    private boolean stopAutoColorRequested = false;
-    private Thread autoColorItThread = null;
+    private boolean stopColorRequested = false;
+    private Thread colorItThread = null;
+    private Thread colorAllThread = null;
 
     // Some graphical properties
     //
@@ -248,10 +249,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
         // Set instruments for the combos (I wasn't able to do it through JComboBox's constructor, because soundbanks cannot be closed and then re-opened
         //
-        setInstruments(colorOneInstrument, instruments);
-        setInstruments(colorTwoInstrument, instruments);
-        setInstruments(colorThreeInstrument, instruments);
-        setInstruments(colorFourInstrument, instruments);
+        setInstrumentsNames(colorOneInstrument, instruments);
+        setInstrumentsNames(colorTwoInstrument, instruments);
+        setInstrumentsNames(colorThreeInstrument, instruments);
+        setInstrumentsNames(colorFourInstrument, instruments);
 
         // Initialize colors
         //
@@ -286,7 +287,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         setVisible(true);
     }
 
-    public void setInstruments(JComboBox jComboBox, Instrument[] instruments) {
+    public void setInstrumentsNames(JComboBox jComboBox, Instrument[] instruments) {
         for (int i = 0; i < instruments.length; i++) {
             jComboBox.addItem(instruments[i].getName());
         }
@@ -300,8 +301,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         scene = new GScene(window);
         mapExplorer.removeAll();
         mapExplorer.add(window.getCanvas());
-
-        mapExplorer.setDoubleBuffered(false); // xxx
 
         // Use a normalized world extent (adding a safety border)
         //
@@ -461,6 +460,75 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 rectangles[0].setText(new GText("" + (map4CT.faces.size() + 1) + ": " + map4CT.faces.get(0).cardinality + " - " + map4CT.sequenceOfCoordinates.numberOfVisibleEdgesAtBorders()));
             }
         }
+
+        /**
+         * draw just one rectangle of the map
+         */
+        public void drawN(int face) {
+
+            // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
+            //
+            // x = Position in the list (index)
+            // y = Number of the F - 1
+            // w = distance between End and Begin (of the indexes)
+            // h = 1 - y
+            //
+            // Everything has to be normalized [0, 1]
+            //
+            double normalizationXFactor = map4CT.sequenceOfCoordinates.sequence.size();
+            double normalizationYFactor = map4CT.faces.size();
+
+            List<GraphicalObjectCoordinate> graphicalObjectCoordinates = new ArrayList<GraphicalObjectCoordinate>(map4CT.faces.size());
+            for (int i = 0; i < map4CT.faces.size(); i++) {
+                graphicalObjectCoordinates.add(new GraphicalObjectCoordinate());
+            }
+
+            // Set the F1
+            //
+            graphicalObjectCoordinates.get(0).x = 0.0f;
+            graphicalObjectCoordinates.get(0).y = 0.0f;
+            graphicalObjectCoordinates.get(0).w = 1.0f;
+            graphicalObjectCoordinates.get(0).h = 1.0f;
+
+            // Computes graphical coordinates for all other Fs
+            //
+            for (int i = 1; i < map4CT.sequenceOfCoordinates.sequence.size() - 1; i++) {
+                GraphicalObjectCoordinate g = graphicalObjectCoordinates.get(map4CT.sequenceOfCoordinates.sequence.get(i).fNumber - 1);
+                if (map4CT.sequenceOfCoordinates.sequence.get(i).type == FCoordinate.TYPE.BEGIN) {
+                    g.x = (float) ((i / normalizationXFactor) + (1.0d / (2.0d * normalizationXFactor)));
+                    g.y = (float) ((map4CT.sequenceOfCoordinates.sequence.get(i).fNumber - 1.0d) / normalizationYFactor);
+                    g.w = (float) i; // Temporary variable
+                    g.h = (float) (1.0d - g.y);
+
+                    if (drawMethodValue == DRAW_METHOD.RECTANGLES_NEW_YORK) {
+                        g.y = 1 - g.y;
+                        g.h = -1 * g.h;
+                    }
+                } else {
+                    g.w = (float) ((i - g.w) * (1.0d / normalizationXFactor));
+                }
+            }
+
+            GraphicalObjectCoordinate g = graphicalObjectCoordinates.get(face);
+            rectangles[face].setGeometryXy(Geometry.createRectangle(g.x, g.y, g.w, g.h));
+            if (showFaceCardinality.isSelected()) {
+                rectangles[face].setText(new GText("" + map4CT.faces.get(face).cardinality));
+            }
+
+            GStyle faceStyle = styleFromFace(map4CT.faces.get(face));
+            rectangles[face].setStyle(faceStyle);
+
+            // First face (the biggest rectangle) is treated separately
+            //
+            if (face == 0) {
+
+                // Override plot data for F1
+                //
+                if (showFaceCardinality.isSelected()) {
+                    rectangles[0].setText(new GText("" + (map4CT.faces.size() + 1) + ": " + map4CT.faces.get(0).cardinality + " - " + map4CT.sequenceOfCoordinates.numberOfVisibleEdgesAtBorders()));
+                }
+            }
+        }
     };
 
     /**
@@ -559,6 +627,65 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             }
         }
 
+        /**
+         * draw just one ring of the map
+         */
+        public void drawN(int face) {
+
+            // First face (the whole disk) is treated separately
+            //
+            if (face == 0) {
+
+                // Plot the first face
+                //
+                rings[0].setGeometryXy(createCircle(0.5, 0.5, MAX_RADIUS));
+
+                // Override plot data for F1
+                //
+                if (showFaceCardinality.isSelected()) {
+                    rings[0].setText(new GText("" + (map4CT.faces.size() + 1) + ": " + map4CT.faces.get(0).cardinality + " - " + map4CT.sequenceOfCoordinates.numberOfVisibleEdgesAtBorders()));
+                }
+                GStyle faceStyle = styleFromFace(map4CT.faces.get(0));
+                rings[0].setStyle(faceStyle);
+            } else {
+
+                // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
+                //
+                // Everything has to be normalized [0, 1]
+                //
+                double normalizationAngleFactor = map4CT.sequenceOfCoordinates.sequence.size();
+                double spaceBetweenCircles = MAX_RADIUS / map4CT.faces.size();
+
+                List<GraphicalObjectCoordinate> graphicalObjectCoordinates = new ArrayList<GraphicalObjectCoordinate>(map4CT.faces.size());
+                for (int i = 0; i < map4CT.faces.size(); i++) {
+                    graphicalObjectCoordinates.add(new GraphicalObjectCoordinate());
+                }
+
+                // Computes graphical coordinates for all other Fs (not considering the first one)
+                //
+                GraphicalObjectCoordinate g = null;
+                for (int i = 1; i < map4CT.sequenceOfCoordinates.sequence.size() - 1; i++) {
+                    g = graphicalObjectCoordinates.get(map4CT.sequenceOfCoordinates.sequence.get(i).fNumber - 1);
+                    if (map4CT.sequenceOfCoordinates.sequence.get(i).type == FCoordinate.TYPE.BEGIN) {
+                        g.startAngle = (float) ((i / normalizationAngleFactor) * 2 * Math.PI);
+                    } else {
+                        g.stopAngle = (float) ((i / normalizationAngleFactor) * 2 * Math.PI);
+                    }
+                }
+
+                g = graphicalObjectCoordinates.get(face);
+                g.startRadius = (float) (face * spaceBetweenCircles);
+                g.stopRadius = MAX_RADIUS;
+                rings[face].setGeometryXy(createRing(0.5, 0.5, g.startRadius, g.stopRadius, g.startAngle, g.stopAngle));
+                if (showFaceCardinality.isSelected()) {
+                    rings[face].setText(new GText("" + map4CT.faces.get(face).cardinality));
+                }
+
+                GStyle faceStyle = styleFromFace(map4CT.faces.get(face));
+                rings[face].setStyle(faceStyle);
+            }
+        }
+
         public double[] createRing(double xCenter, double yCenter, double startRadius, double stopRadius, double startAngle, double stopAngle) {
 
             // A point for each degree
@@ -571,13 +698,11 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             // |......||
             // |......|
             //
-            // There are many ways to write down this formula. Pick yours, I
-            // decided for this one
+            // There are many ways to write down this formula. Pick yours, I decided for this one
             //
             double[] ring = new double[((internalPointsPerArc + 2) * 2 * 2) + 2];
 
-            // Compute the 4 corners: the last one is set as the first one to
-            // close the path
+            // Compute the 4 corners: the last one is set as the first one to close the path
             //
             pointX = 0;
             ring[pointX] = (Math.cos(startAngle) * startRadius) + xCenter;
@@ -603,8 +728,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
             // Inner points of the inner arc and of the outer arc
             //
-            // for (pointX = 2; pointX < (internalPointsPerArc * 2) + 2; pointX
-            // += 2) {
+            // for (pointX = 2; pointX < (internalPointsPerArc * 2) + 2; pointX += 2) {
+            //
             for (int i = 1; i <= internalPointsPerArc; i++) {
                 pointX = i * 2;
                 ring[pointX] = (Math.cos(startAngle + (arcStep * i)) * startRadius) + xCenter;
@@ -802,6 +927,23 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
+    public Action textRepresentationOfCurrentMapAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // "1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+"
+            //
+            if (map4CTCurrent != null) {
+                mapTextRepresentation.setText(map4CTCurrent.sequenceOfCoordinates.sequence.toString().substring(1, map4CTCurrent.sequenceOfCoordinates.sequence.toString().length() - 1));
+            }
+        }
+    };
+
+    public Action drawCurrentMapSlowMotionAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            drawCurrentMapSlowMotion();
+        }
+    };
+
     public Action refreshInfoAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             refreshInfo();
@@ -814,7 +956,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    // For a swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54) I need to change this and use setter and getter methods
+    // For a swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54) I needed to change this and use setter and getter methods
     //
     public final void setTransparencyValue(int value) {
 
@@ -921,7 +1063,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    public Action saveMapToGifAction = new AbstractAction() {
+    public Action saveMapToImageAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             String fileName = null;
             String drawMethodName = "unknown";
@@ -992,209 +1134,76 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    /**
-     * Utility class to run the generate() method of the MapsGenerator
-     */
-    private final Runnable runnableAutoColorIt = new Runnable() {
-        public void run() {
-
-            // Local variables
-            //
-            boolean endOfJob = false;
-            boolean colorFound = false;
-            boolean moveBackOneFace = false;
-            int currentFaceIndex = 0; // 0 is the first face = central face
-            F faceToAnalyze = null;
-            ColorPalette colorsFacingTheOcean = new ColorPalette(false); // When it reaches 4 before to add the ocean, the algorithm can break sooner
-            List<ColorPalette> mapsPalette = new ArrayList<ColorPalette>();
-
-            // If a map is set
-            //
-            if (map4CTCurrent != null) {
-
-                // Play sounds: set the selected instruments
-                //
-                midiChannels[0].programChange(colorOneInstrument.getSelectedIndex());
-                midiChannels[1].programChange(colorTwoInstrument.getSelectedIndex());
-                midiChannels[2].programChange(colorThreeInstrument.getSelectedIndex());
-                midiChannels[3].programChange(colorFourInstrument.getSelectedIndex());
-
-                // Prepare and reset palette for all faces and redraw it
-                //
-                for (int i = 0; i < map4CTCurrent.faces.size(); i++) {
-                    mapsPalette.add(new ColorPalette(true));
-                }
-                map4CTCurrent.resetColors();
-
-                // Draw the map
-                //
-                drawCurrentMap();
-
-                // Start from the center
-                //
-                faceToAnalyze = map4CTCurrent.faces.get(0);
-
-                // While not end of job (loop all faces)
-                //
-                while (!endOfJob && !stopAutoColorRequested) {
-
-                    // Reset colorFound and moveBackOneFace
-                    //
-                    colorFound = false;
-                    moveBackOneFace = false;
-
-                    // Try the four colors
-                    //
-                    while (!colorFound && !moveBackOneFace) {
-
-                        // Pick a color and remove it the the reusable colors
-                        //
-                        if (mapsPalette.get(currentFaceIndex).palette.size() == 0) { // Not correctly colored and I tried all colors
-
-                            // Move to the previous face
-                            //
-                            moveBackOneFace = true;
-                            mapsPalette.get(currentFaceIndex).resetToFull();
-                            faceToAnalyze.color = COLORS.UNCOLORED;
-                            if (map4CTCurrent.isFaceFacingTheOcean(currentFaceIndex + 1) == true) {
-                                colorsFacingTheOcean.palette.pop(); // Throw away the last color inserted
-                            }
-                            currentFaceIndex--;
-                        } else {
-
-                            // Try a new color
-                            //
-                            faceToAnalyze.color = mapsPalette.get(currentFaceIndex).palette.pop();
-
-                            // Update the list of colors already facing the ocean (if the face is facing the ocean)
-                            //
-                            if (map4CTCurrent.isFaceFacingTheOcean(currentFaceIndex + 1) == true) {
-                                if (colorsFacingTheOcean.palette.contains(faceToAnalyze.color) == false) {
-                                    colorsFacingTheOcean.palette.add(faceToAnalyze.color);
-                                }
-                            }
-
-                            // Check if map is correctly four colored respect to neighbors
-                            //
-                            if (map4CTCurrent.isFaceCorrectlyColoredRespectToPreviousNeighbors(faceToAnalyze) == true) {
-
-                                // Check also if it is correctly colored considering the ocean (the ocean is not a face. Is treated as a special face)
-                                //
-                                if (colorsFacingTheOcean.palette.size() < 4) {
-
-                                    // Move to the next face
-                                    //
-                                    colorFound = true;
-                                    currentFaceIndex++;
-                                }
-                            }
-                        }
-
-                        // Play sounds
-                        // If midi note goes out of range 0-127, it it set to maximum (or it would not play any sound)
-                        //
-                        if (soundWhileColoring.isSelected()) {
-                            if (faceToAnalyze.color == COLORS.ONE) {
-                                Integer note = Integer.parseInt(colorOneBaseNote.getText()) + currentFaceIndex;
-                                if (note > 127) {
-                                    note = 127;
-                                }
-                                midiChannels[0].noteOn(note, Integer.parseInt(colorOneBaseVelocity.getText()));
-                                try {
-                                    Thread.sleep(Integer.parseInt(colorOneBaseDuration.getText()));
-                                } catch (InterruptedException interruptedException) {
-                                    interruptedException.printStackTrace();
-                                }
-                                midiChannels[0].noteOff(note);
-                            } else if (faceToAnalyze.color == COLORS.TWO) {
-                                Integer note = Integer.parseInt(colorTwoBaseNote.getText()) + currentFaceIndex;
-                                if (note > 127) {
-                                    note = 127;
-                                }
-                                midiChannels[1].noteOn(note, Integer.parseInt(colorTwoBaseVelocity.getText()));
-                                try {
-                                    Thread.sleep(Integer.parseInt(colorTwoBaseDuration.getText()));
-                                } catch (InterruptedException interruptedException) {
-                                    interruptedException.printStackTrace();
-                                }
-                                midiChannels[1].noteOff(note);
-                            } else if (faceToAnalyze.color == COLORS.THREE) {
-                                Integer note = Integer.parseInt(colorThreeBaseNote.getText()) + currentFaceIndex;
-                                midiChannels[2].noteOn(note, Integer.parseInt(colorThreeBaseVelocity.getText()));
-                                try {
-                                    Thread.sleep(Integer.parseInt(colorThreeBaseDuration.getText()));
-                                } catch (InterruptedException interruptedException) {
-                                    interruptedException.printStackTrace();
-                                }
-                                midiChannels[2].noteOff(note);
-                            } else if (faceToAnalyze.color == COLORS.FOUR) {
-                                Integer note = Integer.parseInt(colorFourBaseNote.getText()) + currentFaceIndex;
-                                midiChannels[3].noteOn(note, Integer.parseInt(colorFourBaseVelocity.getText()));
-                                try {
-                                    Thread.sleep(Integer.parseInt(colorFourBaseDuration.getText()));
-                                } catch (InterruptedException interruptedException) {
-                                    interruptedException.printStackTrace();
-                                }
-                                midiChannels[3].noteOff(note);
-                            }
-                        }
-                    }
-
-                    // Check if end of job
-                    //
-                    if (currentFaceIndex == map4CTCurrent.faces.size()) {
-                        endOfJob = true;
-                    } else {
-                        faceToAnalyze = map4CTCurrent.faces.get(currentFaceIndex);
-                    }
-
-                    // Draw the map
-                    //
-                    drawCurrentMap();
-                }
-            }
-        };
-    };
-
-    public Action autoColorItAction = new AbstractAction() {
+    public Action colorItAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
             // Stop auto coloring if running. It waits few millesec to be sure the thread understands the request
             //
-            stopAutoColorRequested = true;
+            stopColorRequested = true;
             try {
-                Thread.sleep(20);
+                Thread.sleep(120);
             } catch (InterruptedException interruptedException) {
                 interruptedException.printStackTrace();
             }
 
             // Reset the stop auto color it request ("X" button)
             //
-            stopAutoColorRequested = false;
+            stopColorRequested = false;
 
             // Create the thread ... if not created
             // Execute the thread ... if not already running
             //
             // Note: A java thread cannot be reused ... even if it terminated correctly
             //
-            if (autoColorItThread == null) {
-                autoColorItThread = new Thread(runnableAutoColorIt);
-                autoColorItThread.start();
-            } else if (autoColorItThread.isAlive() == false) {
-                autoColorItThread = new Thread(runnableAutoColorIt);
-                autoColorItThread.start();
+            if (colorItThread == null) {
+                colorItThread = new Thread(runnableColorIt);
+                colorItThread.start();
+            } else if (colorItThread.isAlive() == false) {
+                colorItThread = new Thread(runnableColorIt);
+                colorItThread.start();
             }
         }
     };
 
-    public Action stopAutoColorItAction = new AbstractAction() {
+    public Action colorAllAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
             // Stop auto coloring if running. It waits few millesec to be sure the thread understands the request
             //
-            stopAutoColorRequested = true;
+            stopColorRequested = true;
             try {
-                Thread.sleep(20);
+                Thread.sleep(120);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+
+            // Reset the stop auto color it request ("X" button)
+            //
+            stopColorRequested = false;
+
+            // Create the thread ... if not created
+            // Execute the thread ... if not already running
+            //
+            // Note: A java thread cannot be reused ... even if it terminated correctly
+            //
+            if (colorAllThread == null) {
+                colorAllThread = new Thread(runnableColorAll);
+                colorAllThread.start();
+            } else if (colorAllThread.isAlive() == false) {
+                colorAllThread = new Thread(runnableColorAll);
+                colorAllThread.start();
+            }
+        }
+    };
+
+    public Action stopColorAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // Stop auto coloring if running. It waits few millesec to be sure the thread understands the request
+            //
+            stopColorRequested = true;
+            try {
+                Thread.sleep(120);
             } catch (InterruptedException interruptedException) {
                 interruptedException.printStackTrace();
             }
@@ -1209,10 +1218,199 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
+    private final Runnable runnableColorIt = new Runnable() {
+        public void run() {
+            colorIt();
+        }
+    };
+
+    private final Runnable runnableColorAll = new Runnable() {
+        public void run() {
+            colorAll();
+        }
+    };
+
+    public void colorAll() {
+        if (mapsGenerator.maps.size() != 0) {
+
+            // Start from current position to the end
+            //
+            for (; (map4CTCurrentIndex < mapsGenerator.maps.size()) && (stopColorRequested == false); map4CTCurrentIndex++) {
+                map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex);
+                colorIt();
+            }
+        }
+    }
+
+    public void colorIt() {
+
+        // Local variables
+        //
+        boolean endOfJob = false;
+        boolean colorFound = false;
+        boolean moveBackOneFace = false;
+        int currentFaceIndex = 0; // 0 is the first face = central face
+        F faceToAnalyze = null;
+        ColorPalette colorsFacingTheOcean = new ColorPalette(false); // When it reaches 4 before to add the ocean, the algorithm can break sooner
+        List<ColorPalette> mapsPalette = new ArrayList<ColorPalette>();
+
+        // If a map is set
+        //
+        if (map4CTCurrent != null) {
+
+            // Since this is a separated thread I cannot rely on the map4CTCurrent
+            //
+            Map4CT mapBeingColored = map4CTCurrent;
+
+            // Prepare and reset palette for all faces and redraw it
+            //
+            for (int i = 0; i < mapBeingColored.faces.size(); i++) {
+                mapsPalette.add(new ColorPalette(true));
+            }
+            mapBeingColored.resetColors();
+
+            // Draw the map
+            //
+            drawCurrentMap();
+
+            // Start from the center
+            //
+            faceToAnalyze = mapBeingColored.faces.get(0);
+
+            // While not end of job (loop all faces)
+            //
+            while (!endOfJob && !stopColorRequested) {
+
+                // Reset colorFound and moveBackOneFace
+                //
+                colorFound = false;
+                moveBackOneFace = false;
+
+                // Try the four colors
+                //
+                while (!colorFound && !moveBackOneFace) {
+
+                    // Pick a color and remove it the the reusable colors
+                    //
+                    if (mapsPalette.get(currentFaceIndex).palette.size() == 0) { // Not correctly colored and I tried all colors
+
+                        // Move to the previous face
+                        //
+                        moveBackOneFace = true;
+                        mapsPalette.get(currentFaceIndex).resetToFull();
+                        faceToAnalyze.color = COLORS.UNCOLORED;
+                        if (mapBeingColored.isFaceFacingTheOcean(currentFaceIndex + 1) == true) {
+                            colorsFacingTheOcean.palette.pop(); // Throw away the last color inserted
+                        }
+                        currentFaceIndex--;
+                    } else {
+
+                        // Try a new color
+                        //
+                        faceToAnalyze.color = mapsPalette.get(currentFaceIndex).palette.pop();
+
+                        // Update the list of colors already facing the ocean (if the face is facing the ocean)
+                        //
+                        if (mapBeingColored.isFaceFacingTheOcean(currentFaceIndex + 1) == true) {
+                            if (colorsFacingTheOcean.palette.contains(faceToAnalyze.color) == false) {
+                                colorsFacingTheOcean.palette.add(faceToAnalyze.color);
+                            }
+                        }
+
+                        // Check if map is correctly four colored respect to neighbors
+                        //
+                        if (mapBeingColored.isFaceCorrectlyColoredRespectToPreviousNeighbors(faceToAnalyze) == true) {
+
+                            // Check also if it is correctly colored considering the ocean (the ocean is not a face. Is treated as a special face)
+                            //
+                            if (colorsFacingTheOcean.palette.size() < 4) {
+
+                                // Move to the next face
+                                //
+                                colorFound = true;
+                                currentFaceIndex++;
+                            }
+                        }
+                    }
+
+                    // Set the instrumnets
+                    //
+                    // NOTE: I hope that changing the instruments too often won't be a problem
+                    //
+                    changeInstruments();
+
+                    // Play sounds
+                    // If midi note goes out of range 0-127, it it set to maximum (or it would not play any sound)
+                    //
+                    if (soundWhileColoring.isSelected()) {
+                        if (faceToAnalyze.color == COLORS.ONE) {
+                            Integer note = Integer.parseInt(colorOneBaseNote.getText()) + currentFaceIndex;
+                            if (note > 127) {
+                                note = 127;
+                            }
+                            midiChannels[0].noteOn(note, Integer.parseInt(colorOneBaseVelocity.getText()));
+                            try {
+                                Thread.sleep(Integer.parseInt(colorOneBaseDuration.getText()));
+                            } catch (InterruptedException interruptedException) {
+                                interruptedException.printStackTrace();
+                            }
+                            midiChannels[0].noteOff(note);
+                        } else if (faceToAnalyze.color == COLORS.TWO) {
+                            Integer note = Integer.parseInt(colorTwoBaseNote.getText()) + currentFaceIndex;
+                            if (note > 127) {
+                                note = 127;
+                            }
+                            midiChannels[1].noteOn(note, Integer.parseInt(colorTwoBaseVelocity.getText()));
+                            try {
+                                Thread.sleep(Integer.parseInt(colorTwoBaseDuration.getText()));
+                            } catch (InterruptedException interruptedException) {
+                                interruptedException.printStackTrace();
+                            }
+                            midiChannels[1].noteOff(note);
+                        } else if (faceToAnalyze.color == COLORS.THREE) {
+                            Integer note = Integer.parseInt(colorThreeBaseNote.getText()) + currentFaceIndex;
+                            midiChannels[2].noteOn(note, Integer.parseInt(colorThreeBaseVelocity.getText()));
+                            try {
+                                Thread.sleep(Integer.parseInt(colorThreeBaseDuration.getText()));
+                            } catch (InterruptedException interruptedException) {
+                                interruptedException.printStackTrace();
+                            }
+                            midiChannels[2].noteOff(note);
+                        } else if (faceToAnalyze.color == COLORS.FOUR) {
+                            Integer note = Integer.parseInt(colorFourBaseNote.getText()) + currentFaceIndex;
+                            midiChannels[3].noteOn(note, Integer.parseInt(colorFourBaseVelocity.getText()));
+                            try {
+                                Thread.sleep(Integer.parseInt(colorFourBaseDuration.getText()));
+                            } catch (InterruptedException interruptedException) {
+                                interruptedException.printStackTrace();
+                            }
+                            midiChannels[3].noteOff(note);
+                        }
+                    }
+                }
+
+                // Check if end of job
+                //
+                if (currentFaceIndex == mapBeingColored.faces.size()) {
+                    endOfJob = true;
+                } else if (mapBeingColored != map4CTCurrent) {
+                    endOfJob = true;
+                } else {
+                    faceToAnalyze = mapBeingColored.faces.get(currentFaceIndex);
+                }
+
+                // Draw the map
+                //
+                drawCurrentMap();
+            }
+        }
+    }
+
     /**
      * Refresh runtime info
      */
     public synchronized void refreshInfo() {
+        currentMap.setText("" + map4CTCurrentIndex + 1);
         mapsSize.setText("" + mapsGenerator.maps.size());
         mapsRemoved.setText("" + mapsGenerator.removed);
         todoListSize.setText("" + mapsGenerator.todoList.size());
@@ -1247,6 +1445,13 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
      * Draw current map (or reset graph if map4CTCurrent is null)
      */
     public synchronized void drawCurrentMap() {
+
+        // Bug fixed: flickering
+        //
+        // When GCanvas from geosoft gets mixed with swing code, it causes flickering of objects
+        // I found this solution (re-enabling double buffering) and I hape it does not have counter effects. I didn't find any
+        //
+        RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
 
         // Read the draw method
         //
@@ -1292,6 +1497,88 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     }
 
     /**
+     * Draw current map in slow motion mode
+     */
+    public synchronized void drawCurrentMapSlowMotion() {
+
+        // Read the draw method
+        //
+        if (drawMethod.getSelectedIndex() == 0) {
+            drawMethodValue = DRAW_METHOD.CIRCLES;
+        } else if (drawMethod.getSelectedIndex() == 1) {
+            drawMethodValue = DRAW_METHOD.RECTANGLES;
+        } else {
+            drawMethodValue = DRAW_METHOD.RECTANGLES_NEW_YORK;
+        }
+
+        // If a map was already shown, I need to redraw it
+        //
+        if (map4CTCurrent != null) {
+
+            // Clean the scene
+            //
+            scene.removeAll();
+
+            // Circle mode or rectangular mode
+            //
+            if (drawMethodValue != DRAW_METHOD.CIRCLES) {
+                GMap4CTRectangles gMap4CTRectangles = new GMap4CTRectangles(map4CTCurrent);
+                scene.add(gMap4CTRectangles);
+
+                for (int i = 0; i < map4CTCurrent.faces.size(); i++) {
+                    gMap4CTRectangles.drawN(i);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Draw & Refresh
+                    //
+                    scene.refresh();
+
+                    // After "add" a container has to be validated
+                    //
+                    mapExplorer.validate();
+                }
+            } else {
+                GMap4CTCircles gMap4CTCircles = new GMap4CTCircles(map4CTCurrent);
+                scene.add(gMap4CTCircles);
+
+                for (int i = 0; i < map4CTCurrent.faces.size(); i++) {
+                    gMap4CTCircles.drawN(i);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    // Draw & Refresh
+                    //
+                    scene.refresh();
+
+                    // After "add" a container has to be validated
+                    //
+                    mapExplorer.validate();
+                }
+            }
+        } else {
+            scene.removeAll();
+            scene.refresh();
+        }
+    }
+
+    /**
+     * Play sounds: set or change the selected instruments
+     */
+    public void changeInstruments() {
+        midiChannels[0].programChange(colorOneInstrument.getSelectedIndex());
+        midiChannels[1].programChange(colorTwoInstrument.getSelectedIndex());
+        midiChannels[2].programChange(colorThreeInstrument.getSelectedIndex());
+        midiChannels[3].programChange(colorFourInstrument.getSelectedIndex());
+    };
+
+    /**
      * @param face
      * @return The new style
      */
@@ -1332,9 +1619,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         return faceStyle;
     }
 
-    /**
-     * Mouse events
-     */
     public void event(GScene scene, int event, int x, int y) {
 
         // Color a face
@@ -1357,18 +1641,21 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 //
                 F face = (F) interactionSegment.getUserData();
 
-                if (color.getSelectedIndex() == 0) {
+                if (face.color == COLORS.UNCOLORED) {
                     colorToUse = new Color(colorOne.getRed(), colorOne.getGreen(), colorOne.getBlue(), transparency.getValue());
                     face.color = COLORS.ONE;
-                } else if (color.getSelectedIndex() == 1) {
+                } else if (face.color == COLORS.ONE) {
                     colorToUse = new Color(colorTwo.getRed(), colorTwo.getGreen(), colorTwo.getBlue(), transparency.getValue());
                     face.color = COLORS.TWO;
-                } else if (color.getSelectedIndex() == 2) {
+                } else if (face.color == COLORS.TWO) {
                     colorToUse = new Color(colorThree.getRed(), colorThree.getGreen(), colorThree.getBlue(), transparency.getValue());
                     face.color = COLORS.THREE;
-                } else if (color.getSelectedIndex() == 3) {
+                } else if (face.color == COLORS.THREE) {
                     colorToUse = new Color(colorFour.getRed(), colorFour.getGreen(), colorFour.getBlue(), transparency.getValue());
                     face.color = COLORS.FOUR;
+                } else if (face.color == COLORS.FOUR) {
+                    colorToUse = new Color(255, 255, 255, transparency.getValue());
+                    face.color = COLORS.UNCOLORED;
                 }
 
                 // Set the style of this object

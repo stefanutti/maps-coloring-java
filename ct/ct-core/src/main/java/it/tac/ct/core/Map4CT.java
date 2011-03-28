@@ -139,8 +139,7 @@ public class Map4CT implements Cloneable {
         //
         System.out.print("(" + map.sequenceOfCoordinates.numberOfVisibleEdgesAtBorders() + ")");
 
-        // Test if the map has been programmatically built in the correct way (4F2 + 3F3 + 2F4 + 1F5 + 0F6 - 1F7 - 2F8
-        // ... = 12)
+        // Test if the map has been programmatically built in the correct way (4F2 + 3F3 + 2F4 + 1F5 + 0F6 - 1F7 - 2F8 - ... = 12)
         //
         euleroResult = euleroResult + (6 - map.sequenceOfCoordinates.numberOfVisibleEdgesAtBorders());
 

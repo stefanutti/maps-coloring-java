@@ -22,7 +22,7 @@
 
                         <titledseparator constraints="1,1,3,1" />
                         <label constraints="1,3" text="slowdownMillisec" />
-                        <textfield constraints="3,3,1,1" toolTipText="Slowdown the generation of maps" text="0" id="slowdownMillisec" />
+                        <textfield constraints="3,3,1,1" toolTipText="Slowdown activities" text="0" id="slowdownMillisec" />
                         <checkbox constraints="3,5" toolTipText="Log debugging info to stdout" text="logWhilePopulate" selected="false" id="logWhilePopulate" action="logWhilePopulateAction" />
                         <checkbox constraints="3,7" toolTipText="Random generation of maps" text="randomElaboration" selected="true" id="randomElaboration" />
                         <checkbox constraints="3,9" toolTipText="Process all maps" text="processAll" selected="true" id="processAll" />
@@ -49,11 +49,13 @@
                             <button text="@" toolTipText="Random map" action="drawRandomMapAction" />
                             <button text="&gt;" toolTipText="Next map" action="drawNextMapAction" />
                             <button text="&gt;|" toolTipText="Last map" action="drawLastMapAction" />
+                            <button text="slooooow" toolTipText="Recreate the map showing the construction steps (500 millisec)" action="drawCurrentMapSlowMotionAction" />
                         </hbox>
                         <label constraints="1,21" text="createMap" />
                         <hbox constraints="3,21,1,1">
                             <textfield text="1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+" id="mapTextRepresentation" />
                             <button toolTipText="Create a map from its text representation (see logging)" text="go" enabled="true" action="createMapFromTextRepresentationAction" id="createMapFromTextRepresentation" />
+                            <button toolTipText="Get the text representation (see logging) of the current map" text="get" enabled="true" action="textRepresentationOfCurrentMapAction" />
                         </hbox>
 
                         <titledseparator constraints="1,23,3,1" />
@@ -72,18 +74,19 @@
                         <checkbox constraints="3,29" text="showFaceCardinality" selected="false" action="showFaceCardinalityAction" id="showFaceCardinality" />
                         <label constraints="1,31" text="color" />
                         <hbox constraints="3,31,1,1">
-                            <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxColors" id="color" />
-                            <button text="autoColorIt" action="autoColorItAction" />
-                            <button text="X" toolTipText="Stop auto coloring" action="stopAutoColorItAction" />
-                            <button text="saveMapToGif" action="saveMapToGifAction" />
+                            <button text="colorIt" action="colorItAction" />
+                            <button text="colorAll" action="colorAllAction" />
+                            <button text="X" toolTipText="Stop coloring and reset colors" action="stopColorAction" />
+                            <button text="saveMapToImage" action="saveMapToImageAction" />
                         </hbox>
 
                         <titledseparator constraints="1,33,3,1" />
                         <button constraints="1,35,1,1" text="refreshInfo" action="refreshInfoAction" />
                         <hbox constraints="3,35,1,1">
+                            <textfield text="-1" toolTipText="Current map" editable="false" id="currentMap" />
                             <textfield text="0" toolTipText="Size of the list of created maps" editable="false" id="mapsSize" />
                             <textfield text="0" toolTipText="Maps removed" editable="false" id="mapsRemoved" />
-                            <textfield text="1" toolTipText="Sile of the list of maps to elaborate" editable="false" id="todoListSize" />
+                            <textfield text="1" toolTipText="Size of the list of maps to elaborate" editable="false" id="todoListSize" />
                         </hbox>
                         <hbox constraints="3,37,1,1">
                             <textfield text="0" toolTipText="totalMemory" editable="false" id="totalMemory" />
@@ -114,7 +117,7 @@
                             <textfield text="30" toolTipText="Duration" id="colorThreeBaseDuration" />
                             <textfield text="100" toolTipText="Velocity" id="colorThreeBaseVelocity" />
                         </hbox>
-                        <label constraints="1,49" text="TWO" />
+                        <label constraints="1,49" text="FOUR" />
                         <hbox constraints="3,49,1,1">
                             <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorFourInstrument" />
                             <textfield text="60" toolTipText="Starting note" id="colorFourBaseNote" />
