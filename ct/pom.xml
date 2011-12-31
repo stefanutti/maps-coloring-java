@@ -16,7 +16,8 @@
 
 	<modules>
 		<module>ct-core</module>
-		<module>ct-ui-swixml</module>
+		<module>ct-utils</module>
+        <module>ct-ui-swixml</module>
 	</modules>
 
 	<properties>

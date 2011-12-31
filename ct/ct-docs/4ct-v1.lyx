@@ -1,11 +1,12 @@
-#LyX 2.0.0beta2 created this file. For more info see http://www.lyx.org/
-\lyxformat 410
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
 \begin_document
 \begin_header
 \textclass article
 \use_default_options true
 \maintain_unincluded_children false
 \language english
+\language_package default
 \inputencoding auto
 \fontencoding global
 \font_roman bookman
@@ -62,6 +63,7 @@
 \tracking_changes false
 \output_changes false
 \html_math_output 0
+\html_css_as_file 0
 \html_be_strict false
 \end_header
 
@@ -808,7 +810,7 @@ Using this building technique, each F can be inserted (overlapping the previous
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename to-circular-maps.png
+	filename circular-maps.png
 	scale 50
 
 \end_inset
@@ -852,7 +854,7 @@ Following more or less the same procedure explained for circular maps, we
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename to-rectangular-maps.png
+	filename rectangular-maps.png
 	scale 50
 
 \end_inset
@@ -967,7 +969,7 @@ Starting from the clef representation vertexes can be stretched to become
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename to-clef-and-pipes-maps.png
+	filename clef-and-pipes-maps.png
 	scale 70
 
 \end_inset
@@ -1861,7 +1863,8 @@ A long time after I started analyzing the four color problem, I found a
 \end_inset
 
 
-\begin_inset Formula \[
+\begin_inset Formula 
+\[
 2\sum_{x_{n}=2n+1}^{x_{n+1}}...\,\sum_{x_{3}=7}^{x_{4}}\,\sum_{x_{2}=5}^{x_{3}}\,\sum_{x_{1}=3}^{x_{2}}x_{1}(x_{1}-1)(x_{2}-3)(x_{3}-5)...(x_{n}-(2n-1))
 \]
 

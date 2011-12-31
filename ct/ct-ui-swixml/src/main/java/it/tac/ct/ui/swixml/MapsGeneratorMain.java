@@ -30,12 +30,14 @@ import javax.sound.midi.Soundbank;
 import javax.sound.midi.Synthesizer;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -79,7 +81,7 @@ import org.swixml.SwingEngine;
  *          <li>Show the use of memory directly on the UI (heap)
  *          </p>
  *          <p>
- *          DONE:
+ *          DONE (older than SourceForge):
  *          <li>Starting from a displayed map remove the last inserted face (not considering the Ocean) and create another view for compare coloring
  *          <li>Add a map searching tool: for example "find a map with 13 faces" or "find a map with with at least two F6 faces confining" or ... CANCELLED
  *          <li>Try to think to an highly distributed architecture using a grid of computers to distribute jobs and increase memory available CANCELLED
@@ -135,7 +137,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         CIRCLES, RECTANGLES, RECTANGLES_NEW_YORK
     };
 
-    // Variables automatically initialized to form object (swixml)
+    // Variables automatically initialized to form object (linked to swixml)
     //
     private final JFrame mainframe = null;
     private final JTextField slowdownMillisec = null;
@@ -166,6 +168,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private int transparencyValue = 255; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
     private final JPanel mapExplorer = null;
     private final JCheckBox showFaceCardinality = null;
+    private final JButton tait = null;
 
     private final JCheckBox soundWhileColoring = null;
 
@@ -226,6 +229,12 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
      */
     private MapsGeneratorMain() throws Exception {
 
+        // Initialize Swixml
+        //
+        SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
+        URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-v2.xml");
+        engine.render(configFileURL).setVisible(false); // Has to become visible at the end
+
         // Initialize the sound system and load all instruments
         //
         URL soundbankURL = this.getClass().getClassLoader().getResource("config/soundbank-deluxe.gm");
@@ -241,12 +250,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         instruments = synthesizer.getLoadedInstruments();
         midiChannels = synthesizer.getChannels();
 
-        // Initialize Swixml
-        //
-        SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
-        URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-v2.xml");
-        engine.render(configFileURL).setVisible(false); // Has to become visible at the end
-
         // Set instruments for the combos (I wasn't able to do it through JComboBox's constructor, because soundbanks cannot be closed and then re-opened
         //
         setInstrumentsNames(colorOneInstrument, instruments);
@@ -254,7 +257,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         setInstrumentsNames(colorThreeInstrument, instruments);
         setInstrumentsNames(colorFourInstrument, instruments);
 
-        // Initialize colors
+        // Initialize colors = Some colors I liked ... instead of using RGBW
         //
         colorOne = new Color(255, 99, 71);
         colorTwo = new Color(50, 205, 50);
@@ -883,6 +886,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             // Creates a brend new generator
             //
             mapsGenerator = new MapsGenerator();
+            map4CTCurrent = null;
+            map4CTCurrentIndex = -1;
 
             // Reset buttons
             //
@@ -895,12 +900,9 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             copyMapsToTodoElaboration.setEnabled(false);
             createMapFromTextRepresentation.setEnabled(true);
 
-            refreshInfo();
-
-            // Reset graph
+            // Refresh info and redraw (reset in this case) graph
             //
-            map4CTCurrent = null;
-            map4CTCurrentIndex = -1;
+            refreshInfo();
             drawCurrentMap();
         }
     };
@@ -953,6 +955,14 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     public Action drawMethodAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             drawCurrentMap();
+
+            if (drawMethodValue == DRAW_METHOD.RECTANGLES) {
+                tait.setEnabled(true);
+            } else if (drawMethodValue == DRAW_METHOD.RECTANGLES_NEW_YORK) {
+                tait.setEnabled(true);
+            } else if (drawMethodValue == DRAW_METHOD.CIRCLES) {
+                tait.setEnabled(false);
+            }
         }
     };
 
@@ -1063,6 +1073,89 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
+    public Action taitAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // Read the original image from screen
+            //
+            BufferedImage inputImage = new BufferedImage(window.getCanvas().getWidth(), window.getCanvas().getHeight(), BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics2D = inputImage.createGraphics();
+            window.getCanvas().paint(graphics2D);
+            graphics2D.dispose();
+
+            // Create the image where the 3-edge-coloring has to be painted
+            //
+            BufferedImage outputImage = new BufferedImage(inputImage.getWidth(), inputImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+            // Scan the image
+            //
+            int previousColor = 0;
+            int currentColor = 0;
+            int nextColor = 0;
+            for (int iY = 1; iY < inputImage.getHeight() - 1; iY++) {
+                for (int iX = 1; iX < inputImage.getWidth() - 1; iX++) {
+                    currentColor = inputImage.getRGB(iX, iY);
+
+                    if (currentColor == Color.BLACK.getRGB()) {
+
+                        // Y (Vertical) scan - previous = LEFT, next = RIGHT
+                        //
+                        previousColor = inputImage.getRGB(iX - 1, iY);
+                        nextColor = inputImage.getRGB(iX + 1, iY);
+
+                        if (((previousColor == colorOne.getRGB()) && (nextColor == colorThree.getRGB())) || ((previousColor == colorThree.getRGB()) && (nextColor == colorOne.getRGB())) || ((previousColor == colorTwo.getRGB()) && (nextColor == colorFour.getRGB())) || ((previousColor == colorFour.getRGB()) && (nextColor == colorTwo.getRGB()))) {
+                            outputImage.setRGB(iX - 1, iY, Color.RED.getRGB());
+                            outputImage.setRGB(iX, iY, Color.RED.getRGB());
+                            outputImage.setRGB(iX + 1, iY, Color.RED.getRGB());
+                        }
+                        if (((previousColor == colorOne.getRGB()) && (nextColor == colorTwo.getRGB())) || ((previousColor == colorTwo.getRGB()) && (nextColor == colorOne.getRGB())) || ((previousColor == colorThree.getRGB()) && (nextColor == colorFour.getRGB())) || ((previousColor == colorFour.getRGB()) && (nextColor == colorThree.getRGB()))) {
+                            outputImage.setRGB(iX - 1, iY, Color.GREEN.getRGB());
+                            outputImage.setRGB(iX, iY, Color.GREEN.getRGB());
+                            outputImage.setRGB(iX + 1, iY, Color.GREEN.getRGB());
+                        }
+                        if (((previousColor == colorOne.getRGB()) && (nextColor == colorFour.getRGB())) || ((previousColor == colorFour.getRGB()) && (nextColor == colorOne.getRGB())) || ((previousColor == colorTwo.getRGB()) && (nextColor == colorThree.getRGB())) || ((previousColor == colorThree.getRGB()) && (nextColor == colorTwo.getRGB()))) {
+                            outputImage.setRGB(iX - 1, iY, Color.BLUE.getRGB());
+                            outputImage.setRGB(iX, iY, Color.BLUE.getRGB());
+                            outputImage.setRGB(iX + 1, iY, Color.BLUE.getRGB());
+                        }
+
+                        // Y (Vertical) scan - previous = ABOVE, next = BELOW
+                        //
+                        previousColor = inputImage.getRGB(iX, iY - 1);
+                        nextColor = inputImage.getRGB(iX, iY + 1);
+
+                        if (((previousColor == colorOne.getRGB()) && (nextColor == colorThree.getRGB())) || ((previousColor == colorThree.getRGB()) && (nextColor == colorOne.getRGB())) || ((previousColor == colorTwo.getRGB()) && (nextColor == colorFour.getRGB())) || ((previousColor == colorFour.getRGB()) && (nextColor == colorTwo.getRGB()))) {
+                            outputImage.setRGB(iX, iY - 1, Color.RED.getRGB());
+                            outputImage.setRGB(iX, iY, Color.RED.getRGB());
+                            outputImage.setRGB(iX, iY + 1, Color.RED.getRGB());
+                        }
+                        if (((previousColor == colorOne.getRGB()) && (nextColor == colorTwo.getRGB())) || ((previousColor == colorTwo.getRGB()) && (nextColor == colorOne.getRGB())) || ((previousColor == colorThree.getRGB()) && (nextColor == colorFour.getRGB())) || ((previousColor == colorFour.getRGB()) && (nextColor == colorThree.getRGB()))) {
+                            outputImage.setRGB(iX, iY - 1, Color.GREEN.getRGB());
+                            outputImage.setRGB(iX, iY, Color.GREEN.getRGB());
+                            outputImage.setRGB(iX, iY + 1, Color.GREEN.getRGB());
+                        }
+                        if (((previousColor == colorOne.getRGB()) && (nextColor == colorFour.getRGB())) || ((previousColor == colorFour.getRGB()) && (nextColor == colorOne.getRGB())) || ((previousColor == colorTwo.getRGB()) && (nextColor == colorThree.getRGB())) || ((previousColor == colorThree.getRGB()) && (nextColor == colorTwo.getRGB()))) {
+                            outputImage.setRGB(iX, iY - 1, Color.BLUE.getRGB());
+                            outputImage.setRGB(iX, iY, Color.BLUE.getRGB());
+                            outputImage.setRGB(iX, iY + 1, Color.BLUE.getRGB());
+                        }
+                    } else {
+                        outputImage.setRGB(iX, iY, Color.WHITE.getRGB());
+                    }
+                }
+            }
+
+            // Open tait colored image
+            //
+            JFrame taitFrame = new JFrame();
+            JLabel taitImagelabel = new JLabel();
+            taitImagelabel.setIcon(new ImageIcon(outputImage));
+            taitFrame.setContentPane(taitImagelabel);
+            taitFrame.pack();
+            taitFrame.setVisible(true);
+        }
+    };
+
     public Action saveMapToImageAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             String fileName = null;
@@ -1125,6 +1218,28 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     public Action selectColorFourAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             colorFour = chooseNewColor(colorFour);
+            selectColorFour.setForeground(colorFour);
+
+            // Re-init graphic
+            // It did not repaint (even using repaint()). I had to recreate everything. It maybe AWT and SWING mixed together
+            //
+            initMapExplorerForGraphic();
+        }
+    };
+
+    public Action selectColorDefaultAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // Set default = RGBW
+            //
+            colorOne = Color.RED;
+            colorTwo = Color.GREEN;
+            colorThree = Color.BLUE;
+            colorFour = Color.WHITE;
+
+            selectColorOne.setForeground(colorOne);
+            selectColorTwo.setForeground(colorTwo);
+            selectColorThree.setForeground(colorThree);
             selectColorFour.setForeground(colorFour);
 
             // Re-init graphic
@@ -1410,7 +1525,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
      * Refresh runtime info
      */
     public synchronized void refreshInfo() {
-        currentMap.setText("" + map4CTCurrentIndex + 1);
+        currentMap.setText("" + (map4CTCurrentIndex + 1));
         mapsSize.setText("" + mapsGenerator.maps.size());
         mapsRemoved.setText("" + mapsGenerator.removed);
         todoListSize.setText("" + mapsGenerator.todoList.size());

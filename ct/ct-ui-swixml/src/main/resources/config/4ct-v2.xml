@@ -70,6 +70,7 @@
                             <button text="TWO" action="selectColorTwoAction" id="selectColorTwo" />
                             <button text="THREE" action="selectColorThreeAction" id="selectColorThree" />
                             <button text="FOUR" action="selectColorFourAction" id="selectColorFour" />
+                            <button text="rgbw" action="selectColorDefaultAction" />
                         </hbox>
                         <checkbox constraints="3,29" text="showFaceCardinality" selected="false" action="showFaceCardinalityAction" id="showFaceCardinality" />
                         <label constraints="1,31" text="color" />
@@ -77,7 +78,8 @@
                             <button text="colorIt" action="colorItAction" />
                             <button text="colorAll" action="colorAllAction" />
                             <button text="X" toolTipText="Stop coloring and reset colors" action="stopColorAction" />
-                            <button text="saveMapToImage" action="saveMapToImageAction" />
+                            <button text="Tait" enabled="false" toolTipText="Tait 3-edge-coloring to 4-face-coloring" action="taitAction" id="tait" />
+                            <button text="save" action="saveMapToImageAction" />
                         </hbox>
 
                         <titledseparator constraints="1,33,3,1" />
