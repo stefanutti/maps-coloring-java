@@ -14,7 +14,7 @@ public class EdgeToFaceColoring {
 
     public static void main(String[] args) throws Exception {
 
-        // Read the input image and create the empty output image
+        // Read the input image and create an empty output image
         //
         BufferedImage inputImage = ImageIO.read(new File("inputImage.png"));
         BufferedImage outputImage = new BufferedImage(inputImage.getWidth(), inputImage.getHeight(), BufferedImage.TYPE_INT_RGB);
