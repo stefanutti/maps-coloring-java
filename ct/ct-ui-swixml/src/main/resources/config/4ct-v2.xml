@@ -12,7 +12,7 @@
             <menuitem text="About (to be implemented)" />
         </menu>
     </menubar>
-
+    
     <tabbedpane  doubleBuffered="false">
         <panel name="Map Generator" layout="BorderLayout" >
             <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout" >

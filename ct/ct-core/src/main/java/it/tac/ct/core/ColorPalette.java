@@ -14,35 +14,52 @@ import java.util.Stack;
  */
 public class ColorPalette {
 
-	public Stack<COLORS> palette = new Stack<COLORS>();
+    public Stack<COLORS> palette = new Stack<COLORS>();
 
-	/**
-	 * @param isPreconfigured
-	 *            preconfigured with 4 colors?
-	 */
-	public ColorPalette(boolean isPreconfigured) {
-		if (isPreconfigured) {
-			resetToFull();
-		} else {
-			resetToEmpty();
-		}
-	}
+    public boolean isPinned = false;
+    public COLORS savedPinnedColor = COLORS.UNCOLORED; // Default for no color pinned
 
-	/**
-	 * Reset the palette of colors
-	 */
-	public void resetToFull() {
-		palette.removeAllElements();
-		palette.push(COLORS.FOUR);
-		palette.push(COLORS.THREE);
-		palette.push(COLORS.TWO);
-		palette.push(COLORS.ONE);
-	}
+    /**
+     * @param isPreconfigured
+     *            preconfigured with 4 colors?
+     */
+    public ColorPalette(boolean isPreconfigured) {
+        if (isPreconfigured) {
+            setToFull();
+        } else {
+            setToEmpty();
+        }
+    }
 
-	/**
-	 * Reset the palette of colors
-	 */
-	public void resetToEmpty() {
-		palette.removeAllElements();
-	}
+    /**
+     * @param pinnedColor
+     *            If a color has been already given (forced color)
+     */
+    public ColorPalette(COLORS pinnedColor) {
+        savedPinnedColor = pinnedColor;
+        isPinned = true;
+        setToFull();
+    }
+
+    /**
+     * Reset the palette of colors to all four colors
+     */
+    public void setToFull() {
+        palette.removeAllElements();
+        if (isPinned) {
+            palette.push(savedPinnedColor);
+        } else {
+            palette.push(COLORS.FOUR);
+            palette.push(COLORS.THREE);
+            palette.push(COLORS.TWO);
+            palette.push(COLORS.ONE);
+        }
+    }
+
+    /**
+     * Reset the palette of colors to no colors
+     */
+    public void setToEmpty() {
+        palette.removeAllElements();
+    }
 }

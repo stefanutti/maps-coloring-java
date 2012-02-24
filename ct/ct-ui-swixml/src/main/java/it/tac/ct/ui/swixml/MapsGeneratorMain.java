@@ -38,6 +38,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -217,7 +218,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
     /**
      * Main program
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) throws Exception {
@@ -375,7 +376,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
         /**
          * Constructor
-         * 
+         *
          * @param map4CTToDraw
          *            The map to draw
          */
@@ -548,7 +549,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
         /**
          * Constructor
-         * 
+         *
          * @param map4CTToDraw
          *            The map to draw
          */
@@ -1368,6 +1369,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         F faceToAnalyze = null;
         ColorPalette colorsFacingTheOcean = new ColorPalette(false); // When it reaches 4 before to add the ocean, the algorithm can break sooner
         List<ColorPalette> mapsPalette = new ArrayList<ColorPalette>();
+        List<F> facesWithPinnedColor = new ArrayList<F>();
 
         // If a map is set
         //
@@ -1380,9 +1382,14 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             // Prepare and reset palette for all faces and redraw it
             //
             for (int i = 0; i < mapBeingColored.faces.size(); i++) {
-                mapsPalette.add(new ColorPalette(true));
+                if (mapBeingColored.faces.get(i).color != COLORS.UNCOLORED) { // Pinned color
+                    mapsPalette.add(new ColorPalette(mapBeingColored.faces.get(i).color)); // Set a palette with one color (pinned)
+                    facesWithPinnedColor.add(mapBeingColored.faces.get(i));
+                } else {
+                    mapsPalette.add(new ColorPalette(true)); // Set all four colors
+                    mapBeingColored.faces.get(i).color = COLORS.UNCOLORED;
+                }
             }
-            mapBeingColored.resetColors();
 
             // Draw the map
             //
@@ -1412,8 +1419,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                         // Move to the previous face
                         //
                         moveBackOneFace = true;
-                        mapsPalette.get(currentFaceIndex).resetToFull();
-                        faceToAnalyze.color = COLORS.UNCOLORED;
+                        mapsPalette.get(currentFaceIndex).setToFull();
+                        if (mapsPalette.get(currentFaceIndex).isPinned == false) {
+                            faceToAnalyze.color = COLORS.UNCOLORED;
+                        }
                         if (mapBeingColored.isFaceFacingTheOcean(currentFaceIndex + 1) == true) {
                             colorsFacingTheOcean.palette.pop(); // Throw away the last color inserted
                         }
@@ -1432,7 +1441,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                             }
                         }
 
-                        // Check if map is correctly four colored respect to neighbors
+                        // Check if map is correctly four colored respect to previous neighbors
                         //
                         if (mapBeingColored.isFaceCorrectlyColoredRespectToPreviousNeighbors(faceToAnalyze) == true) {
 
@@ -1440,15 +1449,30 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                             //
                             if (colorsFacingTheOcean.palette.size() < 4) {
 
-                                // Move to the next face
+                                // Check also the coloring of pinned faces (hence: check coloring respect to pinned)
                                 //
-                                colorFound = true;
-                                currentFaceIndex++;
+                                boolean correctColoredRespectToPinned = true;
+                                for (int i = 0; (i < facesWithPinnedColor.size()) && (correctColoredRespectToPinned == true); i++) {
+
+                                    if (currentFaceIndex < (facesWithPinnedColor.get(i).id - 1)) {
+                                        if (mapBeingColored.isFaceCorrectlyColoredRespectToPreviousNeighbors(facesWithPinnedColor.get(i)) == false) {
+                                            correctColoredRespectToPinned = false;
+                                        }
+                                    }
+                                }
+
+                                if (correctColoredRespectToPinned) {
+
+                                    // Move to the next face
+                                    //
+                                    colorFound = true;
+                                    currentFaceIndex++;
+                                }
                             }
                         }
                     }
 
-                    // Set the instrumnets
+                    // Set the instruments
                     //
                     // NOTE: I hope that changing the instruments too often won't be a problem
                     //
@@ -1511,7 +1535,11 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 } else if (mapBeingColored != map4CTCurrent) {
                     endOfJob = true;
                 } else {
-                    faceToAnalyze = mapBeingColored.faces.get(currentFaceIndex);
+                    try {
+                        faceToAnalyze = mapBeingColored.faces.get(currentFaceIndex);
+                    } catch (Exception e) {
+                        JOptionPane.showConfirmDialog(this, "Four coloring not possible with these pinned colors.", "Error", JOptionPane.PLAIN_MESSAGE);
+                    }
                 }
 
                 // Draw the map
