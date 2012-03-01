@@ -54,8 +54,9 @@
                         <label constraints="1,21" text="createMap" />
                         <hbox constraints="3,21,1,1">
                             <textfield text="1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+" id="mapTextRepresentation" />
-                            <button toolTipText="Create a map from its text representation (see logging)" text="go" enabled="true" action="createMapFromTextRepresentationAction" id="createMapFromTextRepresentation" />
-                            <button toolTipText="Get the text representation (see logging) of the current map" text="get" enabled="true" action="textRepresentationOfCurrentMapAction" />
+                            <button toolTipText="Create a map from its text representation (see logging)" text="create" enabled="true" action="createMapFromTextRepresentationAction" id="createMapFromTextRepresentation" />
+                            <button toolTipText="Get the text representation (see logging) of the current map" text="get" enabled="true" action="getTextRepresentationOfCurrentMapAction" id="getTextRepresentationOfCurrentMap" />
+                            <button toolTipText="Load the map from a previously saved image (with metadata)" text="load" enabled="true" action="loadMapFromAPreviouslySavedImageAction" id="loadMapFromAPreviouslySavedImage" />
                         </hbox>
 
                         <titledseparator constraints="1,23,3,1" />
@@ -136,6 +137,10 @@
         </panel>
         <panel name="Manual creation" layout="borderLayout">
             <label constraints="BorderLayout.CENTER" text="To be implemented" />
+        </panel>
+        <panel name="Jung library" layout="borderLayout">
+            <panel layout="borderLayout" constraints="BorderLayout.CENTER" id="graphExplorerJung">
+            </panel>
         </panel>
     </tabbedpane>
 </frame>

@@ -353,7 +353,7 @@ public class MapsGenerator {
 
         Map4CT newMap = new Map4CT();
 
-        // Potential criminals (B)
+        // Example: "Potential criminals" (B)
         //
         newMap.insertF(3, 2, 2);
         newMap.insertF(4, 4, 1);

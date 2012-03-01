@@ -16,13 +16,20 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageInputStream;
 import javax.sound.midi.Instrument;
 import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
@@ -43,6 +50,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.RepaintManager;
+import javax.swing.filechooser.FileSystemView;
 
 import no.geosoft.cc.geometry.Geometry;
 import no.geosoft.cc.graphics.GInteraction;
@@ -54,6 +62,10 @@ import no.geosoft.cc.graphics.GText;
 import no.geosoft.cc.graphics.GWindow;
 
 import org.swixml.SwingEngine;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import com.sun.imageio.plugins.png.PNGMetadata;
 
 /**
  * @author Mario Stefanutti
@@ -141,12 +153,14 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     // Variables automatically initialized to form object (linked to swixml)
     //
     private final JFrame mainframe = null;
+
     private final JTextField slowdownMillisec = null;
     private final JCheckBox logWhilePopulate = null;
     private final JCheckBox randomElaboration = null;
     private final JCheckBox processAll = null;
     private final JComboBox maxMethod = null;
     private final JTextField maxNumber = null;
+
     private final JButton startElaboration = null;
     private final JButton pauseElaboration = null;
     private final JButton filterLessThanFourElaboration = null;
@@ -154,8 +168,31 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JButton filterLessThanFacesElaboration = null;
     private final JButton copyMapsToTodoElaboration = null;
     private final JButton resetElaboration = null;
-    private final JButton createMapFromTextRepresentation = null;
+    private final JPanel mapExplorer = null;
     private final JTextField mapTextRepresentation = null;
+    private final JButton createMapFromTextRepresentation = null;
+    private final JButton getTextRepresentationOfCurrentMap = null;
+    private final JButton loadMapFromAPreviouslySavedImage = null;
+
+    private final JComboBox drawMethod = null;
+    private Enum<DRAW_METHOD> drawMethodValue = DRAW_METHOD.CIRCLES;
+    private final JSlider transparency = null;
+    private int transparencyValue = 255; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
+    private final JCheckBox showFaceCardinality = null;
+    private final JButton selectColorOne = null;
+    private final JButton selectColorTwo = null;
+    private final JButton selectColorThree = null;
+    private final JButton selectColorFour = null;
+    private Color colorOne = null;
+    private Color colorTwo = null;
+    private Color colorThree = null;
+    private Color colorFour = null;
+    private Thread colorItThread = null;
+    private Thread colorAllThread = null;
+    private boolean stopColorRequested = false;
+    private final JButton tait = null;
+    private JFileChooser fileChooser = null;
+
     private final JTextField mapsSize = null;
     private final JTextField currentMap = null;
     private final JTextField mapsRemoved = null;
@@ -163,54 +200,28 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JTextField totalMemory = null;
     private final JTextField maxMemory = null;
     private final JTextField freeMemory = null;
-    private final JComboBox drawMethod = null;
-    private Enum<DRAW_METHOD> drawMethodValue = DRAW_METHOD.CIRCLES;
-    private final JSlider transparency = null;
-    private int transparencyValue = 255; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
-    private final JPanel mapExplorer = null;
-    private final JCheckBox showFaceCardinality = null;
-    private final JButton tait = null;
 
     private final JCheckBox soundWhileColoring = null;
-
     private final JComboBox colorOneInstrument = null;
     private final JTextField colorOneBaseNote = null;
     private final JTextField colorOneBaseDuration = null;
     private final JTextField colorOneBaseVelocity = null;
-
     private final JComboBox colorTwoInstrument = null;
     private final JTextField colorTwoBaseNote = null;
     private final JTextField colorTwoBaseDuration = null;
     private final JTextField colorTwoBaseVelocity = null;
-
     private final JComboBox colorThreeInstrument = null;
     private final JTextField colorThreeBaseNote = null;
     private final JTextField colorThreeBaseDuration = null;
     private final JTextField colorThreeBaseVelocity = null;
-
     private final JComboBox colorFourInstrument = null;
     private final JTextField colorFourBaseNote = null;
     private final JTextField colorFourBaseDuration = null;
     private final JTextField colorFourBaseVelocity = null;
-
     private Soundbank soundbank = null;
     private Synthesizer synthesizer = null;
     private Instrument[] instruments = null;
     private MidiChannel[] midiChannels = null;
-
-    private final JButton selectColorOne = null;
-    private final JButton selectColorTwo = null;
-    private final JButton selectColorThree = null;
-    private final JButton selectColorFour = null;
-
-    private Color colorOne = null;
-    private Color colorTwo = null;
-    private Color colorThree = null;
-    private Color colorFour = null;
-
-    private boolean stopColorRequested = false;
-    private Thread colorItThread = null;
-    private Thread colorAllThread = null;
 
     // Some graphical properties
     //
@@ -218,7 +229,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
     /**
      * Main program
-     *
+     * 
      * @param args
      */
     public static void main(String[] args) throws Exception {
@@ -235,6 +246,12 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
         URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-v2.xml");
         engine.render(configFileURL).setVisible(false); // Has to become visible at the end
+
+        // Initialize the fileChooser to desktop
+        //
+        FileSystemView fileSystemView = FileSystemView.getFileSystemView();
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(fileSystemView.getRoots()[0]);
 
         // Initialize the sound system and load all instruments
         //
@@ -270,7 +287,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         selectColorThree.setForeground(colorThree);
         selectColorFour.setForeground(colorFour);
 
-        // StartUp refresh manager (Runtime info, memory, etc.)
+        // StartUp refresh manager (Runtime info, memory, etc.) - poller
         //
         new Thread(refreshManager).start();
 
@@ -322,7 +339,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     }
 
     /**
-     * Utility class to run the generate() method of the MapsGenerator
+     * Utility class to refresh info about memory, etc.
      */
     private final Runnable refreshManager = new Runnable() {
         public void run() {
@@ -359,6 +376,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 filterLessThanFacesElaboration.setEnabled(true);
                 copyMapsToTodoElaboration.setEnabled(true);
                 createMapFromTextRepresentation.setEnabled(true);
+                getTextRepresentationOfCurrentMap.setEnabled(true);
+                loadMapFromAPreviouslySavedImage.setEnabled(true);
                 refreshInfo();
             }
         }
@@ -376,7 +395,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
         /**
          * Constructor
-         *
+         * 
          * @param map4CTToDraw
          *            The map to draw
          */
@@ -549,7 +568,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
         /**
          * Constructor
-         *
+         * 
          * @param map4CTToDraw
          *            The map to draw
          */
@@ -808,6 +827,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             filterLessThanFacesElaboration.setEnabled(false);
             copyMapsToTodoElaboration.setEnabled(false);
             createMapFromTextRepresentation.setEnabled(false);
+            getTextRepresentationOfCurrentMap.setEnabled(false);
+            loadMapFromAPreviouslySavedImage.setEnabled(false);
 
             // Execute the thread
             //
@@ -900,91 +921,12 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             filterLessThanFacesElaboration.setEnabled(false);
             copyMapsToTodoElaboration.setEnabled(false);
             createMapFromTextRepresentation.setEnabled(true);
+            getTextRepresentationOfCurrentMap.setEnabled(true);
+            loadMapFromAPreviouslySavedImage.setEnabled(true);
 
             // Refresh info and redraw (reset in this case) graph
             //
             refreshInfo();
-            drawCurrentMap();
-        }
-    };
-
-    public Action createMapFromTextRepresentationAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-            mapsGenerator.createMapFromTextRepresentation(mapTextRepresentation.getText());
-            map4CTCurrentIndex = mapsGenerator.maps.size();
-            map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex - 1);
-
-            // It behaves as the play (generation) action - At the end of the generation thread
-            //
-            startElaboration.setEnabled(!(mapsGenerator.todoList.size() == 0));
-            pauseElaboration.setEnabled(false);
-            resetElaboration.setEnabled(true);
-            filterLessThanFourElaboration.setEnabled(true);
-            filterLessThanFiveElaboration.setEnabled(true);
-            filterLessThanFacesElaboration.setEnabled(true);
-            copyMapsToTodoElaboration.setEnabled(true);
-            createMapFromTextRepresentation.setEnabled(true);
-
-            refreshInfo();
-            drawCurrentMap();
-        }
-    };
-
-    public Action textRepresentationOfCurrentMapAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-
-            // "1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+"
-            //
-            if (map4CTCurrent != null) {
-                mapTextRepresentation.setText(map4CTCurrent.sequenceOfCoordinates.sequence.toString().substring(1, map4CTCurrent.sequenceOfCoordinates.sequence.toString().length() - 1));
-            }
-        }
-    };
-
-    public Action drawCurrentMapSlowMotionAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-            drawCurrentMapSlowMotion();
-        }
-    };
-
-    public Action refreshInfoAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-            refreshInfo();
-        }
-    };
-
-    public Action drawMethodAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-            drawCurrentMap();
-
-            if (drawMethodValue == DRAW_METHOD.RECTANGLES) {
-                tait.setEnabled(true);
-            } else if (drawMethodValue == DRAW_METHOD.RECTANGLES_NEW_YORK) {
-                tait.setEnabled(true);
-            } else if (drawMethodValue == DRAW_METHOD.CIRCLES) {
-                tait.setEnabled(false);
-            }
-        }
-    };
-
-    // For a swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54) I needed to change this and use setter and getter methods
-    //
-    public final void setTransparencyValue(int value) {
-
-        // Read the transparency to use
-        //
-        // System.out.println("DEBUG: This event is not called. It is a swixml bug. Open a ticket");
-        //
-        drawCurrentMap();
-        transparencyValue = value;
-    }
-
-    public final int getTransparencyValue() {
-        return transparencyValue;
-    }
-
-    public Action showFaceCardinalityAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
             drawCurrentMap();
         }
     };
@@ -1071,6 +1013,197 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
                 drawCurrentMap();
             }
+        }
+    };
+
+    public Action drawCurrentMapSlowMotionAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            drawCurrentMapSlowMotion();
+        }
+    };
+
+    public Action createMapFromTextRepresentationAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            mapsGenerator.createMapFromTextRepresentation(mapTextRepresentation.getText());
+            map4CTCurrentIndex = mapsGenerator.maps.size();
+            map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex - 1);
+
+            // It behaves as the play (generation) action - At the end of the generation thread
+            //
+            startElaboration.setEnabled(!(mapsGenerator.todoList.size() == 0));
+            pauseElaboration.setEnabled(false);
+            resetElaboration.setEnabled(true);
+            filterLessThanFourElaboration.setEnabled(true);
+            filterLessThanFiveElaboration.setEnabled(true);
+            filterLessThanFacesElaboration.setEnabled(true);
+            copyMapsToTodoElaboration.setEnabled(true);
+            createMapFromTextRepresentation.setEnabled(true);
+            getTextRepresentationOfCurrentMap.setEnabled(true);
+            loadMapFromAPreviouslySavedImage.setEnabled(true);
+
+            refreshInfo();
+            drawCurrentMap();
+        }
+    };
+
+    public Action getTextRepresentationOfCurrentMapAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // "1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+"
+            //
+            if (map4CTCurrent != null) {
+                mapTextRepresentation.setText(map4CTCurrent.toString());
+            }
+        }
+    };
+
+    public Action loadMapFromAPreviouslySavedImageAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // Read the metadata from a saved image
+            //
+            if (fileChooser.showOpenDialog(window.getCanvas()) == JFileChooser.APPROVE_OPTION) {
+
+                // Choose the filename
+                //
+                File fileToRead = fileChooser.getSelectedFile();
+                try {
+
+                    // Read the image
+                    //
+                    ImageInputStream inputStream = ImageIO.createImageInputStream(fileToRead);
+                    ImageReader imageReader = ImageIO.getImageReadersByFormatName("png").next();
+                    imageReader.setInput(inputStream, true);
+
+                    // Read the metadata and search for the "map-representation" previously save information
+                    //
+                    PNGMetadata metadata = (PNGMetadata) imageReader.getImageMetadata(0);
+                    Map<String, String> metadataMap = new HashMap<String, String>();
+                    NodeList childNodes = metadata.getStandardTextNode().getChildNodes();
+                    for (int i = 0; i < childNodes.getLength(); i++) {
+                        Node node = childNodes.item(i);
+                        String keyword = node.getAttributes().getNamedItem("keyword").getNodeValue();
+                        String value = node.getAttributes().getNamedItem("value").getNodeValue();
+                        metadataMap.put(keyword, value);
+                    }
+                    String mapRepresentation = metadataMap.get("map-representation");
+
+                    // Create the map
+                    //
+                    mapsGenerator.createMapFromTextRepresentation(mapRepresentation);
+                    map4CTCurrentIndex = mapsGenerator.maps.size();
+                    map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex - 1);
+
+                    // It behaves as the play (generation) action - At the end of the generation thread
+                    //
+                    startElaboration.setEnabled(!(mapsGenerator.todoList.size() == 0));
+                    pauseElaboration.setEnabled(false);
+                    resetElaboration.setEnabled(true);
+                    filterLessThanFourElaboration.setEnabled(true);
+                    filterLessThanFiveElaboration.setEnabled(true);
+                    filterLessThanFacesElaboration.setEnabled(true);
+                    copyMapsToTodoElaboration.setEnabled(true);
+                    createMapFromTextRepresentation.setEnabled(true);
+                    getTextRepresentationOfCurrentMap.setEnabled(true);
+                    loadMapFromAPreviouslySavedImage.setEnabled(true);
+
+                    refreshInfo();
+                    drawCurrentMap();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            }
+        }
+    };
+
+    public Action drawMethodAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            drawCurrentMap();
+
+            if (drawMethodValue == DRAW_METHOD.RECTANGLES) {
+                tait.setEnabled(true);
+            } else if (drawMethodValue == DRAW_METHOD.RECTANGLES_NEW_YORK) {
+                tait.setEnabled(true);
+            } else if (drawMethodValue == DRAW_METHOD.CIRCLES) {
+                tait.setEnabled(false);
+            }
+        }
+    };
+
+    // For a swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54) I needed to change this and use setter and getter methods
+    //
+    public final void setTransparencyValue(int value) {
+
+        // Read the transparency to use
+        //
+        // System.out.println("DEBUG: This event is not called. It is a swixml bug. Open a ticket");
+        //
+        drawCurrentMap();
+        transparencyValue = value;
+    }
+
+    public final int getTransparencyValue() {
+        return transparencyValue;
+    }
+
+    public Action selectColorOneAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            colorOne = chooseNewColor(colorOne);
+            selectColorOne.setForeground(colorOne);
+        }
+    };
+
+    public Action selectColorTwoAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            colorTwo = chooseNewColor(colorTwo);
+            selectColorTwo.setForeground(colorTwo);
+        }
+    };
+
+    public Action selectColorThreeAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            colorThree = chooseNewColor(colorThree);
+            selectColorThree.setForeground(colorThree);
+        }
+    };
+
+    public Action selectColorFourAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            colorFour = chooseNewColor(colorFour);
+            selectColorFour.setForeground(colorFour);
+
+            // Re-init graphic
+            // It did not repaint (even using repaint()). I had to recreate everything. It maybe AWT and SWING mixed together
+            //
+            initMapExplorerForGraphic();
+        }
+    };
+
+    public Action selectColorDefaultAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // Set default = RGBW
+            //
+            colorOne = Color.RED;
+            colorTwo = Color.GREEN;
+            colorThree = Color.BLUE;
+            colorFour = Color.WHITE;
+
+            selectColorOne.setForeground(colorOne);
+            selectColorTwo.setForeground(colorTwo);
+            selectColorThree.setForeground(colorThree);
+            selectColorFour.setForeground(colorFour);
+
+            // Re-init graphic
+            // It did not repaint (even using repaint()). I had to recreate everything. It maybe AWT and SWING mixed together
+            //
+            initMapExplorerForGraphic();
+        }
+    };
+
+    public Action showFaceCardinalityAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            drawCurrentMap();
         }
     };
 
@@ -1178,16 +1311,33 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
             try {
                 File fileToSave = null;
-                JFileChooser chooser = new JFileChooser();
-                chooser.setCurrentDirectory(null);
-                chooser.setSelectedFile(new File(fileName));
-                if (chooser.showOpenDialog(window.getCanvas()) == JFileChooser.APPROVE_OPTION) {
-                    fileToSave = chooser.getSelectedFile();
+                fileChooser.setSelectedFile(new File(fileName));
+                if (fileChooser.showOpenDialog(window.getCanvas()) == JFileChooser.APPROVE_OPTION) {
+
+                    // Choose the filename
+                    //
+                    fileToSave = fileChooser.getSelectedFile();
+
+                    // Write the image to memory (BufferedImage)
+                    //
                     BufferedImage bufferedImage = new BufferedImage(window.getCanvas().getWidth(), window.getCanvas().getHeight(), BufferedImage.TYPE_INT_RGB);
                     Graphics2D graphics2D = bufferedImage.createGraphics();
                     window.getCanvas().paint(graphics2D);
                     graphics2D.dispose();
-                    ImageIO.write(bufferedImage, "png", fileToSave);
+
+                    // Create & populate png metadata
+                    //
+                    PNGMetadata metadata = new PNGMetadata();
+                    metadata.tEXt_keyword.add("map-representation");
+                    metadata.tEXt_text.add(map4CTCurrent.toString());
+
+                    // Write the image to file and close the file stream
+                    //
+                    FileOutputStream imageOutputStream = new FileOutputStream(fileToSave);
+                    ImageWriter writer = (ImageWriter) ImageIO.getImageWritersBySuffix("png").next();
+                    writer.setOutput(ImageIO.createImageOutputStream(imageOutputStream));
+                    writer.write(new IIOImage(bufferedImage, null, metadata));
+                    imageOutputStream.close();
                 }
             } catch (IOException exception) {
                 exception.printStackTrace();
@@ -1195,58 +1345,9 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    public Action selectColorOneAction = new AbstractAction() {
+    public Action refreshInfoAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
-            colorOne = chooseNewColor(colorOne);
-            selectColorOne.setForeground(colorOne);
-        }
-    };
-
-    public Action selectColorTwoAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-            colorTwo = chooseNewColor(colorTwo);
-            selectColorTwo.setForeground(colorTwo);
-        }
-    };
-
-    public Action selectColorThreeAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-            colorThree = chooseNewColor(colorThree);
-            selectColorThree.setForeground(colorThree);
-        }
-    };
-
-    public Action selectColorFourAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-            colorFour = chooseNewColor(colorFour);
-            selectColorFour.setForeground(colorFour);
-
-            // Re-init graphic
-            // It did not repaint (even using repaint()). I had to recreate everything. It maybe AWT and SWING mixed together
-            //
-            initMapExplorerForGraphic();
-        }
-    };
-
-    public Action selectColorDefaultAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-
-            // Set default = RGBW
-            //
-            colorOne = Color.RED;
-            colorTwo = Color.GREEN;
-            colorThree = Color.BLUE;
-            colorFour = Color.WHITE;
-
-            selectColorOne.setForeground(colorOne);
-            selectColorTwo.setForeground(colorTwo);
-            selectColorThree.setForeground(colorThree);
-            selectColorFour.setForeground(colorFour);
-
-            // Re-init graphic
-            // It did not repaint (even using repaint()). I had to recreate everything. It maybe AWT and SWING mixed together
-            //
-            initMapExplorerForGraphic();
+            refreshInfo();
         }
     };
 
@@ -1346,18 +1447,9 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    public void colorAll() {
-        if (mapsGenerator.maps.size() != 0) {
-
-            // Start from current position to the end
-            //
-            for (; (map4CTCurrentIndex < mapsGenerator.maps.size()) && (stopColorRequested == false); map4CTCurrentIndex++) {
-                map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex);
-                colorIt();
-            }
-        }
-    }
-
+    /**
+     * Color a single map
+     */
     public void colorIt() {
 
         // Local variables
@@ -1461,6 +1553,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                                     }
                                 }
 
+                                // If also the coloring of pinned faces is correct
+                                //
                                 if (correctColoredRespectToPinned) {
 
                                     // Move to the next face
@@ -1550,6 +1644,21 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     }
 
     /**
+     * Color all maps
+     */
+    public void colorAll() {
+        if (mapsGenerator.maps.size() != 0) {
+
+            // Start from current position to the end
+            //
+            for (; (map4CTCurrentIndex < mapsGenerator.maps.size()) && (stopColorRequested == false); map4CTCurrentIndex++) {
+                map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex);
+                colorIt();
+            }
+        }
+    }
+
+    /**
      * Refresh runtime info
      */
     public synchronized void refreshInfo() {
@@ -1575,6 +1684,9 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         freeMemory.setText("" + (Runtime.getRuntime().freeMemory() / 1024 / 1024) + " Mb");
     }
 
+    /**
+     * Choose a color
+     */
     public Color chooseNewColor(Color currentColor) {
         Color newColor = JColorChooser.showDialog(null, "Change color", currentColor);
         if (newColor == null) {
@@ -1723,7 +1835,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
     /**
      * @param face
-     * @return The new style
+     * @return The new style (G library)
      */
     public GStyle styleFromFace(F face) {
 
@@ -1762,6 +1874,9 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         return faceStyle;
     }
 
+    /**
+     * Handle mouse events
+     */
     public void event(GScene scene, int event, int x, int y) {
 
         // Color a face

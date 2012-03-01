@@ -327,4 +327,9 @@ public class Map4CT implements Cloneable {
 
         return clonedMap;
     }
+
+    @Override
+    public String toString() {
+        return sequenceOfCoordinates.sequence.toString().substring(1, sequenceOfCoordinates.sequence.toString().length() - 1);
+    }
 }

@@ -1,50 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<parent>
-		<groupId>it.tac.ct</groupId>
-		<artifactId>ct-user-properties</artifactId>
-		<version>1.0</version>
-		<relativePath>../ct-user-properties.xml</relativePath>
-	</parent>
+  <parent>
+    <groupId>it.tac.ct</groupId>
+    <artifactId>ct-user-properties</artifactId>
+    <version>1.0</version>
+    <relativePath>../ct-user-properties.xml</relativePath>
+  </parent>
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>it.tac.ct</groupId>
-	<artifactId>ct</artifactId>
-	<name>ColorTheorem</name>
-	<packaging>pom</packaging>
-	<version>1.0</version>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>it.tac.ct</groupId>
+  <artifactId>ct</artifactId>
+  <name>ColorTheorem</name>
+  <packaging>pom</packaging>
+  <version>1.0</version>
 
-	<modules>
-		<module>ct-core</module>
-		<module>ct-utils</module>
-        <module>ct-ui-swixml</module>
-	</modules>
+  <modules>
+    <module>ct-core</module>
+    <module>ct-ui-swixml</module>
+  </modules>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
-	<repositories>
-		<repository>
-			<id>Tac</id>
-			<name>Reply</name>
-			<url>file:${tac.project.ct.home}/ct-maven/file_repository
-			</url>
-		</repository>
-	</repositories>
+  <repositories>
+    <repository>
+      <id>Tac</id>
+      <name>Reply</name>
+      <url>file:${tac.project.ct.home}/ct-maven/file_repository
+      </url>
+    </repository>
+  </repositories>
 
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 </project>

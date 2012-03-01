@@ -20,11 +20,11 @@ public class ColorPalette {
     public COLORS savedPinnedColor = COLORS.UNCOLORED; // Default for no color pinned
 
     /**
-     * @param isPreconfigured
-     *            preconfigured with 4 colors?
+     * @param isFull
+     *            preconfigured with 4 colors (or with the pinned color)?
      */
-    public ColorPalette(boolean isPreconfigured) {
-        if (isPreconfigured) {
+    public ColorPalette(boolean isFull) {
+        if (isFull) {
             setToFull();
         } else {
             setToEmpty();
