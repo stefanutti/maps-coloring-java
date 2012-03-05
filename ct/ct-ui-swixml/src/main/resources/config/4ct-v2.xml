@@ -138,8 +138,21 @@
         <panel name="Manual creation" layout="borderLayout">
             <label constraints="BorderLayout.CENTER" text="To be implemented" />
         </panel>
-        <panel name="Jung library" layout="borderLayout">
-            <panel layout="borderLayout" constraints="BorderLayout.CENTER" id="graphExplorerJung">
+        <panel name="Graph theory" layout="borderLayout">
+            <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout" >
+                <scrollpane>
+                    <panel>
+                        <layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
+
+                        <titledseparator constraints="1,1,3,1" />
+                        <label constraints="1,3" text="jgrapht" />
+                        <hbox constraints="3,3,1,1">
+                            <button text="test" enabled="true" action="testJGraphTAction" id="testJGraphT" />
+                        </hbox>
+                    </panel>
+                </scrollpane>
+            </panel>
+            <panel layout="borderLayout" constraints="BorderLayout.CENTER" id="graphExplorer">
             </panel>
         </panel>
     </tabbedpane>

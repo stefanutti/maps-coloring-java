@@ -154,6 +154,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     //
     private final JFrame mainframe = null;
 
+    // TAB: Main
+    //
     private final JTextField slowdownMillisec = null;
     private final JCheckBox logWhilePopulate = null;
     private final JCheckBox randomElaboration = null;
@@ -222,6 +224,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private Synthesizer synthesizer = null;
     private Instrument[] instruments = null;
     private MidiChannel[] midiChannels = null;
+
+    // TAB: Graph theory
+    //
+    private final JButton testJGraphT = null;
 
     // Some graphical properties
     //
@@ -1432,6 +1438,11 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 map4CTCurrent.resetColors();
                 drawCurrentMap();
             }
+        }
+    };
+
+    public Action testJGraphTAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
         }
     };
 
