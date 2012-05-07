@@ -11,17 +11,17 @@ import org.swixml.SwingEngine;
 
 public class SwixmlUITester extends JFrame {
 
-	public SwixmlUITester() {
-		try {
-			SwingEngine<SwixmlUITester> engine = new SwingEngine<SwixmlUITester>(this);
-			URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-test-snap.xml");
-			engine.render(configFileURL).setVisible(true);
-		} catch (Exception exception) {
-			exception.printStackTrace();
-		}
-	}
+    public SwixmlUITester() {
+        try {
+            SwingEngine<SwixmlUITester> engine = new SwingEngine<SwixmlUITester>(this);
+            URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-test-snap.xml");
+            engine.render(configFileURL).setVisible(true);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
 
-	public static void main(String[] args) {
-		new SwixmlUITester();
-	}
+    public static void main(String[] args) {
+        new SwixmlUITester();
+    }
 }

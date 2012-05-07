@@ -27,10 +27,9 @@ public class MapsGenerator {
     public Enum<MAX_METHOD> maxMethod = MAX_METHOD.MAPS;
     public int maxNumber = 0;
 
-    // Maps removed during elaboration. These would have been removed anyway running
-    // removeMapsWithCardinalityLessThanFour after elaboration
+    // Maps removed during elaboration. These would have been removed anyway running removeMapsWithCardinalityLessThanFour after elaboration
     //
-    public int removed = 0;
+    public int numberOfRemovedMaps = 0;
 
     // If this method will be used from a thread, it can be stopped setting this flag
     //
@@ -46,10 +45,10 @@ public class MapsGenerator {
      */
     public MapsGenerator() {
 
-        // Prepare the basic map, out of which all the other will be prepared
+        // Prepare the basic map, out of which all the other maps will be prepared
         //
         // For simplicity (not to handle limit cases), the basic map is made of 3 faces considering the ocean (the third Face)
-        // - key = 1.1, cardinality = 2 for all faces. Sequence (at border) = "1b+, 2b+, 2e+, 1e+"
+        // - key = 1.1, cardinality = 2 for all faces. Sequence (at shore) = "1b+, 2b+, 2e+, 1e+"
         //
         Map4CT map = new Map4CT();
 
@@ -94,6 +93,16 @@ public class MapsGenerator {
 
                 // Loops on the possible end points (related to the disposition of edges at border)
                 //
+                // Note: I think here there is a bug, but this time is a good bug
+                // - Every map ends with: "... 2e+ 1e+"
+                // - End insertion point of every new F should be after the last edge
+                // - But since given a graph I can always choose the first 3 neighbours to represent the ocean and the first two faces,
+                // - I can stop before the last edge
+                // - It would be better to have the face number two at the beginning of the string "1b+ 2b+ ...", but I'm satisfied with this configuration
+                // - I'm happy with this unexpected bug ... and I don't want to kill this lucky one!
+                //
+                // I can also always force the colors of the first two faces and of the ocean!
+                //
                 RandomLoopManager numberOfEToTouchLoopManager = new RandomLoopManager(1, numberOfVisibleEdgesAtBorders - insertPoint + 2, processAll);
                 int numberOfEToTouch = -1;
                 while ((numberOfEToTouch = numberOfEToTouchLoopManager.getValue(randomElaboration)) != -1) {
@@ -131,12 +140,12 @@ public class MapsGenerator {
 
                         // Increase the number of removed maps (optimization for memory and speed)
                         //
-                        removed++;
+                        numberOfRemovedMaps++;
 
                         // Log
                         //
                         if (logWhilePopulate == true) {
-                            System.out.print("REMOVED-" + removeCase + ": " + removed + ": ");
+                            System.out.print("REMOVED-" + removeCase + ": " + numberOfRemovedMaps + ": ");
                             Map4CT.printDetailedMap(newMap);
                         }
                     } else {
@@ -416,9 +425,14 @@ public class MapsGenerator {
     }
 
     /**
-     * Create a new map from the text representation: 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
+     * Create a new map from its text representation, stopping at n faces (facesToCreate) not considering the ocean
+     * 
+     * @param mapTextRepresentation
+     *            Example: 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
+     * @param facesToCreate
+     *            Values permitted go from 2 to the number of faces of the map (max is: tokensOfTheMapTextRepresentation.length / 2;) not considering the ocean
      */
-    public void createMapFromTextRepresentation(String mapTextRepresentation) {
+    public Map4CT createMapFromTextRepresentation(String mapTextRepresentation, int facesToCreate) {
 
         // Create an empty (almost) map (default is 2 faces + the ocean = 3 faces)
         //
@@ -427,9 +441,16 @@ public class MapsGenerator {
         // Analyze the input string to understand how many faces I need to create
         //
         String[] tokensOfTheMapTextRepresentation = mapTextRepresentation.split(", ");
-        int numberOfFaces = tokensOfTheMapTextRepresentation.length / 2;
+        int numberOfFaces = facesToCreate;
+        if (facesToCreate == -1) {
+            numberOfFaces = tokensOfTheMapTextRepresentation.length / 2;
+        } else if ((facesToCreate < 2) || (facesToCreate > (tokensOfTheMapTextRepresentation.length / 2))) {
+            throw new IndexOutOfBoundsException();
+        } else {
+            numberOfFaces = facesToCreate;
+        }
 
-        // Loops all faces
+        // Loops all faces. The first two faces are created by the constructor() of Map4CT
         //
         for (int faceNumber = 3; faceNumber <= numberOfFaces; faceNumber++) {
 
@@ -447,14 +468,14 @@ public class MapsGenerator {
             while (beginInsertPointFound == false) {
                 String extractNumber = tokensOfTheMapTextRepresentation[tokenNumber].substring(0, tokensOfTheMapTextRepresentation[tokenNumber].length() - 2);
                 int faceAnalyzed = Integer.parseInt(extractNumber, 10);
-                String extractVisibilityType = tokensOfTheMapTextRepresentation[tokenNumber].substring(tokensOfTheMapTextRepresentation[tokenNumber].length() - 2, tokensOfTheMapTextRepresentation[tokenNumber].length() - 1);
-                String extractVisibility = null;
+                String extractVisibilityBeginOrEnd = tokensOfTheMapTextRepresentation[tokenNumber].substring(tokensOfTheMapTextRepresentation[tokenNumber].length() - 2, tokensOfTheMapTextRepresentation[tokenNumber].length() - 1);
+                String extractVisibilityPlusOrMinus = null;
                 for (int i = 0; i < currentTokensOfTheMapTextRepresentation.length; i++) {
-                    if (currentTokensOfTheMapTextRepresentation[i].startsWith("" + faceAnalyzed + extractVisibilityType)) {
-                        extractVisibility = currentTokensOfTheMapTextRepresentation[i].substring(currentTokensOfTheMapTextRepresentation[i].length() - 1, currentTokensOfTheMapTextRepresentation[i].length());
+                    if (currentTokensOfTheMapTextRepresentation[i].startsWith("" + faceAnalyzed + extractVisibilityBeginOrEnd)) {
+                        extractVisibilityPlusOrMinus = currentTokensOfTheMapTextRepresentation[i].substring(currentTokensOfTheMapTextRepresentation[i].length() - 1, currentTokensOfTheMapTextRepresentation[i].length());
                     }
                 }
-                if ((faceAnalyzed < faceNumber) && (extractVisibility.compareTo("+") == 0)) {
+                if ((faceAnalyzed < faceNumber) && (extractVisibilityPlusOrMinus.compareTo("+") == 0)) {
                     beginInsertPoint++;
                 } else if (faceAnalyzed == faceNumber) {
                     beginInsertPointFound = true;
@@ -468,14 +489,14 @@ public class MapsGenerator {
             while (numberOfEToTouchComputed == false) {
                 String extractNumber = tokensOfTheMapTextRepresentation[tokenNumber].substring(0, tokensOfTheMapTextRepresentation[tokenNumber].length() - 2);
                 int faceAnalyzed = Integer.parseInt(extractNumber, 10);
-                String extractVisibilityType = tokensOfTheMapTextRepresentation[tokenNumber].substring(tokensOfTheMapTextRepresentation[tokenNumber].length() - 2, tokensOfTheMapTextRepresentation[tokenNumber].length() - 1);
-                String extractVisibility = null;
+                String extractVisibilityBeginOrEnd = tokensOfTheMapTextRepresentation[tokenNumber].substring(tokensOfTheMapTextRepresentation[tokenNumber].length() - 2, tokensOfTheMapTextRepresentation[tokenNumber].length() - 1);
+                String extractVisibilityPlusOrMinus = null;
                 for (int i = 0; i < currentTokensOfTheMapTextRepresentation.length; i++) {
-                    if (currentTokensOfTheMapTextRepresentation[i].startsWith("" + faceAnalyzed + extractVisibilityType)) {
-                        extractVisibility = currentTokensOfTheMapTextRepresentation[i].substring(currentTokensOfTheMapTextRepresentation[i].length() - 1, currentTokensOfTheMapTextRepresentation[i].length());
+                    if (currentTokensOfTheMapTextRepresentation[i].startsWith("" + faceAnalyzed + extractVisibilityBeginOrEnd)) {
+                        extractVisibilityPlusOrMinus = currentTokensOfTheMapTextRepresentation[i].substring(currentTokensOfTheMapTextRepresentation[i].length() - 1, currentTokensOfTheMapTextRepresentation[i].length());
                     }
                 }
-                if ((faceAnalyzed < faceNumber) && (extractVisibility.compareTo("+") == 0)) {
+                if ((faceAnalyzed < faceNumber) && (extractVisibilityPlusOrMinus.compareTo("+") == 0)) {
                     numberOfEToTouch++;
                 } else if (faceAnalyzed == faceNumber) {
                     numberOfEToTouchComputed = true;
@@ -488,10 +509,9 @@ public class MapsGenerator {
             newMap.insertF(faceNumber, beginInsertPoint, numberOfEToTouch);
         }
 
-        // Update the map list and the todoList
+        // Return the new map
         //
-        maps.add(newMap);
-        todoList.add(newMap);
+        return newMap;
     }
 
     /**
@@ -504,5 +524,21 @@ public class MapsGenerator {
         for (int iMaps = 0; iMaps < maps.size(); iMaps++) {
             todoList.add(maps.get(iMaps));
         }
+    }
+
+    /**
+     * Main program
+     * 
+     * @param args
+     */
+    public static void main(String[] args) throws Exception {
+        MapsGenerator mapsGenerator = new MapsGenerator();
+
+        String mapString = "1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+";
+        Map4CT map = mapsGenerator.createMapFromTextRepresentation(mapString, 2);
+        System.out.println("Debug: map = " + map.toString());
+
+        map = mapsGenerator.createMapFromTextRepresentation(mapString, 3);
+        System.out.println("Debug: map = " + map.toString());
     }
 }

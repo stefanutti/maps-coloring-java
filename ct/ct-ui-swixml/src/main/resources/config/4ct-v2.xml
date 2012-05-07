@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<frame name="frame"  size="1000,650" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
+<frame name="frame" size="1000,650" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
     <menubar>
         <menu text="File">
             <menuitem text="Load skin (to be implemented)" />
@@ -12,8 +12,8 @@
             <menuitem text="About (to be implemented)" />
         </menu>
     </menubar>
-    
-    <tabbedpane  doubleBuffered="false">
+
+    <tabbedpane doubleBuffered="false">
         <panel name="Map Generator" layout="BorderLayout" >
             <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout" >
                 <scrollpane>
@@ -76,10 +76,11 @@
                         <checkbox constraints="3,29" text="showFaceCardinality" selected="false" action="showFaceCardinalityAction" id="showFaceCardinality" />
                         <label constraints="1,31" text="color" />
                         <hbox constraints="3,31,1,1">
-                            <button text="colorIt" action="colorItAction" />
-                            <button text="colorAll" action="colorAllAction" />
-                            <button text="X" toolTipText="Stop coloring and reset colors" action="stopColorAction" />
+                            <button text="It" action="colorItAction" />
+                            <button text="All" action="colorAllAction" />
+                            <button text="Reset" toolTipText="Stop coloring and reset colors" action="stopColorAction" />
                             <button text="Tait" enabled="false" toolTipText="Tait 3-edge-coloring to 4-face-coloring" action="taitAction" id="tait" />
+                            <button text="@" enabled="true" toolTipText="Spiral chain" action="spiralChainAction" id="spiralChain" />
                             <button text="save" action="saveMapToImageAction" />
                         </hbox>
 
@@ -145,9 +146,9 @@
                         <layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
 
                         <titledseparator constraints="1,1,3,1" />
-                        <label constraints="1,3" text="jgrapht" />
+                        <label constraints="1,3" text="createGraphOfCurrentMap" />
                         <hbox constraints="3,3,1,1">
-                            <button text="test" enabled="true" action="testJGraphTAction" id="testJGraphT" />
+                            <button text="go" enabled="true" action="jGraphTAction" />
                         </hbox>
                     </panel>
                 </scrollpane>

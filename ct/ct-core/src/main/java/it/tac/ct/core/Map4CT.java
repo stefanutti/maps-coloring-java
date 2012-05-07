@@ -20,7 +20,7 @@ public class Map4CT implements Cloneable {
     //
     public List<F> faces = new ArrayList<F>();
 
-    // The sequence of all coordinates (for each F): 1b,3b,2b-,2e-,3e,1e (as seen from the shore)
+    // The sequence of all coordinates (for each F): 1b+,3b+,2b-,2e-,3e+,1e+ (as seen from the shore)
     //
     // b = begin e = end - = not visible
     //

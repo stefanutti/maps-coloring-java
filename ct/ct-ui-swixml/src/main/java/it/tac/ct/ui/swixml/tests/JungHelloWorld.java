@@ -22,11 +22,11 @@ import edu.uci.ics.jung.visualization.BasicVisualizationServer;
  * 
  * @author Dr. Greg M. Bernstein
  */
-public class JungSimpleGraphView {
+public class JungHelloWorld {
     Graph<Integer, String> g;
 
     /** Creates a new instance of SimpleGraphView */
-    public JungSimpleGraphView() {
+    public JungHelloWorld() {
         // Graph<V, E> where V is the type of the vertices and E is the type of the edges
         g = new SparseMultigraph<Integer, String>();
         // Add some vertices. From above we defined these to be type Integer.
@@ -39,7 +39,7 @@ public class JungSimpleGraphView {
     }
 
     public static void main(String[] args) {
-        JungSimpleGraphView sgv = new JungSimpleGraphView(); // We create our graph in here
+        JungHelloWorld sgv = new JungHelloWorld(); // We create our graph in here
         // The Layout<V, E> is parameterized by the vertex and edge types
         Layout<Integer, String> layout = new CircleLayout(sgv.g);
         layout.setSize(new Dimension(300, 300)); // sets the initial size of the layout space

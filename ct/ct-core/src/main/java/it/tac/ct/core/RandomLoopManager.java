@@ -18,8 +18,7 @@ public class RandomLoopManager {
     //
     private List<Integer> loopValueList = null;
 
-    // If you don't want to process all the values, set processAll = false This variable keeps track of the number of
-    // elements to process
+    // If you don't want to process all the values, set processAll = false This variable keeps track of the number of elements to process
     //
     private int numberOfIterations = 0;
 
@@ -41,7 +40,7 @@ public class RandomLoopManager {
         if (processAll) {
             numberOfIterations = loopValueList.size();
         } else {
-            numberOfIterations = Math.round((long)(Math.random() * loopValueList.size()));
+            numberOfIterations = Math.round((long) (Math.random() * loopValueList.size()));
             if (numberOfIterations == 0) {
                 numberOfIterations = 1;
             }
@@ -68,7 +67,7 @@ public class RandomLoopManager {
         } else if (randomFlag == false) {
             value = loopValueList.remove(0).intValue();
         } else {
-            int index = Math.round((long)(Math.random() * loopValueList.size()));
+            int index = Math.round((long) (Math.random() * loopValueList.size()));
             value = loopValueList.remove(index).intValue();
         }
 
