@@ -3,7 +3,6 @@
  */
 package it.tac.ct.core;
 
-
 /**
  * @author Mario Stefanutti
  * @version September 2007
@@ -13,10 +12,18 @@ package it.tac.ct.core;
  */
 public class Edge {
 
-    /**
-     * Serializable
-     */
-    private static final long serialVersionUID = 1L;
+    // The shape when drawing the rectangular map
+    //
+    public enum SHAPE_TYPE {
+        STRAIGHT, L, MIRRORED_L, U, OCEAN
+    }
+
+    public Enum<SHAPE_TYPE> shapeType = SHAPE_TYPE.STRAIGHT;
+
+    // The vertices of the edge
+    //
+    public Vertex firstVertex = null;
+    public Vertex secondVertex = null;
 
     // Name
     //
@@ -29,4 +36,10 @@ public class Edge {
     // Used for coloring maps
     //
     public COLORS color = COLORS.UNCOLORED; // Default for no color
+
+    // Support method
+    //
+    public String toString() {
+        return name;
+    }
 }

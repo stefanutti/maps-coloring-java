@@ -14,12 +14,16 @@ public class Vertex {
 
     // For the shape of the Vertex
     //
-    public static int WIDTH = 30;
-    public static int HEIGHT = 30;
+    public static int WIDTH = 10;
+    public static int HEIGHT = 10;
 
     // Name
     //
     public String name = "";
+
+    // The face that created this vertex
+    //
+    public int faceNumber = -1;
 
     // If the vertex has already been visited/used
     //
@@ -49,6 +53,8 @@ public class Vertex {
     //
     public COLORS color = COLORS.UNCOLORED; // Default for no color
 
+    // Support method
+    //
     public String toString() {
         return name;
     }

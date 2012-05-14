@@ -6,6 +6,7 @@ package it.tac.ct.ui.swixml;
 import it.tac.ct.core.COLORS;
 import it.tac.ct.core.ColorPalette;
 import it.tac.ct.core.Edge;
+import it.tac.ct.core.Edge.SHAPE_TYPE;
 import it.tac.ct.core.F;
 import it.tac.ct.core.FCoordinate;
 import it.tac.ct.core.GraphicalObjectCoordinate;
@@ -22,10 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -71,12 +70,17 @@ import org.swixml.SwingEngine;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.mxgraph.layout.mxCircleLayout;
+import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
+import com.mxgraph.model.mxGeometry;
 import com.mxgraph.model.mxGraphModel;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxPoint;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
@@ -85,64 +89,6 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 /**
  * @author Mario Stefanutti
  * @version September 2007
- *          <p>
- *          Main program: It uses Swixml for GUI and the G graphical library for graphic
- *          </p>
- *          <p>
- *          MOVED TO SOURCEFORGE TRACKER:
- *          <li>Bug?: if method == F and maxNumber < 7 and automatic filter is active --> computation does not produce maps (only the basic one)
- *          <li>Bug?: Place somewhere else the variables: x, y, w, h and startRadius, stopRadius, ... of F?
- *          <li>Bug?: Review the indexes used for array and similar. Some begin from 0 and some from 1
- *          <li>Bug: When coloring the map, do not recreate it every time but change only the styles
- *          <li>Bug?: Verify if styles are created also when not needed (create 4 styles and use the same style for more objects)
- *          <li>Bug: If you push other buttons when automatic color algorithm is working (separated thread) coloring start acting strange
- *          <li>Add a coloring method based on the arbitrary choice of the three color for central face, ocean + another face adjoining the other two
- *          <li>Set a map manually (using the string that represents the "sequence of coordinates" as in logging on stdout)
- *          <li>Add a flag to not filter (remove) any map, not even if a not reach-able face has cardinality = 2
- *          <li>Add timing statistics
- *          <li>Color all maps (silent without visualization + progress bar)
- *          <li>Add a grid to easily understand each face which face it is (or mouse over)
- *          <li>Add a tool that from the picture of a graph or of a map (to upload), transform it into a simplified map
- *          <li>Make the user interface more compact and write an introduction (all before publishing it) - skins
- *          <li>Save and restore maps on disk (single and groups). Each map can be saved as a string that represents the "sequence of coordinates"
- *          <li>Save all images found (if list is small or +- 10 maps respect the current one)
- *          <li>Show the use of memory directly on the UI (heap)
- *          </p>
- *          <p>
- *          DONE (older than SourceForge):
- *          <li>Starting from a displayed map remove the last inserted face (not considering the Ocean) and create another view for compare coloring
- *          <li>Add a map searching tool: for example "find a map with 13 faces" or "find a map with with at least two F6 faces confining" or ... CANCELLED
- *          <li>Try to think to an highly distributed architecture using a grid of computers to distribute jobs and increase memory available CANCELLED
- *          <li>Transform a map that does'nt have an F5 ocean into a map with an F5 ocean (from plane back to sphere and hole an F5)
- *          <li>Permit zoom or color mode or find a way to have both at the same time (different buttons?) CANCELLED
- *          <li>When F mode is activated and while generating maps, filter "closed" maps that have reached F faces (only if >= 12)
- *          <li>Filter maps with less than F faces (considering the ocean)
- *          <li>Change the transparent slider to text and add an action to it (open a swixml2 BUG for sliders not handling actions)
- *          <li>CANCELLED: Use 64 bits JVM to use more memory. 64 bits JVM has many bugs
- *          <li>If the list of maps gets empty (after a filtering) also clean the screen with the visualized map
- *          <li>LinkedList have been changed to ArrayList to free memory (CPU is sacrificed)
- *          <li>Clean the code: Adjust the automatic coloring algorithm and then find some enhancement + some others + some others
- *          <li>Clean the code: Simplify hasUnreachableFWithCardinalityLessThanFive
- *          <li>Clean the code: Fix the fNumberAtIndex and fNumberAtIndexForColors problem
- *          <li>Set automatic method: compute, filter, copy, compute, filter, copy, etc. NOTE: FIXED_MAPS_LEN already daes it
- *          <li>VERIFIED (it works correctly): Filter less than 4 does not longer work: it remove all maps, no matter what
- *          <li>Automatic "color it" algorithm button
- *          <li>CANCELLED: For the NewYork mode version show a skyline and the statue of liberty
- *          <li>Permit to color the map from a four color palette
- *          <li>text/no-text for numbers
- *          <li>Add buttons to move and visualize maps in order: start, previous, random, next, last
- *          <li>Create the object Ocean to color it, through mouse selection as any other face
- *          <li>Add print button
- *          <li>Circles mode
- *          <li>3D mode: navigable in all directions + all angles (like google earth). It will be done for the JMonkey version
- *          <li>Remove maps that have also ocean < 5
- *          <li>Set todoList = maps
- *          <li>Use a LinkedList instead a Map (to free memory)
- *          <li>Build using Ant or Maven (consider also the configuration file)
- *          <li>Add more graphical controls: X-Ray, colors, etc.
- *          <li>Use JGoodies FormLayout
- *          <li>Find a graphic library for swing --> G: http://geosoft.no/graphics/
- *          </p>
  */
 @SuppressWarnings("serial")
 public class MapsGeneratorMain extends JFrame implements GInteraction {
@@ -156,7 +102,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private Map4CT map4CTCurrent = null;
     private int map4CTCurrentIndex = -1;
 
-    // Graphic objects to draw maps
+    // G Graphic objects to draw maps
     //
     private GScene gScene = null;
     private GWindow gWindow = null;
@@ -164,6 +110,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private enum DRAW_METHOD {
         CIRCLES, RECTANGLES, RECTANGLES_NEW_YORK
     };
+
+    // Some graphical properties
+    //
+    public static final int LINE_WIDTH = 1;
 
     // Variables automatically initialized to form object (linked to swixml)
     //
@@ -208,7 +158,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private Thread colorAllThread = null;
     private boolean stopColorRequested = false;
     private final JButton tait = null;
-    private final JButton spiralChain = null;
     private JFileChooser fileChooser = null;
 
     private final JTextField mapsSize = null;
@@ -244,6 +193,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     // TAB: Graph theory
     //
     private final JPanel graphExplorer = null;
+    private final JCheckBox fitToWindow = null;
+    private final JComboBox graphLayout = null;
+
+    public static final int GRAPH_MARGIN = 50;
 
     // Variables to distinguish the various cases in graph creation (B-E, B-M, M-M, M-E)
     //
@@ -251,14 +204,19 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         NOT_DEFINED, BEGIN, MIDDLE, END
     };
 
-    private mxGraph graph4CTCurrent = null; // yyy
-    private mxGraphComponent graph4CTCurrentComponent = null;
-    private mxStylesheet graph4CTCurrentStylesheet = null;
-    mxIGraphLayout graph4CTCurrentLayout = null;
+    public Enum<Edge.SHAPE_TYPE> shapeType = SHAPE_TYPE.STRAIGHT;
 
-    // Some graphical properties
-    //
-    public static final int LINE_WIDTH = 1;
+    private enum GRAPH_LAYOUT {
+        RECTANGULAR, MX_CIRCLE_LAYOUT, MX_HIERARCHICAL_LAYOUT
+    };
+
+    public Enum<GRAPH_LAYOUT> chosenGraphLayout = GRAPH_LAYOUT.RECTANGULAR;
+
+    private mxGraph graph4CTCurrent = null;
+    private mxGraphComponent graph4CTCurrentComponent = null;
+    private mxIGraphLayout graph4CTCurrentLayout = null;
+    private Map<String, Vertex> verticesMap = null;
+    private Map<String, Edge> edgesMap = null;
 
     /**
      * Main program
@@ -278,7 +236,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         //
         SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
         URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct.xml");
-        engine.render(configFileURL).setVisible(false); // Has to become visible at the end
+        engine.render(configFileURL).setVisible(false); // Has to become visible at the end, not now
 
         // Initialize the fileChooser to desktop
         //
@@ -345,12 +303,21 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         setVisible(true);
     }
 
+    /**
+     * Set the instruments name taken from an internet bank
+     * 
+     * @param jComboBox
+     * @param instruments
+     */
     public void setInstrumentsNames(JComboBox jComboBox, Instrument[] instruments) {
         for (int i = 0; i < instruments.length; i++) {
             jComboBox.addItem(instruments[i].getName());
         }
     }
 
+    /**
+     * Init the MapExplorer to visualize G graphics
+     */
     public void initMapExplorerForGraphic() {
 
         // G lib initialization (link window canvas to JPanel)
@@ -375,6 +342,9 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         gWindow.startInteraction(this);
     }
 
+    /**
+     * Init the GraphExplorer to visualize mxGraph (jgraph) graphics
+     */
     public void initGraphExplorerForGraphic() {
 
         // This is the graph theory model that has to be modified
@@ -384,46 +354,50 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         graph4CTCurrent = new mxGraph();
         graph4CTCurrentComponent = new mxGraphComponent(graph4CTCurrent);
 
-        // Style
+        // Set styles
         //
-        mxStylesheet graph4CTCurrentStylesheet = graph4CTCurrent.getStylesheet();
+        setGraphStyles();
 
-        Hashtable<String, Object> cellStyle = new Hashtable<String, Object>();
-        cellStyle.put(mxConstants.STYLE_FILLCOLOR, mxUtils.getHexColorString(Color.WHITE));
-        cellStyle.put(mxConstants.STYLE_STROKEWIDTH, 2);
-        cellStyle.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        cellStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
-        cellStyle.put(mxConstants.STYLE_PERIMETER, mxConstants.PERIMETER_ELLIPSE);
-        cellStyle.put(mxConstants.STYLE_NOLABEL, "0"); // 0 == visualize the label
-        cellStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
-
-        Hashtable<String, Object> edgeStyle = new Hashtable<String, Object>();
-        edgeStyle.put(mxConstants.STYLE_NOLABEL, "1");
-        // edgeStyle.put(mxConstants.EDGESTYLE_ORTHOGONAL, "1"); // better without this
-        edgeStyle.put(mxConstants.STYLE_STARTARROW, "0");
-        edgeStyle.put(mxConstants.STYLE_ENDARROW, "0");
-        // edgeStyle.put(mxConstants.STYLE_EDITABLE, "0"); // does not work?
-        // edgeStyle.put(mxConstants.STYLE_MOVABLE, "0"); // does not work?
-        edgeStyle.put(mxConstants.STYLE_STROKEWIDTH, "3");
-
-        graph4CTCurrentStylesheet.putCellStyle("MyVertexStyle", cellStyle);
-        graph4CTCurrentStylesheet.putCellStyle("MyEdgeStyle", edgeStyle);
-
-        // Automatic layout
+        // Init the automatic graph layouts
         //
-        graph4CTCurrentLayout = new mxHierarchicalLayout(graph4CTCurrent);
-        ((mxHierarchicalLayout) graph4CTCurrentLayout).setIntraCellSpacing(50);
-        ((mxHierarchicalLayout) graph4CTCurrentLayout).setOrientation(SwingConstants.WEST);
-        // ((mxHierarchicalLayout) graph4CTCurrentLayout).setParentBorder(100); // does not work?
-        // ((mxHierarchicalLayout) graph4CTCurrentLayout).setUseBoundingBox(true); // does not work?
+        initGraphLayouts(chosenGraphLayout);
 
-        // Not drag-gable
+        // Graph not drag-gable (also to avoid a NotSerializable Exception during drag & drop)
         //
         graph4CTCurrentComponent.setDragEnabled(false);
 
         // Attach it to the JPanel
         //
+        graphExplorer.removeAll();
         graphExplorer.add(graph4CTCurrentComponent);
+    }
+
+    /**
+     * Init the styles for mxGraph
+     */
+    public void setGraphStyles() {
+        mxStylesheet graph4CTCurrentStylesheet = graph4CTCurrent.getStylesheet();
+
+        Hashtable<String, Object> vertexStyle = new Hashtable<String, Object>();
+        vertexStyle.put(mxConstants.STYLE_FILLCOLOR, mxUtils.getHexColorString(Color.WHITE));
+        vertexStyle.put(mxConstants.STYLE_STROKEWIDTH, 2);
+        vertexStyle.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
+        vertexStyle.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_ELLIPSE);
+        vertexStyle.put(mxConstants.STYLE_PERIMETER, mxConstants.PERIMETER_ELLIPSE);
+        vertexStyle.put(mxConstants.STYLE_NOLABEL, "1"); // 0 == visualize the label
+        vertexStyle.put(mxConstants.STYLE_ALIGN, mxConstants.ALIGN_CENTER);
+
+        Hashtable<String, Object> edgeStyle = new Hashtable<String, Object>();
+        edgeStyle.put(mxConstants.STYLE_NOLABEL, "1");
+        edgeStyle.put(mxConstants.STYLE_STARTARROW, "0");
+        edgeStyle.put(mxConstants.STYLE_ENDARROW, "0");
+        edgeStyle.put(mxConstants.STYLE_STROKEWIDTH, "4");
+        // edgeStyle.put(mxConstants.EDGESTYLE_ORTHOGONAL, "1"); // better without this
+        // edgeStyle.put(mxConstants.STYLE_EDITABLE, "0"); // does not work!?
+        // edgeStyle.put(mxConstants.STYLE_MOVABLE, "0"); // does not work!?
+
+        graph4CTCurrentStylesheet.putCellStyle("MyVertexStyle", vertexStyle);
+        graph4CTCurrentStylesheet.putCellStyle("MyEdgeStyle", edgeStyle);
     }
 
     /**
@@ -472,7 +446,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     };
 
     /**
-     * The G map to draw
+     * Inner class: The G map to draw
      */
     private class GMap4CTRectangles extends GObject {
 
@@ -573,7 +547,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
 
         /**
-         * draw just one rectangle of the map
+         * Draw just one rectangle of the map
+         * 
+         * @param face
+         *            The face (rectangle) to show
          */
         public void drawN(int face) {
 
@@ -739,7 +716,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
 
         /**
-         * draw just one ring of the map
+         * Draw just one ring of the map
+         * 
+         * @param face
+         *            The face (rectangle) to show
          */
         public void drawN(int face) {
 
@@ -797,6 +777,17 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             }
         }
 
+        /**
+         * Create a new ring with the given parameters
+         * 
+         * @param xCenter
+         * @param yCenter
+         * @param startRadius
+         * @param stopRadius
+         * @param startAngle
+         * @param stopAngle
+         * @return
+         */
         public double[] createRing(double xCenter, double yCenter, double startRadius, double stopRadius, double startAngle, double stopAngle) {
 
             // A point for each degree
@@ -854,6 +845,14 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             return ring;
         }
 
+        /**
+         * Create a new circle with the given parameters
+         * 
+         * @param xCenter
+         * @param yCenter
+         * @param radius
+         * @return
+         */
         public double[] createCircle(double xCenter, double yCenter, double radius) {
 
             // A point for each degree
@@ -874,12 +873,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
     // EVENTS EVENTS EVENTS ...
     //
-    public Action tabbedPaneSwitchAction = new AbstractAction() { // zzz
-        public void actionPerformed(ActionEvent e) {
-            System.out.println("Debug: xxxxxxx");
-        }
-    };
-
     public Action quitAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             System.exit(NORMAL);
@@ -1188,7 +1181,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
                     // Create the map
                     //
-                    Map4CT newMap = mapsGenerator.createMapFromTextRepresentation(mapTextRepresentation.getText(), -1);
+                    Map4CT newMap = mapsGenerator.createMapFromTextRepresentation(mapRepresentation, -1);
                     mapsGenerator.maps.add(newMap);
                     mapsGenerator.todoList.add(newMap);
                     map4CTCurrent = newMap;
@@ -1229,8 +1222,65 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    // For a swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54) I needed to change this and use setter and getter methods
-    //
+    public Action graphLayoutAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            if (graphLayout.getSelectedIndex() == 0) {
+                chosenGraphLayout = GRAPH_LAYOUT.RECTANGULAR;
+            } else if (graphLayout.getSelectedIndex() == 1) {
+                chosenGraphLayout = GRAPH_LAYOUT.MX_CIRCLE_LAYOUT;
+            } else if (graphLayout.getSelectedIndex() == 2) {
+                chosenGraphLayout = GRAPH_LAYOUT.MX_HIERARCHICAL_LAYOUT;
+            }
+
+            initGraphLayouts(chosenGraphLayout);
+            drawCurrentGraph();
+        }
+    };
+
+    /**
+     * Init the layouts for the mxGraph
+     * 
+     * @param layout
+     *            The layout number (check the external class) to set
+     */
+    public void initGraphLayouts(Enum<GRAPH_LAYOUT> layout) {
+
+        // Set the layout parameters
+        //
+        // "rectangular               "
+        // "mxCircleLayout            " ?OK - Nice. Useful? OK when fit == false, NOK with errors when fit.
+        // "mxHierarchicalLayout      " +OK - Very nice
+        //
+        // "mxCompactTreeLayout       " NOK - I don't understand it! Ugly, not useful
+        // "mxEdgeLabelLayout         " NOK - All Vertices at origin. Ugly, not useful
+        // "mxFastOrganicLayout       " ?OK - Seems random positioning. Useful?
+        // "mxOrganicLayout           " NOK - Similar to mxFastOrganicLayout but worse than that!
+        // "mxOrthogonalLayout        " NOK - All Vertices at origin. Ugly, not useful
+        // "mxParallelEdgeLayout      " NOK - All Vertices at origin. Ugly, not useful
+        // "mxPartitionLayout         " NOK - All Vertices at origin. Ugly, not useful
+        // "mxStackLayout             " NOK - All Vertices on the same line. Not useful
+        //
+        if (layout == GRAPH_LAYOUT.RECTANGULAR) {
+            graph4CTCurrentLayout = new mxHierarchicalLayout(graph4CTCurrent);
+        }
+        if (layout == GRAPH_LAYOUT.MX_CIRCLE_LAYOUT) {
+            graph4CTCurrentLayout = new mxCircleLayout(graph4CTCurrent);
+        } else if (layout == GRAPH_LAYOUT.MX_HIERARCHICAL_LAYOUT) {
+            graph4CTCurrentLayout = new mxHierarchicalLayout(graph4CTCurrent);
+            ((mxHierarchicalLayout) graph4CTCurrentLayout).setIntraCellSpacing(100);
+            ((mxHierarchicalLayout) graph4CTCurrentLayout).setFineTuning(true);
+            ((mxHierarchicalLayout) graph4CTCurrentLayout).setOrientation(SwingConstants.WEST);
+            ((mxHierarchicalLayout) graph4CTCurrentLayout).setLayoutFromSinks(false);
+            ((mxHierarchicalLayout) graph4CTCurrentLayout).setFixRoots(false);
+
+        }
+    }
+
+    /**
+     * Set the Transparency value
+     * 
+     * For a swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54) I needed to change this and use setter and getter methods
+     */
     public final void setTransparencyValue(int value) {
 
         // Read the transparency to use
@@ -1435,54 +1485,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 }
             }
         }
-
-        private int[] VERTEX_ARRAY = new int[3];
-
-        private void initialize() {
-            VERTEX_ARRAY[0] = 255;
-            VERTEX_ARRAY[1] = 0;
-            VERTEX_ARRAY[2] = 0;
-
-            VERTEX_ARRAY[3] = 1;
-            VERTEX_ARRAY[4] = 1;
-            VERTEX_ARRAY[5] = 1;
-        }
-
-        private boolean onVertex(int[] imageWindow3x3) {
-            if (Arrays.equals(imageWindow3x3, VERTEX_ARRAY))
-                ;
-            return false;
-        }
-
-        private void readImageWindow3x3(BufferedImage inputImage, int iX, int iY, int[] imageWindow3x3) {
-            imageWindow3x3[0] = inputImage.getRGB(iX - 1, iY - 1);
-            imageWindow3x3[1] = inputImage.getRGB(iX - 0, iY - 1);
-            imageWindow3x3[2] = inputImage.getRGB(iX + 1, iY - 1);
-
-            imageWindow3x3[3] = inputImage.getRGB(iX - 1, iY - 0);
-            imageWindow3x3[4] = inputImage.getRGB(iX - 0, iY - 0);
-            imageWindow3x3[5] = inputImage.getRGB(iX + 1, iY - 0);
-
-            imageWindow3x3[6] = inputImage.getRGB(iX - 1, iY + 1);
-            imageWindow3x3[7] = inputImage.getRGB(iX - 0, iY + 1);
-            imageWindow3x3[8] = inputImage.getRGB(iX + 1, iY + 1);
-        }
-
-        private void printImageWindow3x3(int[] imageWindow3x3) {
-            System.out.print("" + imageWindow3x3[0]);
-            System.out.print("" + imageWindow3x3[1]);
-            System.out.println("" + imageWindow3x3[2]);
-
-            System.out.print("" + imageWindow3x3[3]);
-            System.out.print("" + imageWindow3x3[4]);
-            System.out.println("" + imageWindow3x3[5]);
-
-            System.out.print("" + imageWindow3x3[6]);
-            System.out.print("" + imageWindow3x3[7]);
-            System.out.println("" + imageWindow3x3[8]);
-
-            System.out.println("------------------------------------");
-        }
     };
 
     public Action saveMapToImageAction = new AbstractAction() {
@@ -1518,6 +1520,53 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                     BufferedImage bufferedImage = new BufferedImage(gWindow.getCanvas().getWidth(), gWindow.getCanvas().getHeight(), BufferedImage.TYPE_INT_RGB);
                     Graphics2D graphics2D = bufferedImage.createGraphics();
                     gWindow.getCanvas().paint(graphics2D);
+                    graphics2D.dispose();
+
+                    // Create & populate png metadata
+                    //
+                    PNGMetadata metadata = new PNGMetadata();
+                    metadata.tEXt_keyword.add("map-representation");
+                    metadata.tEXt_text.add(map4CTCurrent.toString());
+
+                    // Write the image to file and close the file stream
+                    //
+                    FileOutputStream imageOutputStream = new FileOutputStream(fileToSave);
+                    ImageWriter writer = (ImageWriter) ImageIO.getImageWritersBySuffix("png").next();
+                    writer.setOutput(ImageIO.createImageOutputStream(imageOutputStream));
+                    writer.write(new IIOImage(bufferedImage, null, metadata));
+                    imageOutputStream.close();
+                }
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+    };
+
+    public Action saveGraphToImageAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            String fileName = null;
+            String drawMethodName = "unknown";
+
+            if (graph4CTCurrent != null) {
+                fileName = "save-graph-" + drawMethodName + "-" + map4CTCurrent.hashCode() + ".png";
+            } else {
+                fileName = "save-graph-" + drawMethodName + "-" + "000" + ".png";
+            }
+
+            try {
+                File fileToSave = null;
+                fileChooser.setSelectedFile(new File(fileName));
+                if (fileChooser.showOpenDialog(graphExplorer) == JFileChooser.APPROVE_OPTION) {
+
+                    // Choose the filename
+                    //
+                    fileToSave = fileChooser.getSelectedFile();
+
+                    // Write the image to memory (BufferedImage)
+                    //
+                    BufferedImage bufferedImage = new BufferedImage((int) graph4CTCurrent.getView().getGraphBounds().getWidth(), (int) graph4CTCurrent.getView().getGraphBounds().getHeight(), BufferedImage.TYPE_INT_RGB);
+                    Graphics2D graphics2D = bufferedImage.createGraphics();
+                    graphExplorer.paint(graphics2D);
                     graphics2D.dispose();
 
                     // Create & populate png metadata
@@ -1731,80 +1780,84 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         //
         graph4CTCurrent.getModel().beginUpdate();
 
-        // Create a new Graph (xxx)
+        // Create a new Graph
         //
         Vertex v1 = new Vertex();
         v1.name = "v1";
         Vertex v2 = new Vertex();
         v2.name = "v2";
-        Vertex v3 = new Vertex();
-        v3.name = "v3";
-        Vertex v4 = new Vertex();
-        v4.name = "v4";
 
         Edge e1 = new Edge();
         e1.name = v1.name + "/" + v2.name;
-        Edge e2 = new Edge();
-        e2.name = v2.name + "/" + v3.name;
-        Edge e3 = new Edge();
-        e3.name = v3.name + "/" + v4.name;
-        Edge e4 = new Edge();
-        e4.name = v4.name + "/" + v1.name;
 
-        Object v1O = graph4CTCurrent.insertVertex(graph4CTCurrent.getDefaultParent(), v1.name, v1, 0, 0, 30, 30, "MyVertexStyle");
-        Object v2O = graph4CTCurrent.insertVertex(graph4CTCurrent.getDefaultParent(), v2.name, v2, 0, 0, 30, 30, "MyVertexStyle");
-        Object v3O = graph4CTCurrent.insertVertex(graph4CTCurrent.getDefaultParent(), v3.name, v3, 0, 0, 30, 30, "MyVertexStyle");
-        Object v4O = graph4CTCurrent.insertVertex(graph4CTCurrent.getDefaultParent(), v4.name, v4, 0, 0, 30, 30, "MyVertexStyle");
-
-        System.out.println("Debug: " + v1O + " ==? " + v1 + " - " + ((Vertex) ((mxCell) v1O).getValue()));
+        Object v1O = graph4CTCurrent.insertVertex(graph4CTCurrent.getDefaultParent(), v1.name, v1, 20, 20, Vertex.WIDTH, Vertex.HEIGHT, "MyVertexStyle");
+        Object v2O = graph4CTCurrent.insertVertex(graph4CTCurrent.getDefaultParent(), v2.name, v2, 500, 20, Vertex.WIDTH, Vertex.HEIGHT, "MyVertexStyle");
 
         graph4CTCurrent.insertEdge(graph4CTCurrent.getDefaultParent(), e1.name, e1, v1O, v2O, "MyEdgeStyle");
-        graph4CTCurrent.insertEdge(graph4CTCurrent.getDefaultParent(), e2.name, e2, v2O, v3O, "MyEdgeStyle");
-        graph4CTCurrent.insertEdge(graph4CTCurrent.getDefaultParent(), e3.name, e3, v3O, v4O, "MyEdgeStyle");
-        graph4CTCurrent.insertEdge(graph4CTCurrent.getDefaultParent(), e4.name, e4, v4O, v1O, "MyEdgeStyle");
 
-        // End the transaction to modify the graph
+        // graph4CTCurrent.getModel().endUpdate();
         //
-        graph4CTCurrentLayout.execute(graph4CTCurrent.getDefaultParent());
+        // graph4CTCurrent.getModel().beginUpdate();
+
+        mxCell edgeToChange = (mxCell) ((mxGraphModel) graph4CTCurrent.getModel()).getCell("v1/v2");
+        mxGeometry geometryOfEdge = edgeToChange.getGeometry();
+        List<mxPoint> pointsOfTheEdge = geometryOfEdge.getPoints();
+        if (pointsOfTheEdge == null) {
+            pointsOfTheEdge = new ArrayList<mxPoint>();
+        }
+        pointsOfTheEdge.add(new mxPoint(200, 300));
+        pointsOfTheEdge.add(new mxPoint(400, 300));
+        geometryOfEdge.setPoints(pointsOfTheEdge);
+        edgeToChange.setGeometry(geometryOfEdge);
+
         graph4CTCurrent.getModel().endUpdate();
 
         graphExplorer.validate();
     }
 
-    // Create the graph (update graph4CTCurrent) from the sequence of coordinates of the current map (xxx)
-    //
-    // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
-    //
+    /**
+     * Create the graph (update graph4CTCurrent) from the sequence of coordinates of the current map: 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
+     */
     public void drawCurrentGraph() {
 
         // If a map has been selected
         //
         if (map4CTCurrent != null) {
 
+            // Temp variable
+            //
+            FCoordinate fTempPreviousCoordinate = null;
+            FCoordinate fTempCurrentCoordinate = null;
+            FCoordinate fTempCoordinate = null;
+
             // Variables to distinguish the various cases (B-E, B-M, M-M, M-E)
             //
             Enum<TYPE_OF_VERTEX> typeOfPreviousVertex = TYPE_OF_VERTEX.NOT_DEFINED;
             Enum<TYPE_OF_VERTEX> typeOfCurrentVertex = TYPE_OF_VERTEX.NOT_DEFINED;
 
-            // Maintain a map of vertices
-            //
-            Map<String, Vertex> verticesMap = new HashMap<String, Vertex>();
-
-            // Maintain a list of hidden vertices
+            // Maintain a list of hidden vertices (temp)
             //
             List<String> hiddenVertices = new ArrayList<String>();
+
+            // Maintain a map of vertices and edges
+            //
+            verticesMap = new HashMap<String, Vertex>();
+            edgesMap = new HashMap<String, Edge>();
+
+            // Re-init all
+            //
+            initGraphExplorerForGraphic();
 
             // Start the transaction to modify the graph
             //
             graph4CTCurrent.getModel().beginUpdate();
 
             // Clean up the graph
-            // xxx Maybe I have to put verticesMap at the same level of the graph and clean it up here
             //
-            graph4CTCurrent.removeCells(graph4CTCurrent.getChildCells(graph4CTCurrent.getDefaultParent(), true, true));
+            // graph4CTCurrent.removeCells(graph4CTCurrent.getChildCells(graph4CTCurrent.getDefaultParent(), true, true));
 
             // Create the graph, analyzing all submaps, rebuilding the original map step by step, face by face
-            // NOTE: The first face is not indexed 0 but 1
+            // NOTE: The first face is not 0 but 1 (don't remember why I named it starting from 1)
             //
             for (int iFace = 2; iFace < (map4CTCurrent.sequenceOfCoordinates.sequence.size() / 2) + 1; iFace++) {
 
@@ -1817,12 +1870,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 Vertex previousVertex = null;
                 Vertex currentVertex = null;
 
-                // Temp variable
-                //
-                FCoordinate fTempPreviousCoordinate = null;
-                FCoordinate fTempCurrentCoordinate = null;
-
-                // Skip to the BEGIN coordinate
+                // Skip to the BEGIN coordinate and set the location characteristics
                 //
                 int iCoordinate = 1;
                 while (subMap.sequenceOfCoordinates.sequence.get(iCoordinate).fNumber != iFace) {
@@ -1862,12 +1910,16 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                         //
                         if ((typeOfPreviousVertex == TYPE_OF_VERTEX.BEGIN) && (typeOfCurrentVertex == TYPE_OF_VERTEX.MIDDLE)) {
                             previousVertex = addVertexToGraph(graph4CTCurrent, map4CTCurrent, verticesMap, iFace, FCoordinate.TYPE.BEGIN);
-                            currentVertex = verticesMap.get(searchFCoordinateInMap(map4CTCurrent, fTempCurrentCoordinate.fNumber, fTempCurrentCoordinate.type).toString());
-                            addEdgeBottomLeft(graph4CTCurrent, previousVertex, currentVertex);
+                            fTempCoordinate = searchFCoordinateInMap(map4CTCurrent, fTempCurrentCoordinate.fNumber, fTempCurrentCoordinate.type);
+                            currentVertex = verticesMap.get(fTempCoordinate.toString());
+                            setVertexCoordinate(map4CTCurrent, currentVertex, iFace, fTempCoordinate, graphExplorer);
+                            addEdgeBottomLeft(graph4CTCurrent, previousVertex, currentVertex, Edge.SHAPE_TYPE.L);
                         } else if ((typeOfPreviousVertex == TYPE_OF_VERTEX.MIDDLE) && (typeOfCurrentVertex == TYPE_OF_VERTEX.MIDDLE)) {
                             previousVertex = verticesMap.get(searchFCoordinateInMap(map4CTCurrent, fTempPreviousCoordinate.fNumber, fTempPreviousCoordinate.type).toString());
-                            currentVertex = verticesMap.get(searchFCoordinateInMap(map4CTCurrent, fTempCurrentCoordinate.fNumber, fTempCurrentCoordinate.type).toString());
-                            addEdgeRightLeft(graph4CTCurrent, previousVertex, currentVertex);
+                            fTempCoordinate = searchFCoordinateInMap(map4CTCurrent, fTempCurrentCoordinate.fNumber, fTempCurrentCoordinate.type);
+                            currentVertex = verticesMap.get(fTempCoordinate.toString());
+                            setVertexCoordinate(map4CTCurrent, currentVertex, iFace, fTempCoordinate, graphExplorer);
+                            addEdgeRightLeft(graph4CTCurrent, previousVertex, currentVertex, Edge.SHAPE_TYPE.STRAIGHT);
                         }
                     }
 
@@ -1888,11 +1940,11 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 if ((typeOfPreviousVertex == TYPE_OF_VERTEX.BEGIN) && (typeOfCurrentVertex == TYPE_OF_VERTEX.END)) {
                     previousVertex = addVertexToGraph(graph4CTCurrent, map4CTCurrent, verticesMap, iFace, FCoordinate.TYPE.BEGIN);
                     currentVertex = addVertexToGraph(graph4CTCurrent, map4CTCurrent, verticesMap, iFace, FCoordinate.TYPE.END);
-                    addEdgeBottomBottom(graph4CTCurrent, previousVertex, currentVertex);
+                    addEdgeBottomBottom(graph4CTCurrent, previousVertex, currentVertex, Edge.SHAPE_TYPE.U);
                 } else if ((typeOfPreviousVertex == TYPE_OF_VERTEX.MIDDLE) && (typeOfCurrentVertex == TYPE_OF_VERTEX.END)) {
                     previousVertex = verticesMap.get(searchFCoordinateInMap(map4CTCurrent, fTempPreviousCoordinate.fNumber, fTempPreviousCoordinate.type).toString());
                     currentVertex = addVertexToGraph(graph4CTCurrent, map4CTCurrent, verticesMap, iFace, FCoordinate.TYPE.END);
-                    addEdgeRightBottom(graph4CTCurrent, previousVertex, currentVertex);
+                    addEdgeRightBottom(graph4CTCurrent, previousVertex, currentVertex, Edge.SHAPE_TYPE.MIRRORED_L);
                 }
             }
 
@@ -1911,7 +1963,9 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 iCoordinate++;
             }
             previousVertex = null;
-            currentVertex = verticesMap.get(map4CTCurrent.sequenceOfCoordinates.sequence.get(iCoordinate).toString());
+            fTempCoordinate = map4CTCurrent.sequenceOfCoordinates.sequence.get(iCoordinate);
+            currentVertex = verticesMap.get(fTempCoordinate.toString());
+            setVertexCoordinate(map4CTCurrent, currentVertex, map4CTCurrent.faces.size() + 1, fTempCoordinate, graphExplorer);
 
             // Step ahead and loop until the end of all visible coordinates (excluding 1e+)
             //
@@ -1919,8 +1973,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             for (; iCoordinate < (map4CTCurrent.sequenceOfCoordinates.sequence.size() - 1); iCoordinate++) {
                 if (map4CTCurrent.sequenceOfCoordinates.sequence.get(iCoordinate).isVisible) {
                     previousVertex = currentVertex;
-                    currentVertex = verticesMap.get(map4CTCurrent.sequenceOfCoordinates.sequence.get(iCoordinate).toString());
-                    addEdgeRightLeft(graph4CTCurrent, previousVertex, currentVertex);
+                    fTempCoordinate = map4CTCurrent.sequenceOfCoordinates.sequence.get(iCoordinate);
+                    currentVertex = verticesMap.get(fTempCoordinate.toString());
+                    setVertexCoordinate(map4CTCurrent, currentVertex, map4CTCurrent.faces.size() + 1, fTempCoordinate, graphExplorer);
+                    addEdgeRightLeft(graph4CTCurrent, previousVertex, currentVertex, Edge.SHAPE_TYPE.STRAIGHT);
                 }
             }
 
@@ -1928,29 +1984,165 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             //
             previousVertex = verticesMap.get(map4CTCurrent.sequenceOfCoordinates.sequence.get(1).toString());
             currentVertex = verticesMap.get(map4CTCurrent.sequenceOfCoordinates.sequence.get(map4CTCurrent.sequenceOfCoordinates.sequence.size() - 2).toString());
-            addEdgeLeftRight(graph4CTCurrent, previousVertex, currentVertex);
+            addEdgeLeftRight(graph4CTCurrent, previousVertex, currentVertex, Edge.SHAPE_TYPE.OCEAN);
 
-            // Debug
+            // End the transaction (modify the graph)
             //
-            System.out.println(map4CTCurrent.toString());
-            Iterator it = verticesMap.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pairs = (Map.Entry) it.next();
-                Vertex v = (Vertex) pairs.getValue();
-                System.out.println("Debug: " + v.name + ", " + v.edgeAtLeft.name + ", " + v.edgeAtRight.name + ", " + v.edgeAtBottom.name);
-            }
-
-            // End the transaction to modify the graph
-            //
-            graph4CTCurrentLayout.execute(graph4CTCurrent.getDefaultParent());
             graph4CTCurrent.getModel().endUpdate();
 
-            // Validate the graph
+            // Apply a layout:
+            //
+            // Rectangular layout: I will set the position of vertices and create the shape of the edges
+            // For the other layouts: Execute the out-of-the-box layout (set by the user)
+            //
+            if (chosenGraphLayout == GRAPH_LAYOUT.RECTANGULAR) {
+                graph4CTCurrent.getModel().beginUpdate();
+                manualLayoutToRectangular();
+                graph4CTCurrent.getModel().endUpdate();
+            } else {
+                graph4CTCurrent.getModel().beginUpdate();
+                graph4CTCurrentLayout.execute(graph4CTCurrent.getDefaultParent());
+                graph4CTCurrent.getModel().endUpdate();
+
+                // Update or reset the scale according to the user flag (swing checkbox)
+                //
+                graph4CTCurrent.getModel().beginUpdate();
+                if (fitToWindow.isSelected()) {
+                    updateScaleToFitTheWindow();
+                } else {
+                    graph4CTCurrent.getView().setScale(1);
+                }
+                graph4CTCurrent.getModel().endUpdate();
+            }
+
+            // Validate the graph panel
             //
             graphExplorer.validate();
         }
     }
 
+    public void manualLayoutToRectangular() {
+
+        // Iter all vertices, get the cells representing the vertices and set the location
+        //
+        for (Vertex vertex : verticesMap.values()) {
+            mxCell cellToReposition = (mxCell) ((mxGraphModel) graph4CTCurrent.getModel()).getCell(vertex.toString());
+            ((mxGraphLayout) graph4CTCurrentLayout).setVertexLocation(cellToReposition, vertex.xCoordinate, vertex.yCoordinate);
+        }
+
+        // Iter all edges, get the cells representing the edges and modify the edge points
+        //
+        for (Edge edge : edgesMap.values()) {
+
+            // Gets the points representing the Edge
+            //
+            mxCell edgeToChange = (mxCell) ((mxGraphModel) (graph4CTCurrent.getModel())).getCell(edge.name);
+            mxGeometry geometryOfEdge = graph4CTCurrent.getModel().getGeometry(edgeToChange);
+            geometryOfEdge = (mxGeometry) geometryOfEdge.clone();
+            List<mxPoint> pointsOfTheEdge = geometryOfEdge.getPoints();
+            if (pointsOfTheEdge == null) {
+                pointsOfTheEdge = new ArrayList<mxPoint>();
+            }
+
+            // Add points to the geometry
+            //
+            double maxY = graphExplorer.getHeight() - (GRAPH_MARGIN * 2);
+            double stepY = maxY / map4CTCurrent.faces.size();
+            int adjust = (Vertex.HEIGHT / 2);
+
+            if (edge.shapeType == Edge.SHAPE_TYPE.STRAIGHT) {
+
+                // Nothing to do
+                //
+            } else if (edge.shapeType == Edge.SHAPE_TYPE.L) {
+                pointsOfTheEdge.add(new mxPoint(edge.firstVertex.xCoordinate + adjust, edge.secondVertex.yCoordinate + Vertex.HEIGHT));
+            } else if (edge.shapeType == Edge.SHAPE_TYPE.MIRRORED_L) {
+                pointsOfTheEdge.add(new mxPoint(edge.secondVertex.xCoordinate + adjust, edge.firstVertex.yCoordinate + Vertex.HEIGHT));
+            } else if (edge.shapeType == Edge.SHAPE_TYPE.U) {
+                int yBaseCoordinate = (int) (GRAPH_MARGIN + maxY - ((edge.firstVertex.faceNumber - 1) * stepY));
+                pointsOfTheEdge.add(new mxPoint(edge.firstVertex.xCoordinate + adjust, yBaseCoordinate + Vertex.HEIGHT));
+                pointsOfTheEdge.add(new mxPoint(edge.secondVertex.xCoordinate + adjust, yBaseCoordinate + Vertex.HEIGHT));
+            } else if (edge.shapeType == Edge.SHAPE_TYPE.OCEAN) {
+                pointsOfTheEdge.add(new mxPoint(edge.firstVertex.xCoordinate - (GRAPH_MARGIN / 2) + adjust, GRAPH_MARGIN + Vertex.HEIGHT));
+                pointsOfTheEdge.add(new mxPoint(edge.firstVertex.xCoordinate - (GRAPH_MARGIN / 2) + adjust, GRAPH_MARGIN + maxY + Vertex.HEIGHT));
+                pointsOfTheEdge.add(new mxPoint(edge.secondVertex.xCoordinate + (GRAPH_MARGIN / 2) + adjust, GRAPH_MARGIN + maxY + Vertex.HEIGHT));
+                pointsOfTheEdge.add(new mxPoint(edge.secondVertex.xCoordinate + (GRAPH_MARGIN / 2) + adjust, GRAPH_MARGIN + Vertex.HEIGHT));
+            }
+
+            // Set the geometry back to the edge
+            //
+            geometryOfEdge.setPoints(pointsOfTheEdge);
+            graph4CTCurrent.getModel().setGeometry(edgeToChange, geometryOfEdge);
+        }
+    }
+
+    private void setVertexCoordinate(Map4CT map, Vertex vertex, int vertexAtFaceNumber, FCoordinate fCoordinateToSearch, JPanel panel) {
+
+        // Margin for all borders
+        //
+        double maxX = panel.getWidth() - (GRAPH_MARGIN * 2);
+        double maxY = panel.getHeight() - (GRAPH_MARGIN * 2);
+        double stepX = maxX / map.sequenceOfCoordinates.sequence.size();
+        double stepY = maxY / map.faces.size();
+
+        // Search the position of the coordinate
+        //
+        int iPositionOfCoordinate = 0;
+        while (map.sequenceOfCoordinates.sequence.get(iPositionOfCoordinate).toString().compareTo(fCoordinateToSearch.toString()) != 0) {
+            iPositionOfCoordinate++;
+        }
+
+        // Set the coordinates
+        //
+        vertex.xCoordinate = (int) (GRAPH_MARGIN + (iPositionOfCoordinate * stepX));
+        vertex.yCoordinate = (int) (GRAPH_MARGIN + maxY - ((vertexAtFaceNumber - 1) * stepY));
+
+        // System.out.println("Debug: vertex = " + vertex.toString() + ", x = " + vertex.xCoordinate + ", y = " + vertex.yCoordinate);
+    }
+
+    public void updateScaleToFitTheWindow() {
+
+        // Set the scale to 1 before to read the size
+        //
+        // xxx graph4CTCurrent.getView().setScale(1);
+
+        // Get the real size
+        //
+        mxRectangle currentDimentionOfTheGraph = graph4CTCurrent.getView().getGraphBounds();
+
+        // If the graph is larger than tall, it has to fit into the window height. If it is taller than larger, ...
+        // If it is a square, it has to fit min(height, width)
+        //
+        double maxValueOfGraph = -1;
+        double maxValueOfWindow = -1;
+        if (currentDimentionOfTheGraph.getHeight() > currentDimentionOfTheGraph.getWidth()) {
+            maxValueOfGraph = currentDimentionOfTheGraph.getHeight();
+            maxValueOfWindow = graphExplorer.getHeight();
+        } else if (currentDimentionOfTheGraph.getHeight() < currentDimentionOfTheGraph.getWidth()) {
+            maxValueOfGraph = currentDimentionOfTheGraph.getWidth();
+            maxValueOfWindow = graphExplorer.getWidth();
+        } else {
+            maxValueOfGraph = currentDimentionOfTheGraph.getHeight();
+            Math.min(graphExplorer.getHeight(), graphExplorer.getWidth());
+        }
+
+        // Compute and set the new scale (addin a little margin)
+        //
+        double scale = (maxValueOfWindow / maxValueOfGraph) - 0.01;
+
+        graph4CTCurrent.getView().setScale(scale);
+    }
+
+    /**
+     * Add a new Vertex to the graph
+     * 
+     * @param graph
+     * @param map
+     * @param verticesMapToUpdate
+     * @param iFace
+     * @param fCoordinateType
+     * @return
+     */
     public Vertex addVertexToGraph(mxGraph graph, Map4CT map, Map<String, Vertex> verticesMapToUpdate, int iFace, Enum<FCoordinate.TYPE> fCoordinateType) {
 
         // Add another vertex
@@ -1958,10 +2150,11 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         FCoordinate fRealCoordinate = searchFCoordinateInMap(map, iFace, fCoordinateType);
         Vertex vertexToAdd = new Vertex();
         vertexToAdd.name = fRealCoordinate.toString();
+        vertexToAdd.faceNumber = iFace;
         if (fRealCoordinate.isVisible) {
             vertexToAdd.isOnTheExcternalCycle = true;
         }
-        graph.insertVertex(graph4CTCurrent.getDefaultParent(), vertexToAdd.name, vertexToAdd, 0, 0, 30, 30, "MyVertexStyle");
+        graph.insertVertex(graph4CTCurrent.getDefaultParent(), vertexToAdd.name, vertexToAdd, 0, 0, Vertex.WIDTH, Vertex.HEIGHT, "MyVertexStyle");
 
         // Update the list of vertices
         //
@@ -1972,6 +2165,17 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         return vertexToAdd;
     }
 
+    /**
+     * Search a coordinate (begin or end) in the map's coordinate list
+     * 
+     * @param map
+     *            The map
+     * @param iFaceToSearch
+     *            Face to search
+     * @param typeOfCoordinateToSearch
+     *            Type or coordinate (Begin or End)
+     * @return The coordinate
+     */
     private FCoordinate searchFCoordinateInMap(Map4CT map, int iFaceToSearch, Enum<FCoordinate.TYPE> typeOfCoordinateToSearch) {
 
         // The coordinate to return
@@ -1992,73 +2196,95 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         return fCoordinateToReturn;
     }
 
-    private void addEdgeBottomLeft(mxGraph graph, Vertex firstVertex, Vertex secondVertex) {
-        Edge edgeToCreate = new Edge();
-        edgeToCreate.name = firstVertex.name + "/" + secondVertex.name;
-        mxCell firstVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(firstVertex.name);
-        mxCell secondVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(secondVertex.name);
-        graph.insertEdge(graph.getDefaultParent(), edgeToCreate.name, edgeToCreate, firstVertexRaw, secondVertexRaw, "MyEdgeStyle");
+    /**
+     * Create a new Edge and set the orientation respect to vertices (used to compute left and right)
+     * 
+     * @param graph
+     * @param firstVertex
+     * @param secondVertex
+     * @param shapeType
+     */
+    private void addEdgeBottomLeft(mxGraph graph, Vertex firstVertex, Vertex secondVertex, Enum<Edge.SHAPE_TYPE> shapeTypeTemp) {
+        Edge edgeToCreate = addEdgeGeneric(graph, firstVertex, secondVertex, shapeTypeTemp);
         firstVertex.edgeAtBottom = edgeToCreate;
         secondVertex.edgeAtLeft = edgeToCreate;
     }
 
-    private void addEdgeRightLeft(mxGraph graph, Vertex firstVertex, Vertex secondVertex) {
-        // Bug?:
-        // Map: [1b+, 5b+, 15b+, 14b-, 15e+, 14e+, 5e+, 7b+, 11b+, 2b-, 7e-, 11e+, 8b+, 8e+, 3b+, 6b+, 3e-, 4b-, 6e+, 10b+, 12b+, 13b+, 13e+, 9b-, 4e-, 10e-, 12e+, 9e+, 2e+, 1e+]
-        // edgeToCreate null pointer exception at: 8b+ 8e+
-        // Is it a multiple edge
-        //
-        Edge edgeToCreate = new Edge();
-        edgeToCreate.name = firstVertex.name + "/" + secondVertex.name;
-        mxCell firstVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(firstVertex.name);
-        mxCell secondVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(secondVertex.name);
-        graph.insertEdge(graph.getDefaultParent(), edgeToCreate.name, edgeToCreate, firstVertexRaw, secondVertexRaw, "MyEdgeStyle");
+    /**
+     * Create a new Edge and set the orientation respect to vertices (used to compute left and right)
+     * 
+     * @param graph
+     * @param firstVertex
+     * @param secondVertex
+     * @param shapeType
+     */
+    private void addEdgeRightLeft(mxGraph graph, Vertex firstVertex, Vertex secondVertex, Enum<Edge.SHAPE_TYPE> shapeTypeTemp) {
+        Edge edgeToCreate = addEdgeGeneric(graph, firstVertex, secondVertex, shapeTypeTemp);
         firstVertex.edgeAtRight = edgeToCreate;
         secondVertex.edgeAtLeft = edgeToCreate;
     }
 
-    private void addEdgeLeftRight(mxGraph graph, Vertex firstVertex, Vertex secondVertex) {
-        Edge edgeToCreate = new Edge();
-        edgeToCreate.name = firstVertex.name + "/" + secondVertex.name;
-        mxCell firstVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(firstVertex.name);
-        mxCell secondVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(secondVertex.name);
-        graph.insertEdge(graph.getDefaultParent(), edgeToCreate.name, edgeToCreate, firstVertexRaw, secondVertexRaw, "MyEdgeStyle");
+    /**
+     * Create a new Edge and set the orientation respect to vertices (used to compute left and right)
+     * 
+     * @param graph
+     * @param firstVertex
+     * @param secondVertex
+     * @param shapeType
+     */
+    private void addEdgeLeftRight(mxGraph graph, Vertex firstVertex, Vertex secondVertex, Enum<Edge.SHAPE_TYPE> shapeTypeTemp) {
+        Edge edgeToCreate = addEdgeGeneric(graph, firstVertex, secondVertex, shapeTypeTemp);
         firstVertex.edgeAtLeft = edgeToCreate;
         secondVertex.edgeAtRight = edgeToCreate;
     }
 
-    private void addEdgeBottomBottom(mxGraph graph, Vertex firstVertex, Vertex secondVertex) {
-        Edge edgeToCreate = new Edge();
-        edgeToCreate.name = firstVertex.name + "/" + secondVertex.name;
-        mxCell firstVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(firstVertex.name);
-        mxCell secondVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(secondVertex.name);
-        graph.insertEdge(graph.getDefaultParent(), edgeToCreate.name, edgeToCreate, firstVertexRaw, secondVertexRaw, "MyEdgeStyle");
+    /**
+     * Create a new Edge and set the orientation respect to vertices (used to compute left and right)
+     * 
+     * @param graph
+     * @param firstVertex
+     * @param secondVertex
+     * @param shapeType
+     */
+    private void addEdgeBottomBottom(mxGraph graph, Vertex firstVertex, Vertex secondVertex, Enum<Edge.SHAPE_TYPE> shapeTypeTemp) {
+        Edge edgeToCreate = addEdgeGeneric(graph, firstVertex, secondVertex, shapeTypeTemp);
         firstVertex.edgeAtBottom = edgeToCreate;
         secondVertex.edgeAtBottom = edgeToCreate;
     }
 
-    private void addEdgeRightBottom(mxGraph graph, Vertex firstVertex, Vertex secondVertex) {
-        Edge edgeToCreate = new Edge();
-        edgeToCreate.name = firstVertex.name + "/" + secondVertex.name;
-        mxCell firstVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(firstVertex.name);
-        mxCell secondVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(secondVertex.name);
-        graph.insertEdge(graph.getDefaultParent(), edgeToCreate.name, edgeToCreate, firstVertexRaw, secondVertexRaw, "MyEdgeStyle");
+    /**
+     * Create a new Edge and set the orientation respect to vertices (used to compute left and right)
+     * 
+     * @param graph
+     * @param firstVertex
+     * @param secondVertex
+     * @param shapeType
+     */
+    private void addEdgeRightBottom(mxGraph graph, Vertex firstVertex, Vertex secondVertex, Enum<Edge.SHAPE_TYPE> shapeTypeTemp) {
+        Edge edgeToCreate = addEdgeGeneric(graph, firstVertex, secondVertex, shapeTypeTemp);
         firstVertex.edgeAtRight = edgeToCreate;
         secondVertex.edgeAtBottom = edgeToCreate;
     }
 
-    private int findThePreviousVisibleCoordinate(List<FCoordinate> sequence, int coordinateNumber) {
-
-        // Loop while not found
-        //
-        boolean previousVisibleEdgeFound = false;
-        while (previousVisibleEdgeFound == false) {
-            coordinateNumber--;
-            if (sequence.get(coordinateNumber).isVisible == true) {
-                previousVisibleEdgeFound = true;
-            }
-        }
-        return coordinateNumber;
+    /**
+     * Create a new Edge
+     * 
+     * @param graph
+     * @param firstVertex
+     * @param secondVertex
+     * @param shapeTypeToSet
+     */
+    public Edge addEdgeGeneric(mxGraph graph, Vertex firstVertex, Vertex secondVertex, Enum<Edge.SHAPE_TYPE> shapeTypeToSet) {
+        Edge edgeToCreate = new Edge();
+        edgeToCreate.name = firstVertex.name + "/" + secondVertex.name;
+        edgeToCreate.shapeType = shapeTypeToSet;
+        edgeToCreate.firstVertex = firstVertex;
+        edgeToCreate.secondVertex = secondVertex;
+        edgesMap.put(edgeToCreate.name, edgeToCreate);
+        mxCell firstVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(firstVertex.name);
+        mxCell secondVertexRaw = (mxCell) ((mxGraphModel) graph.getModel()).getCell(secondVertex.name);
+        graph.insertEdge(graph.getDefaultParent(), edgeToCreate.name, edgeToCreate, firstVertexRaw, secondVertexRaw, "MyEdgeStyle");
+        return edgeToCreate;
     }
 
     private final Runnable runnableColorIt = new Runnable() {
@@ -2311,7 +2537,11 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     }
 
     /**
-     * Choose a color
+     * Choose a new color
+     * 
+     * @param currentColor
+     *            The current color
+     * @return The new color
      */
     public Color chooseNewColor(Color currentColor) {
         Color newColor = JColorChooser.showDialog(null, "Change color", currentColor);
@@ -2460,7 +2690,10 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     };
 
     /**
+     * Set the object style from the Face parameters
+     * 
      * @param face
+     *            The face from which to read the parameters
      * @return The new style (G library)
      */
     public GStyle styleFromFace(F face) {

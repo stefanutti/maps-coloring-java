@@ -13,7 +13,7 @@
         </menu>
     </menubar>
 
-    <tabbedpane doubleBuffered="false" action="tabbedPaneSwitchAction">
+    <tabbedpane doubleBuffered="false">
         <panel name="Map Generator" layout="BorderLayout">
             <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout">
                 <scrollpane>
@@ -80,7 +80,6 @@
                             <button text="All" action="colorAllAction" />
                             <button text="Reset" toolTipText="Stop coloring and reset colors" action="stopColorAction" />
                             <button text="Tait" enabled="false" toolTipText="Tait 3-edge-coloring to 4-face-coloring" action="taitAction" id="tait" />
-                            <button text="@" enabled="true" toolTipText="Spiral chain" action="spiralChainAction" id="spiralChain" />
                             <button text="save" action="saveMapToImageAction" />
                         </hbox>
 
@@ -146,21 +145,26 @@
                         <layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
 
                         <titledseparator constraints="1,1,3,1" />
-                        <label constraints="1,3" text="layout" />
-                        <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxLayout" constraints="3,3,1,1" id="layout" />
-                        <label constraints="1,5" text="browsing" />
-                        <hbox constraints="3,5,1,1">
+                        <checkbox constraints="3,3" toolTipText="Fit to window" text="fitToWindow" selected="false" id="fitToWindow" action="fitToWindowAction" />
+                        <label constraints="1,5" text="layout" />
+                        <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxGraphLayout" constraints="3,5,1,1" action="graphLayoutAction" id="graphLayout" />
+                        <label constraints="1,7" text="browsing" />
+                        <hbox constraints="3,7,1,1">
                             <button text="|&lt;" toolTipText="First graph" action="drawFirstGraphAction" />
                             <button text="&lt;" toolTipText="Previous graph" action="drawPreviousGraphAction" />
                             <button text="@" toolTipText="Random graph" action="drawRandomGraphAction" />
                             <button text="&gt;" toolTipText="Next graph" action="drawNextGraphAction" />
                             <button text="&gt;|" toolTipText="Last graph" action="drawLastGraphAction" />
                         </hbox>
+                        <button constraints="3,9" text="spiral chain" enabled="true" toolTipText="Compute the spiral chain" action="spiralChainAction" />
+                        <button constraints="3,11" text="save the graph" action="saveGraphToImageAction" />
                     </panel>
                 </scrollpane>
             </panel>
-            <panel layout="borderLayout" constraints="BorderLayout.CENTER" id="graphExplorer">
-            </panel>
+            <scrollpane>
+                <panel layout="borderLayout" constraints="BorderLayout.CENTER" id="graphExplorer">
+                </panel>
+            </scrollpane>
         </panel>
     </tabbedpane>
 </frame>

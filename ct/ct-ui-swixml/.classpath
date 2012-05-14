@@ -5,7 +5,7 @@
   <classpathentry kind="var" path="M2_REPO/it/tac/larvalabs/collections-generic/4.01/collections-generic-4.01.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/ct/ct-core/1.0/ct-core-1.0.jar"/>
+  <classpathentry kind="src" path="/ct-core"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/com/jgoodies/forms/1.1.0/forms-1.1.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/geosoft/G/1.0/G-1.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/jdom/jdom/1.0/jdom-1.0.jar"/>
