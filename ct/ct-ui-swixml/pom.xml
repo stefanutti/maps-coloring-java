@@ -10,7 +10,7 @@
     <artifactId>ct-ui-swixml</artifactId>
     <name>ct-ui-swixml</name>
     <packaging>jar</packaging>
-    <version>1.8</version>
+    <version>1.9</version>
 
     <dependencies>
         <dependency>
@@ -107,11 +107,11 @@
             <version>0.8.3</version>
         </dependency>
         <!-- JGRAPHX -->
-        <dependency>
+        <!-- dependency>
             <groupId>it.tac.org.jgraph</groupId>
             <artifactId>jgraph</artifactId>
             <version>0.8.3</version>
-        </dependency>
+        </dependency -->
         <dependency>
             <groupId>it.tac.org.jgraph</groupId>
             <artifactId>jgraphx</artifactId>

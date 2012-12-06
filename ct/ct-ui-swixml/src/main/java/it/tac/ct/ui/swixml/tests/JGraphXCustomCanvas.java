@@ -14,14 +14,14 @@ import com.mxgraph.swing.view.mxInteractiveCanvas;
 import com.mxgraph.view.mxCellState;
 import com.mxgraph.view.mxGraph;
 
-public class CustomCanvas extends JFrame {
+public class JGraphXCustomCanvas extends JFrame {
 
     /**
 	 * 
 	 */
     private static final long serialVersionUID = -844106998814982739L;
 
-    public CustomCanvas() {
+    public JGraphXCustomCanvas() {
         super("Custom Canvas");
 
         // Demonstrates the use of a Swing component for rendering vertices.
@@ -101,7 +101,7 @@ public class CustomCanvas extends JFrame {
     }
 
     public static void main(String[] args) {
-        CustomCanvas frame = new CustomCanvas();
+        JGraphXCustomCanvas frame = new JGraphXCustomCanvas();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 320);
         frame.setVisible(true);

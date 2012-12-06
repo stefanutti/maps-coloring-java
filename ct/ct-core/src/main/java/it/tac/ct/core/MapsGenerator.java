@@ -24,7 +24,7 @@ public class MapsGenerator {
     public boolean logWhilePopulate = false;
     public boolean randomElaboration = false;
     public boolean processAll = true;
-    public Enum<MAX_METHOD> maxMethod = MAX_METHOD.MAPS;
+    public MAX_METHOD maxMethod = MAX_METHOD.MAPS;
     public int maxNumber = 0;
 
     // Maps removed during elaboration. These would have been removed anyway running removeMapsWithCardinalityLessThanFour after elaboration
@@ -358,7 +358,7 @@ public class MapsGenerator {
     /**
      * Create a new map from the text representation (for debugging)
      */
-    public void createMapFromTextRepresentationTemp(String mapTextRepresentation) {
+    public Map4CT createMapFromTextRepresentationTest(String mapTextRepresentation, int facesToCreate) {
 
         Map4CT newMap = new Map4CT();
 
@@ -422,6 +422,10 @@ public class MapsGenerator {
 
         System.out.println("DEBUG: " + newMap.sequenceOfCoordinates.sequence);
         System.out.println("DEBUG: " + mapTextRepresentation);
+
+        // Return the new map
+        //
+        return newMap;
     }
 
     /**
@@ -432,7 +436,7 @@ public class MapsGenerator {
      * @param facesToCreate
      *            Values permitted go from 2 to the number of faces of the map (max is: tokensOfTheMapTextRepresentation.length / 2;) not considering the ocean
      */
-    public Map4CT createMapFromTextRepresentation(String mapTextRepresentation, int facesToCreate) {
+    public static Map4CT createMapFromTextRepresentation(String mapTextRepresentation, int facesToCreate) {
 
         // Create an empty (almost) map (default is 2 faces + the ocean = 3 faces)
         //

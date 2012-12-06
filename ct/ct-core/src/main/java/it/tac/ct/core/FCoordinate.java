@@ -21,7 +21,7 @@ public class FCoordinate implements Cloneable {
     /**
      * BEGIN or END?
      */
-    public Enum<TYPE> type = TYPE.BEGIN;
+    public TYPE type = TYPE.BEGIN;
 
     /**
      * The id of the F (from 1 to ...)
@@ -47,7 +47,7 @@ public class FCoordinate implements Cloneable {
      * @param isVisible
      *            Is the F at this coordinate still visible? Can the border (BEGIN or END) access to the ocean?
      */
-    public FCoordinate(Enum<TYPE> type, int fNumber, boolean isVisible) {
+    public FCoordinate(TYPE type, int fNumber, boolean isVisible) {
         this.type = type;
         this.fNumber = fNumber;
         this.isVisible = isVisible;
@@ -80,6 +80,6 @@ public class FCoordinate implements Cloneable {
      */
     @Override
     public FCoordinate clone() throws CloneNotSupportedException {
-        return (FCoordinate)super.clone();
+        return (FCoordinate) super.clone();
     }
 }

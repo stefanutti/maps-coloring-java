@@ -10,7 +10,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>it.tac.ct</groupId>
   <artifactId>ct</artifactId>
-  <name>ColorTheorem</name>
+  <name>ct</name>
   <packaging>pom</packaging>
   <version>1.0</version>
 

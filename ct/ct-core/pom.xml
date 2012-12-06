@@ -13,6 +13,18 @@
 	<version>1.0</version>
 
 	<dependencies>
+        <!-- JGRAPHT -->
+        <dependency>
+            <groupId>it.tac.org.jgrapht</groupId>
+            <artifactId>jgrapht</artifactId>
+            <version>0.8.3</version>
+        </dependency>
+        <!-- JGRAPHX -->
+        <dependency>
+            <groupId>it.tac.org.jgraph</groupId>
+            <artifactId>jgraphx</artifactId>
+            <version>1.10.0.3</version>
+        </dependency>
 	</dependencies>
 
 	<build>

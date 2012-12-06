@@ -3,6 +3,8 @@
  */
 package it.tac.ct.core;
 
+import java.awt.Color;
+
 /**
  * @author Mario Stefanutti
  * @version September 2007
@@ -12,10 +14,15 @@ package it.tac.ct.core;
  */
 public class Vertex {
 
+    // Variables to distinguish the various cases in graph creation (B-E, B-M, M-M, M-E)
+    //
+    public enum TYPE_OF_VERTEX {
+        NOT_DEFINED, BEGIN, MIDDLE, END
+    };
+
     // For the shape of the Vertex
     //
-    public static int WIDTH = 10;
-    public static int HEIGHT = 10;
+    public static int DIAMETER = 10;
 
     // Name
     //
@@ -24,6 +31,11 @@ public class Vertex {
     // The face that created this vertex
     //
     public int faceNumber = -1;
+
+    // The face that created this vertex
+    //
+    public int spiralChainNumber = -1;
+    public int spiralChainSequenceNumber = -1;
 
     // If the vertex has already been visited/used
     //
@@ -49,9 +61,75 @@ public class Vertex {
     public int xCoordinate = -1;
     public int yCoordinate = -1;
 
-    // Used for coloring maps
+    // Used for coloring spiral chains
     //
-    public COLORS color = COLORS.UNCOLORED; // Default for no color
+    public Color color = Color.black; // Default for no color
+    public static final Color USED_COLOR = Color.black;
+    public static final Color FIRST_USED_FILL_COLOR = Color.white;
+    public static final Color USED_FILL_COLOR = Color.black;
+
+    /**
+     * Which edge is at right? I don't care about used edges
+     * 
+     * @param comingFrom
+     *            The edge I am coming from
+     * @return The edge at left
+     */
+    public Edge getTheEdgeAtRight(Edge comingFrom) {
+
+        // The edge to return
+        //
+        Edge edgeToReturn = null;
+
+        // From which direction am I coming?
+        //
+        if (comingFrom == edgeAtLeft) {
+            edgeToReturn = edgeAtBottom;
+        } else if (comingFrom == edgeAtRight) {
+            edgeToReturn = edgeAtLeft;
+        } else if (comingFrom == edgeAtBottom) {
+            edgeToReturn = edgeAtRight;
+        }
+
+        // Return the edge
+        //
+        return edgeToReturn;
+    }
+
+    /**
+     * Which edge is at left? I DO care about used edges
+     * 
+     * @param comingFrom
+     *            The edge I am coming from
+     * @return The edge at left or null if all edges have been previously used
+     */
+    public Edge getTheEdgeToTurnLeftOrRightIfLeftIsUsed(Edge comingFrom) {
+
+        // The edge to return
+        //
+        Edge edgeToReturn = null;
+
+        // If all edges have been used, returns null
+        //
+        if (edgeAtLeft.used && edgeAtRight.used && edgeAtBottom.used) {
+            edgeToReturn = null;
+        } else {
+
+            // From which direction am I coming? Is the edge at left used?
+            //
+            if (comingFrom == edgeAtLeft) {
+                edgeToReturn = edgeAtRight.used ? edgeAtBottom : edgeAtRight;
+            } else if (comingFrom == edgeAtRight) {
+                edgeToReturn = edgeAtBottom.used ? edgeAtLeft : edgeAtBottom;
+            } else if (comingFrom == edgeAtBottom) {
+                edgeToReturn = edgeAtLeft.used ? edgeAtRight : edgeAtLeft;
+            }
+        }
+
+        // Return the edge
+        //
+        return edgeToReturn;
+    }
 
     // Support method
     //

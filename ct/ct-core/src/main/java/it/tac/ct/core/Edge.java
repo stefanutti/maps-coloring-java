@@ -3,6 +3,8 @@
  */
 package it.tac.ct.core;
 
+import java.awt.Color;
+
 /**
  * @author Mario Stefanutti
  * @version September 2007
@@ -18,7 +20,7 @@ public class Edge {
         STRAIGHT, L, MIRRORED_L, U, OCEAN
     }
 
-    public Enum<SHAPE_TYPE> shapeType = SHAPE_TYPE.STRAIGHT;
+    public SHAPE_TYPE shapeType = SHAPE_TYPE.STRAIGHT;
 
     // The vertices of the edge
     //
@@ -33,9 +35,29 @@ public class Edge {
     //
     public boolean used = false;
 
-    // Used for coloring maps
+    // Used for coloring graphs
     //
-    public COLORS color = COLORS.UNCOLORED; // Default for no color
+    public Color color = Color.lightGray; // Default for no color
+    public static final Color USED_COLOR = Color.black;
+
+    /**
+     * Return the other vertex of an edge (or null if null is given)
+     * 
+     * @param The
+     *            vertex of an edge we don't want
+     * @return The other vertex
+     */
+    public Vertex getTheOtherVertex(Vertex vertex) {
+        Vertex vertexToReturn = null;
+
+        if (firstVertex == vertex) {
+            vertexToReturn = secondVertex;
+        } else if (secondVertex == vertex) {
+            vertexToReturn = firstVertex;
+        }
+
+        return vertexToReturn;
+    }
 
     // Support method
     //

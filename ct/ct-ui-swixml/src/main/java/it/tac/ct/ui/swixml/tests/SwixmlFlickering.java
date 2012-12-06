@@ -21,13 +21,13 @@ import no.geosoft.cc.graphics.GWindow;
 
 import org.swixml.SwingEngine;
 
-public class Flickering extends JFrame {
+public class SwixmlFlickering extends JFrame {
 
     private final JPanel mapExplorer = null;
 
-    public Flickering() {
+    public SwixmlFlickering() {
         try {
-            SwingEngine<Flickering> engine = new SwingEngine<Flickering>(this);
+            SwingEngine<SwixmlFlickering> engine = new SwingEngine<SwixmlFlickering>(this);
             URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-test-flickering.xml");
             engine.render(configFileURL);
 
@@ -89,6 +89,6 @@ public class Flickering extends JFrame {
     }
 
     public static void main(String[] args) {
-        new Flickering();
+        new SwixmlFlickering();
     }
 }

@@ -19,6 +19,7 @@ public class SwixmlComboboxGraphLayout extends DefaultComboBoxModel {
      * Constructor.
      */
     public SwixmlComboboxGraphLayout() {
-        super(new Object[] { "rectangular", "mxCircleLayout", "mxHierarchicalLayout" });
+        // super(new Object[] { "rectangular", "mxHierarchicalLayout", "mxCircleLayout"});
+        super(new Object[] { "rectangular", "mxHierarchicalLayout" });
     }
 };

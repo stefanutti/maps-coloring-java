@@ -39,35 +39,36 @@
  */
 package it.tac.ct.ui.swixml.tests;
 
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import org.jgrapht.*;
-import org.jgrapht.graph.*;
-
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleGraph;
 
 /**
  * A simple introduction to using JGraphT.
- *
+ * 
  * @author Barak Naveh
  * @since Jul 27, 2003
  */
-public final class JGraphTHelloWorld
-{
-    //~ Constructors -----------------------------------------------------------
+public final class JGraphTHelloWorld {
+    // ~ Constructors -----------------------------------------------------------
 
-    private JGraphTHelloWorld()
-    {
+    private JGraphTHelloWorld() {
     } // ensure non-instantiability.
 
-    //~ Methods ----------------------------------------------------------------
+    // ~ Methods ----------------------------------------------------------------
 
     /**
      * The starting point for the demo.
-     *
-     * @param args ignored.
+     * 
+     * @param args
+     *            ignored.
      */
-    public static void main(String [] args)
-    {
+    public static void main(String[] args) {
         UndirectedGraph<String, DefaultEdge> stringGraph = createStringGraph();
 
         // note undirected edges are printed as: {<v1>,<v2>}
@@ -81,15 +82,12 @@ public final class JGraphTHelloWorld
     }
 
     /**
-     * Creates a toy directed graph based on URL objects that represents link
-     * structure.
-     *
+     * Creates a toy directed graph based on URL objects that represents link structure.
+     * 
      * @return a graph based on URL objects.
      */
-    private static DirectedGraph<URL, DefaultEdge> createHrefGraph()
-    {
-        DirectedGraph<URL, DefaultEdge> g =
-            new DefaultDirectedGraph<URL, DefaultEdge>(DefaultEdge.class);
+    private static DirectedGraph<URL, DefaultEdge> createHrefGraph() {
+        DirectedGraph<URL, DefaultEdge> g = new DefaultDirectedGraph<URL, DefaultEdge>(DefaultEdge.class);
 
         try {
             URL amazon = new URL("http://www.amazon.com");
@@ -113,13 +111,11 @@ public final class JGraphTHelloWorld
 
     /**
      * Craete a toy graph based on String objects.
-     *
+     * 
      * @return a graph based on String objects.
      */
-    private static UndirectedGraph<String, DefaultEdge> createStringGraph()
-    {
-        UndirectedGraph<String, DefaultEdge> g =
-            new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
+    private static UndirectedGraph<String, DefaultEdge> createStringGraph() {
+        UndirectedGraph<String, DefaultEdge> g = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
 
         String v1 = "v1";
         String v2 = "v2";
@@ -141,5 +137,3 @@ public final class JGraphTHelloWorld
         return g;
     }
 }
-
-// End HelloJGraphT.java

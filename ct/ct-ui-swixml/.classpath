@@ -9,7 +9,6 @@
   <classpathentry kind="var" path="M2_REPO/it/tac/com/jgoodies/forms/1.1.0/forms-1.1.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/geosoft/G/1.0/G-1.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/jdom/jdom/1.0/jdom-1.0.jar"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/org/jgraph/jgraph/0.8.3/jgraph-0.8.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/org/jgrapht/jgrapht/0.8.3/jgrapht-0.8.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/org/jgraph/jgraphx/1.10.0.3/jgraphx-1.10.0.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/javax/jnlp/jnlp/1.6/jnlp-1.6.jar"/>
