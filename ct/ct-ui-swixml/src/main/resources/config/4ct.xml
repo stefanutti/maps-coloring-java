@@ -18,22 +18,25 @@
             <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout">
                 <scrollpane>
                     <panel>
-                        <layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
+                        <layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
 
                         <titledseparator constraints="1,1,3,1" />
                         <label constraints="1,3" text="slowdownMillisec" />
                         <textfield constraints="3,3,1,1" toolTipText="Slowdown activities" text="0" id="slowdownMillisecTextField" />
-                        <checkbox constraints="3,5" toolTipText="Log debugging info to stdout" text="logWhilePopulate" selected="false" id="logWhilePopulate" action="logWhilePopulateAction" />
-                        <checkbox constraints="3,7" toolTipText="Random generation of maps" text="randomElaboration" selected="false" id="randomElaboration" />
-                        <checkbox constraints="3,9" toolTipText="Process all maps" text="processAll" selected="true" id="processAll" />
-                        <label constraints="1,11" text="maxMethod" />
-                        <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxMaxMethod" constraints="3,11,1,1" id="maxMethod" />
-                        <label constraints="1,13" text="maxNumber" />
-                        <textfield constraints="3,13,1,1" text="12" id="maxNumberTextField" />
+                        <label constraints="1,5" text="elaration" />
+                        <hbox constraints="3,5,1,1">
+                            <checkbox toolTipText="Log debugging info to stdout" text="logWhilePopulate" selected="false" id="logWhilePopulate" action="logWhilePopulateAction" />
+                            <checkbox toolTipText="Random generation of maps" text="random" selected="false" id="randomElaboration" />
+                            <checkbox toolTipText="Process all maps" text="processAll" selected="true" id="processAll" />
+                        </hbox>
+                        <label constraints="1,7" text="maxMethod" />
+                        <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxMaxMethod" constraints="3,7,1,1" id="maxMethod" />
+                        <label constraints="1,9" text="maxNumber" />
+                        <textfield constraints="3,9,1,1" text="12" id="maxNumberTextField" />
 
-                        <titledseparator constraints="1,15,3,1" />
-                        <label constraints="1,17" text="generate" />
-                        <hbox constraints="3,17,1,1">
+                        <titledseparator constraints="1,11,3,1" />
+                        <label constraints="1,13" text="generate" />
+                        <hbox constraints="3,13,1,1">
                             <button text=">" enabled="true" toolTipText="Start the generation of maps" action="startElaborationAction" id="startElaborationButton" />
                             <button text="||" enabled="false" toolTipText="Pause" action="pauseElaborationAction" id="pauseElaborationButton" />
                             <button text="-4" enabled="false" toolTipText="Filter maps with faces that have less than 4 edges" action="filterLessThanFourElaborationAction" id="filterLessThanFourElaborationButton" />
@@ -42,8 +45,8 @@
                             <button text=".|." enabled="false" toolTipText="Copy the maps elaborated into the todo list" action="copyMapsToTodoElaborationAction" id="copyMapsToTodoElaborationButton" />
                             <button text="0" enabled="false" toolTipText="Reset all maps" action="resetElaborationAction" id="resetElaborationButton" />
                         </hbox>
-                        <label constraints="1,19" text="browsing" />
-                        <hbox constraints="3,19,1,1">
+                        <label constraints="1,15" text="browsing" />
+                        <hbox constraints="3,15,1,1">
                             <button text="|&lt;" toolTipText="First map" action="drawFirstMapAction" />
                             <button text="&lt;" toolTipText="Previous map" action="drawPreviousMapAction" />
                             <button text="@" toolTipText="Random map" action="drawRandomMapAction" />
@@ -51,12 +54,16 @@
                             <button text="&gt;|" toolTipText="Last map" action="drawLastMapAction" />
                             <button text="slooooow" toolTipText="Recreate the map showing the construction steps (500 millisec)" action="drawCurrentMapSlowMotionAction" />
                         </hbox>
-                        <label constraints="1,21" text="createMap" />
-                        <hbox constraints="3,21,1,1">
+                        <label constraints="1,19" text="createMap" />
+                        <hbox constraints="3,19,1,1">
                             <textfield text="1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+" id="mapTextRepresentationTextField" />
                             <button toolTipText="Create a map from its text representation (see logging)" text="create" enabled="true" action="createMapFromTextRepresentationAction" id="createMapFromTextRepresentationButton" />
                             <button toolTipText="Get the text representation (see logging) of the current map" text="get" enabled="true" action="getTextRepresentationOfCurrentMapAction" id="getTextRepresentationOfCurrentMapButton" />
                             <button toolTipText="Load the map from a previously saved image (with metadata)" text="load" enabled="true" action="loadMapFromAPreviouslySavedImageAction" id="loadMapFromAPreviouslySavedImageButton" />
+                        </hbox>
+                        <hbox constraints="3,21,1,1">
+                            <button toolTipText="Save maps and todoList" text="Save maps + todoList" enabled="true" action="saveAllMapsAndTodoListAction" />
+                            <button toolTipText="Load maps and todoList" text="Load maps + todoList" enabled="true" action="loadAllMapsAndTodoListAction" />                            
                         </hbox>
 
                         <titledseparator constraints="1,23,3,1" />
@@ -80,7 +87,7 @@
                             <button text="All" action="colorAllAction" />
                             <button text="Stop" toolTipText="Stop coloring and reset colors" action="stopColorAllAction" />
                             <button text="Tait" enabled="false" toolTipText="Tait 3-edge-coloring to 4-face-coloring" action="taitAction" id="taitButton" />
-                            <button text="save" action="saveMapToImageAction" />
+                            <button text="save image" action="saveMapToImageAction" />
                         </hbox>
 
                         <titledseparator constraints="1,33,3,1" />
@@ -96,39 +103,47 @@
                             <textfield text="0" toolTipText="maxMemory" editable="false" id="maxMemoryTextField" />
                             <textfield text="0" toolTipText="freeMemory" editable="false" id="freeMemoryTextField" />
                         </hbox>
+                        <hbox constraints="3,39,1,1">
+                            <button text="- iso in maps" enabled="true" toolTipText="Remove isomorphic maps" action="removeIsoMapsAction" />
+                            <button text="- iso in todoList" enabled="true" toolTipText="Remove isomorphic todoList maps" action="removeIsoTodoListAction" />
+                            <button text="stop" enabled="true" toolTipText="stop removing isomorphic maps" action="stopRemovingIsoAction" />
+                         </hbox>
+                        <hbox constraints="3,41,1,1">
+                            <textfield text="0" toolTipText="Outer loop" editable="false" id="isoOuterLoopTextField" />
+                            <textfield text="0" toolTipText="Inner loop" editable="false" id="isoInnerLoopTextField" />
+                            <textfield text="0" toolTipText="Removed duplicated graphs (isomorphic)" editable="0" id="isoRemovedTextField" />
+                         </hbox>
 
-                        <titledseparator constraints="1,39,3,1" />
-                        <checkbox constraints="3,41" toolTipText="Turn on/off the sound while coloring" text="soundWhileColoring" selected="false" id="soundWhileColoring" />
-                        <label constraints="1,43" text="ONE" />
-                        <hbox constraints="3,43,1,1">
+                        <titledseparator constraints="1,43,3,1" />
+                        <checkbox constraints="3,45" toolTipText="Turn on/off the sound while coloring" text="soundWhileColoring" selected="false" id="soundWhileColoring" />
+                        <label constraints="1,47" text="ONE" />
+                        <hbox constraints="3,47,1,1">
                             <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorOneInstrument" />
                             <textfield text="60" toolTipText="Starting note" id="colorOneBaseNoteTextField" />
                             <textfield text="30" toolTipText="Duration" id="colorOneBaseDurationTextField" />
                             <textfield text="100" toolTipText="Velocity" id="colorOneBaseVelocityTextField" />
                         </hbox>
-                        <label constraints="1,45" text="TWO" />
-                        <hbox constraints="3,45,1,1">
+                        <label constraints="1,49" text="TWO" />
+                        <hbox constraints="3,49,1,1">
                             <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorTwoInstrument" />
                             <textfield text="60" toolTipText="Starting note" id="colorTwoBaseNoteTextField" />
                             <textfield text="30" toolTipText="Duration" id="colorTwoBaseDurationTextField" />
                             <textfield text="100" toolTipText="Velocity" id="colorTwoBaseVelocityTextField" />
                         </hbox>
-                        <label constraints="1,47" text="THREE" />
-                        <hbox constraints="3,47,1,1">
+                        <label constraints="1,51" text="THREE" />
+                        <hbox constraints="3,51,1,1">
                             <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorThreeInstrument" />
                             <textfield text="60" toolTipText="Starting note" id="colorThreeBaseNoteTextField" />
                             <textfield text="30" toolTipText="Duration" id="colorThreeBaseDurationTextField" />
                             <textfield text="100" toolTipText="Velocity" id="colorThreeBaseVelocityTextField" />
                         </hbox>
-                        <label constraints="1,49" text="FOUR" />
-                        <hbox constraints="3,49,1,1">
+                        <label constraints="1,53" text="FOUR" />
+                        <hbox constraints="3,53,1,1">
                             <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxInstrument" id="colorFourInstrument" />
                             <textfield text="60" toolTipText="Starting note" id="colorFourBaseNoteTextField" />
                             <textfield text="30" toolTipText="Duration" id="colorFourBaseDurationTextField" />
                             <textfield text="100" toolTipText="Velocity" id="colorFourBaseVelocityTextField" />
                         </hbox>
-
-                        <titledseparator constraints="1,51,3,1" />
                     </panel>
                 </scrollpane>
             </panel>
@@ -168,16 +183,10 @@
                             <button text="png" action="saveGraphToImageAction" />
                             <button text="GraphML" action="saveGraphToGraphMLAction" />
                          </hbox>
-                        <hbox constraints="3,15,1,1">
-                            <button text="find iso" enabled="true" toolTipText="Find isomorphic graphs" action="findIsomorphicGraphsAction" />
-                            <button text="stop" enabled="true" toolTipText="stop isomorphism" action="stopFindIsomorphicGraphsAction" />
-                            <textfield text="1/N" toolTipText="Outer loop" editable="false" id="outerLoopTextField" />
-                            <textfield text="1/N" toolTipText="Inner loop" editable="false" id="innerLoopTextField" />
-                         </hbox>
-                        <hbox constraints="3,17,1,1">
+                        <!-- hbox constraints="3,19,1,1">
                             <button text="Hamiltonian?" enabled="true" toolTipText="Check if all graphs have Hamiltonian paths" action="hamiltonialCheckAction" />
                             <button text="stop" enabled="true" toolTipText="stop checking Hamilton-icity" action="stopHamiltonialCheckAction" />
-                         </hbox>
+                         </hbox -->
                     </panel>
                 </scrollpane>
             </panel>

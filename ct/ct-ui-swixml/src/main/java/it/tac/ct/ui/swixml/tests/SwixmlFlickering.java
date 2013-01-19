@@ -28,7 +28,7 @@ public class SwixmlFlickering extends JFrame {
     public SwixmlFlickering() {
         try {
             SwingEngine<SwixmlFlickering> engine = new SwingEngine<SwixmlFlickering>(this);
-            URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct-test-flickering.xml");
+            URL configFileURL = this.getClass().getClassLoader().getResource("config/tests/4ct-test-flickering.xml");
             engine.render(configFileURL);
 
             // Create the graphic canvas

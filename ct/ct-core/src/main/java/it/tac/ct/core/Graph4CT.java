@@ -37,6 +37,10 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
 
+import edu.ucla.sspace.graph.Graph;
+import edu.ucla.sspace.graph.SimpleEdge;
+import edu.ucla.sspace.graph.SparseUndirectedGraph;
+
 /**
  * @author Mario Stefanutti
  *         <p>
@@ -63,6 +67,7 @@ public class Graph4CT {
     //
     private mxGraph jGraph4CT = null;
     private UndirectedGraph<String, DefaultEdge> jGraphT4CT = null;
+    private Graph<edu.ucla.sspace.graph.Edge> sSpaceGraph4CT = null;
     private mxGraphComponent jGraph4CTComponent = null;
     private mxIGraphLayout jGraph4CTLayout = null;
 
@@ -89,6 +94,10 @@ public class Graph4CT {
         return jGraphT4CT;
     }
 
+    public Graph<edu.ucla.sspace.graph.Edge> getSSpaceGraph4CT() {
+        return sSpaceGraph4CT;
+    }
+
     /**
      * Set the size of the graph on the graphical component
      * 
@@ -111,6 +120,7 @@ public class Graph4CT {
         //
         jGraph4CT = new mxGraph();
         jGraphT4CT = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
+        sSpaceGraph4CT = new SparseUndirectedGraph();
         jGraph4CTComponent = new mxGraphComponent(jGraph4CT);
 
         map4CT = null;
@@ -142,8 +152,7 @@ public class Graph4CT {
         // Listener to edge detection: mouse has been clicked on an edge
         //
         jGraph4CTComponent.getGraphControl().addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
+            @Override public void mousePressed(MouseEvent e) {
                 Object cell = jGraph4CTComponent.getCellAt(e.getX(), e.getY());
                 if ((cell != null) && ((((mxCell) cell).getValue()) instanceof Edge)) {
 
@@ -903,6 +912,7 @@ public class Graph4CT {
         mxCell secondVertexRaw = (mxCell) ((mxGraphModel) jGraph4CT.getModel()).getCell(secondVertex.name);
         jGraph4CT.insertEdge(jGraph4CT.getDefaultParent(), edgeToCreate.name, edgeToCreate, firstVertexRaw, secondVertexRaw, "MyEdgeStyle");
         jGraphT4CT.addEdge(firstVertex.name, secondVertex.name);
+        sSpaceGraph4CT.add(new SimpleEdge(firstVertex.name.hashCode(), secondVertex.name.hashCode()));
         return edgeToCreate;
     }
 

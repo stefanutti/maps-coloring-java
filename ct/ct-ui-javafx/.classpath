@@ -1,0 +1,12 @@
+<classpath>
+  <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
+  <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
+  <classpathentry kind="output" path="target/classes"/>
+  <classpathentry kind="src" path="/ct-core"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/geosoft/G/1.0/G-1.0.jar"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/com/oracle/javafx-runtime/2.2/javafx-runtime-2.2.jar"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/org/jgrapht/jgrapht/0.8.3/jgrapht-0.8.3.jar"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/org/jgraph/jgraphx/1.10.0.3/jgraphx-1.10.0.3.jar"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/edu/ucla/sspace/2.0.3/sspace-2.0.3.jar"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+</classpath>

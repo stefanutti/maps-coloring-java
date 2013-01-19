@@ -3,6 +3,7 @@
  */
 package it.tac.ct.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  *          Represent a Face (F) of a regular map
  *          </p>
  */
-public class F implements Cloneable {
+public class F implements Cloneable, Serializable {
 
     // Number of Edges of the F (type of F in the Euler formula): F = F2 + F3 + F4 + F5 + ...
     //
@@ -46,8 +47,7 @@ public class F implements Cloneable {
     /**
      * @return The cloned F
      */
-    @Override
-    public F clone() throws CloneNotSupportedException {
-        return (F)super.clone();
+    @Override public F clone() throws CloneNotSupportedException {
+        return (F) super.clone();
     }
 }

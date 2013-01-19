@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="1000.0" xmlns:fx="http://javafx.com/fxml" fx:controller="it.tac.ct.ui.javafx.MapsGeneratorMain">
+  <children>
+    <TabPane tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <tabs>
+        <Tab text="Maps generator">
+          <content>
+            <AnchorPane id="Content">
+              <children>
+                <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <ScrollPane maxWidth="400.0" minWidth="400.0" prefWidth="400.0">
+                      <content>
+                        <AnchorPane id="Content">
+                          <children>
+                            <VBox maxWidth="390.0" minWidth="390.0" prefWidth="390.0">
+                              <children>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="slowdownMillisec" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <TextField fx:id="slowdownMillisecTextField" prefWidth="9999.0" text="0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_LEFT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <CheckBox fx:id="logWhilePopulate" mnemonicParsing="false" onAction="#logWhilePopulateAction" text="logWhilePopulate" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_LEFT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <CheckBox fx:id="randomElaboration" mnemonicParsing="false" text="randomElaboration" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_LEFT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <CheckBox fx:id="processAll" mnemonicParsing="false" selected="true" text="processAll" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="maxMethod" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <ComboBox fx:id="maxMethod" pickOnBounds="false" prefWidth="9999.0">
+                                          <items>
+                                            <FXCollections fx:factory="observableArrayList">
+                                              <String fx:value="FIXED_MAPS_LEN" />
+                                              <String fx:value="MAPS" />
+                                              <String fx:value="F" />
+                                            </FXCollections>
+                                          </items>
+                                        </ComboBox>
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="maxNumber" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <TextField fx:id="maxNumberTextField" prefWidth="9999.0" text="12" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Separator prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Separator prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="generate" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Button fx:id="startElaborationButton" mnemonicParsing="false" onAction="#startElaborationAction" prefWidth="9999.0" text="&gt;" />
+                                        <Button fx:id="pauseElaborationButton" mnemonicParsing="false" onAction="#pauseElaborationAction" prefWidth="9999.0" text="||" />
+                                        <Button fx:id="filterLessThanFourElaborationButton" mnemonicParsing="false" onAction="#filterLessThanFourElaborationAction" prefWidth="9999.0" text="-4" />
+                                        <Button fx:id="filterLessThanFiveElaborationButton" mnemonicParsing="false" onAction="#filterLessThanFiveElaborationAction" prefWidth="9999.0" text="-5" />
+                                        <Button fx:id="filterLessThanFacesElaborationButton" mnemonicParsing="false" onAction="#filterLessThanFacesElaborationAction" prefWidth="9999.0" text="-F" />
+                                        <Button fx:id="copyMapsToTodoElaborationButton" mnemonicParsing="false" onAction="#copyMapsToTodoElaborationAction" prefWidth="9999.0" text=".|." />
+                                        <Button fx:id="resetElaborationButton" mnemonicParsing="false" onAction="#resetElaborationAction" prefWidth="9999.0" text="0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="browsing" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Button mnemonicParsing="false" onAction="#drawFirstMapAction" prefWidth="9999.0" text="|&lt;" />
+                                        <Button mnemonicParsing="false" onAction="#drawPreviousMapAction" prefWidth="9999.0" text="&lt;" />
+                                        <Button mnemonicParsing="false" onAction="#drawRandomMapAction" prefWidth="9999.0" text="\@" />
+                                        <Button mnemonicParsing="false" onAction="#drawNextMapAction" prefWidth="9999.0" text="&gt;" />
+                                        <Button mnemonicParsing="false" onAction="#drawLastMapAction" prefWidth="9999.0" text="&gt;|" />
+                                        <Button mnemonicParsing="false" onAction="#drawCurrentMapSlowMotionAction" prefWidth="9999.0" text="slooooow" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="createMap" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <TextField fx:id="mapTextRepresentationTextField" minWidth="120.0" prefWidth="120.0" text="1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+" />
+                                        <Button fx:id="createMapFromTextRepresentationButton" mnemonicParsing="false" onAction="#createMapFromTextRepresentationAction" prefWidth="9999.0" text="create" />
+                                        <Button fx:id="getTextRepresentationOfCurrentMapButton" mnemonicParsing="false" onAction="#getTextRepresentationOfCurrentMapAction" prefWidth="9999.0" text="get" />
+                                        <Button fx:id="loadMapFromAPreviouslySavedImageButton" mnemonicParsing="false" onAction="#loadMapFromAPreviouslySavedImageAction" prefWidth="9999.0" text="load" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Separator prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Separator prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="drawMethod" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <ComboBox fx:id="drawMethod" minWidth="100.0" onAction="#drawMethodAction" prefWidth="100.0">
+                                          <items>
+                                            <FXCollections fx:factory="observableArrayList">
+                                              <String fx:value="CIRCLES" />
+                                              <String fx:value="RECTANGLES" />
+                                              <String fx:value="RECTANGLES_NYC" />
+                                            </FXCollections>
+                                          </items>
+                                        </ComboBox>
+                                        <Slider fx:id="transparency" prefWidth="9999.0" value="100.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="assignColors" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Button fx:id="selectColorOneButton" mnemonicParsing="false" onAction="#selectColorOneAction" prefWidth="9999.0" text="ONE" />
+                                        <Button fx:id="selectColorTwoButton" mnemonicParsing="false" onAction="#selectColorTwoAction" prefWidth="9999.0" text="TWO" />
+                                        <Button fx:id="selectColorThreeButton" mnemonicParsing="false" onAction="#selectColorThreeAction" prefWidth="9999.0" text="THREE" />
+                                        <Button fx:id="selectColorFourButton" mnemonicParsing="false" onAction="#selectColorFourAction" prefWidth="9999.0" text="FOUR" />
+                                        <Button fx:id="selectColorDefaultActionButton" mnemonicParsing="false" onAction="#selectColorDefaultAction" prefWidth="9999.0" text="RGBW" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_LEFT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <CheckBox fx:id="showFaceCardinality" mnemonicParsing="false" onAction="#showFaceCardinalityAction" text="showFaceCardinality" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="color" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Button mnemonicParsing="false" onAction="#colorItAction" prefWidth="9999.0" text="it" />
+                                        <Button mnemonicParsing="false" onAction="#colorAllAction" prefWidth="9999.0" text="all" />
+                                        <Button mnemonicParsing="false" onAction="#stopColorAllAction" prefWidth="9999.0" text="stop" />
+                                        <Button fx:id="taitButton" mnemonicParsing="false" onAction="#taitAction" prefWidth="9999.0" text="Tait" />
+                                        <Button mnemonicParsing="false" onAction="#saveMapToImageAction" prefWidth="9999.0" text="save" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Separator prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Separator prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Button mnemonicParsing="false" onAction="#refreshInfoAction" text="refreshInfo" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <TextField fx:id="currentMapTextField" editable="false" prefWidth="9999.0" text="-1" />
+                                        <TextField fx:id="mapsSizeTextField" editable="false" prefWidth="9999.0" text="0" />
+                                        <TextField fx:id="mapsRemovedTextField" editable="false" prefWidth="9999.0" text="0" />
+                                        <TextField fx:id="todoListSizeTextField" editable="false" prefWidth="9999.0" text="1" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_LEFT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <TextField fx:id="totalMemoryTextField" editable="false" prefWidth="9999.0" text="0" />
+                                        <TextField fx:id="maxMemoryTextField" editable="false" prefWidth="9999.0" text="0" />
+                                        <TextField fx:id="freeMemoryTextField" editable="false" prefWidth="9999.0" text="0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Separator prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Separator prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_LEFT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <CheckBox fx:id="soundWhileColoring" mnemonicParsing="false" text="soundOnWhileColoring" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="ONE" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <ComboBox fx:id="colorOneInstrument" minWidth="100.0" prefWidth="100.0" />
+                                        <TextField fx:id="colorOneBaseNoteTextField" prefWidth="9999.0" />
+                                        <TextField fx:id="colorOneBaseDurationTextField" prefWidth="9999.0" />
+                                        <TextField fx:id="colorOneBaseVelocityTextField" prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="TWO" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <ComboBox fx:id="colorTwoInstrument" minWidth="100.0" prefWidth="100.0" />
+                                        <TextField fx:id="colorTwoBaseNoteTextField" prefWidth="9999.0" />
+                                        <TextField fx:id="colorTwoBaseDurationTextField" prefWidth="9999.0" />
+                                        <TextField fx:id="colorTwoBaseVelocityTextField" prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="THREE" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <ComboBox fx:id="colorThreeInstrument" minWidth="100.0" prefWidth="100.0" />
+                                        <TextField fx:id="colorThreeBaseNoteTextField" prefWidth="9999.0" />
+                                        <TextField fx:id="colorThreeBaseDurationTextField" prefWidth="9999.0" />
+                                        <TextField fx:id="colorThreeBaseVelocityTextField" prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="FOUR" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <ComboBox fx:id="colorFourInstrument" minWidth="100.0" prefWidth="100.0" />
+                                        <TextField fx:id="colorFourBaseNoteTextField" prefWidth="9999.0" />
+                                        <TextField fx:id="colorFourBaseDurationTextField" prefWidth="9999.0" />
+                                        <TextField fx:id="colorFourBaseVelocityTextField" prefWidth="9999.0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                              </children>
+                            </VBox>
+                          </children>
+                        </AnchorPane>
+                      </content>
+                    </ScrollPane>
+                    <Separator orientation="VERTICAL" />
+                    <Pane fx:id="mapExplorerPanel" prefWidth="9999.0" />
+                  </children>
+                </HBox>
+              </children>
+            </AnchorPane>
+          </content>
+        </Tab>
+        <Tab text="Graph generator">
+          <content>
+            <AnchorPane id="Content">
+              <children>
+                <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <children>
+                    <ScrollPane maxWidth="400.0" minWidth="400.0" prefWidth="400.0">
+                      <content>
+                        <AnchorPane id="Content">
+                          <children>
+                            <VBox maxWidth="390.0" minWidth="390.0" prefWidth="390.0">
+                              <children>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <CheckBox fx:id="fitToWindow" mnemonicParsing="false" text="fitToWindow" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="layout" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <ComboBox fx:id="graphLayout" onAction="#graphLayoutAction" pickOnBounds="false" prefWidth="9999.0">
+                                          <items>
+                                            <FXCollections fx:factory="observableArrayList">
+                                              <String fx:value="RECTANGULAR" />
+                                              <String fx:value="MX_HIERARCHICAL_LAYOUT" />
+                                            </FXCollections>
+                                          </items>
+                                        </ComboBox>
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="browsing" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Button mnemonicParsing="false" onAction="#drawFirstGraphAction" prefWidth="9999.0" text="|&lt;" />
+                                        <Button mnemonicParsing="false" onAction="#drawPreviousGraphAction" prefWidth="9999.0" text="&lt;" />
+                                        <Button mnemonicParsing="false" onAction="#drawRandomGraphAction" prefWidth="9999.0" text="\@" />
+                                        <Button mnemonicParsing="false" onAction="#drawNextGraphAction" prefWidth="9999.0" text="&gt;" />
+                                        <Button mnemonicParsing="false" onAction="#drawLastGraphAction" prefWidth="9999.0" text="&gt;|" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0" />
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <CheckBox fx:id="autoSpiral" mnemonicParsing="false" text="autoSpiral" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="startingVertex" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <TextField fx:id="startingVertexTextField" prefWidth="9999.0" text="0" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="\@" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Button mnemonicParsing="false" onAction="#spiralChainAction" prefWidth="9999.0" text="drawSpiralChain" />
+                                        <Button mnemonicParsing="false" onAction="#clearSpiralChainAction" prefWidth="9999.0" text="clear" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="iso" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Button mnemonicParsing="false" onAction="#findIsomorphicGraphsAction" prefWidth="9999.0" text="findIso" />
+                                        <Button mnemonicParsing="false" onAction="#stopFindIsomorphicGraphsAction" prefWidth="9999.0" text="stop" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                                <HBox prefHeight="25.0" spacing="2.0">
+                                  <children>
+                                    <HBox alignment="CENTER_RIGHT" maxWidth="100.0" minWidth="100.0" prefWidth="100.0">
+                                      <children>
+                                        <Label text="hamiltonian" />
+                                      </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefWidth="9999.0">
+                                      <children>
+                                        <Button mnemonicParsing="false" onAction="#hamiltonialCheckAction" prefWidth="9999.0" text="isHamiltonian?" />
+                                        <Button mnemonicParsing="false" onAction="#stopHamiltonialCheckAction" prefWidth="9999.0" text="stop" />
+                                      </children>
+                                    </HBox>
+                                  </children>
+                                </HBox>
+                              </children>
+                            </VBox>
+                          </children>
+                        </AnchorPane>
+                      </content>
+                    </ScrollPane>
+                    <Separator orientation="VERTICAL" prefHeight="200.0" />
+                    <Pane prefHeight="200.0" prefWidth="200.0" />
+                  </children>
+                </HBox>
+              </children>
+            </AnchorPane>
+          </content>
+        </Tab>
+        <Tab text="Home">
+          <content>
+            <AnchorPane id="Content">
+              <children>
+                <TextArea text="Info:&#10;&#10;- aaa&#10;- bbb" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+              </children>
+            </AnchorPane>
+          </content>
+        </Tab>
+      </tabs>
+    </TabPane>
+  </children>
+</AnchorPane>

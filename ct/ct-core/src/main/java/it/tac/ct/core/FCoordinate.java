@@ -3,6 +3,8 @@
  */
 package it.tac.ct.core;
 
+import java.io.Serializable;
+
 /**
  * @author Mario Stefanutti
  * @version September 2007
@@ -10,7 +12,7 @@ package it.tac.ct.core;
  *          It is used to make it easier to compute the graphical coordinates of the map
  *          </p>
  */
-public class FCoordinate implements Cloneable {
+public class FCoordinate implements Cloneable, Serializable {
 
     // Possible TYPEs of coordinates
     //
@@ -56,8 +58,7 @@ public class FCoordinate implements Cloneable {
     /**
      * @return The string representation of a coordinate (for debugging and output)
      */
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuffer sb = new StringBuffer();
 
         sb.append(fNumber);
@@ -78,8 +79,7 @@ public class FCoordinate implements Cloneable {
     /**
      * @return The cloned FCoordinate
      */
-    @Override
-    public FCoordinate clone() throws CloneNotSupportedException {
+    @Override public FCoordinate clone() throws CloneNotSupportedException {
         return (FCoordinate) super.clone();
     }
 }

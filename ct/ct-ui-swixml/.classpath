@@ -2,7 +2,6 @@
   <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
   <classpathentry kind="src" path="src/main/resources" excluding="**/*.java"/>
   <classpathentry kind="output" path="target/classes"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/larvalabs/collections-generic/4.01/collections-generic-4.01.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar"/>
   <classpathentry kind="src" path="/ct-core"/>
@@ -12,12 +11,8 @@
   <classpathentry kind="var" path="M2_REPO/it/tac/org/jgrapht/jgrapht/0.8.3/jgrapht-0.8.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/org/jgraph/jgraphx/1.10.0.3/jgraphx-1.10.0.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/javax/jnlp/jnlp/1.6/jnlp-1.6.jar"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/edu/jung/jung-algorithms/2.0.1/jung-algorithms-2.0.1.jar"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/edu/jung/jung-api/2.0.1/jung-api-2.0.1.jar"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/edu/jung/jung-graph-impl/2.0.1/jung-graph-impl-2.0.1.jar"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/edu/jung/jung-io/2.0.1/jung-io-2.0.1.jar"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/edu/jung/jung-visualization/2.0.1/jung-visualization-2.0.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/com/fifesoft/rsyntaxtextarea/1.4.1/rsyntaxtextarea-1.4.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/edu/ucla/sspace/2.0.3/sspace-2.0.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/org/swixml/swixml/2.5/swixml-2.5.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/org/swixml/swixml-contrib/2.5/swixml-contrib-2.5.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/com/apple/ui/1.2/ui-1.2.jar"/>

@@ -19,9 +19,12 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,11 +68,7 @@ import no.geosoft.cc.graphics.GStyle;
 import no.geosoft.cc.graphics.GText;
 import no.geosoft.cc.graphics.GWindow;
 
-import org.jgrapht.UndirectedGraph;
-import org.jgrapht.experimental.isomorphism.AdaptiveIsomorphismInspectorFactory;
-import org.jgrapht.experimental.isomorphism.GraphIsomorphismInspector;
 import org.jgrapht.ext.GraphMLExporter;
-import org.jgrapht.graph.DefaultEdge;
 import org.swixml.SwingEngine;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -80,15 +79,14 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 // TODO: Change "G" to JavaFX
 // TODO: Change swixml2 to JavaFX
 // TODO: Remove unused libraries: JUNG, ...
-// TODO: Spiral chains with sleep(), clear a graph, save to svg, manual vertex selection for spiral start vertex
-// TODO: saveAllGraphs... choose the directory where to save all graphs
+// TODO: Spiral chains with sleep(), save to svg, manual vertex selection for spiral start vertex
+// TODO: saveAllGraphs ... choose the directory where to save all graphs
 
 /**
  * @author Mario Stefanutti
  * @version September 2007
  */
-@SuppressWarnings("serial")
-public class MapsGeneratorMain extends JFrame implements GInteraction {
+@SuppressWarnings("serial") public class MapsGeneratorMain extends JFrame implements GInteraction {
 
     // The main class to generate maps
     //
@@ -193,20 +191,21 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JComboBox graphLayout = null;
     private final JTextField startingVertexTextField = null;
     private final JCheckBox autoSpiral = null;
+    private final JTextField isoOuterLoopTextField = null;
+    private final JTextField isoInnerLoopTextField = null;
+    private final JTextField isoRemovedTextField = null;
 
-    // Variables to solve some swings problem I don't know how to solve
+    // Variables to solve some swings problem, I don't know how to completely solve
     //
     private int graphExplorerOriginalWidth = -1; // I have many problems with resize(), partially solved this way
     private int graphExplorerOriginalHeight = -1;
 
-    // Graph, JGraphX and JGraphT objects
+    // Various to control graph visualization
     //
     private Graph4CT graph4CTCurrent = null;
-    private boolean stopFindIsomorphicGraphsRequested = false;
-    private boolean stopHamiltonialCheckRequested = false;
-    private Thread findIsoThread = null;
-    private final JTextField outerLoopTextField = null;
-    private final JTextField innerLoopTextField = null;
+    private Thread removeIsoThread = null;
+
+    // private boolean stopHamiltonialCheckRequested = false; // I used it only to verify something. All graphs simplified with 12 faces are all isomorphic
 
     /**
      * Main program
@@ -386,6 +385,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             while (true) {
                 refreshInfo();
                 refreshMemoryInfo();
+                refreshIsoInfo();
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException interruptedException) {
@@ -455,8 +455,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         /**
          * draw the map
          */
-        @Override
-        public void draw() {
+        @Override public void draw() {
 
             // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
             //
@@ -635,8 +634,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         /**
          * draw the map
          */
-        @Override
-        public void draw() {
+        @Override public void draw() {
 
             // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
             //
@@ -772,7 +770,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
             int pointX = 0; // Convenient variable to fill the double[]
 
-            // |......||
+            // |......|
             // |......|
             //
             // There are many ways to write down this formula. Pick yours, I decided for this one
@@ -1374,96 +1372,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    private final Runnable runnableHamiltonialCheck = new Runnable() {
-        public void run() {
-            hamiltonianCheck();
-        }
-    };
-
-    public Action stopHamiltonialCheckAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-
-            // Stop checking Hamilton-nicity
-            //
-            stopHamiltonialCheckRequested = true;
-        }
-    };
-
-    public Action hamiltonialCheckAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-
-            // Stop cheching hamilton-icity
-            //
-            stopHamiltonialCheckRequested = true;
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException interruptedException) {
-                interruptedException.printStackTrace();
-            }
-
-            // Reset the flag to stop the work
-            //
-            stopHamiltonialCheckRequested = false;
-
-            // Create the thread ... if not created
-            // Execute the thread ... if not already running
-            //
-            // Note: A java thread cannot be reused ... even if it terminated correctly
-            //
-            if (findIsoThread == null) {
-                findIsoThread = new Thread(runnableHamiltonialCheck);
-                findIsoThread.start();
-            } else if (findIsoThread.isAlive() == false) {
-                findIsoThread = new Thread(runnableHamiltonialCheck);
-                findIsoThread.start();
-            }
-        }
-    };
-
-    public void hamiltonianCheck() {
-
-        // Stop when the graph is not Hamiltonian (more than 1 spiral) or stop requested
-        //
-        // NOTE: It may be Hamiltonian with a different starting point
-        //
-        int numberOfSpiralChain = 1;
-
-        // Loop
-        //
-        for (int iMap = 0; (iMap < (mapsGenerator.maps.size() - 1)) && (numberOfSpiralChain == 1) && (stopHamiltonialCheckRequested == false); iMap++) {
-
-            // Move to map
-            //
-            map4CTCurrentIndex = iMap;
-            map4CTCurrent = mapsGenerator.maps.get(iMap);
-
-            // Draw the graph
-            //
-            drawCurrentGraph(false);
-
-            // Draw the spiral
-            //
-            numberOfSpiralChain = graph4CTCurrent.drawSpiralChain("default");
-
-            // Show the counter
-            //
-            if ((iMap % 100) == 0) {
-
-                // Update the inner counter
-                //
-                // innerLoopTextField.setText("" + iMap + "/" + mapsGenerator.maps.size());
-                System.out.println("Debug: " + iMap + "/" + mapsGenerator.maps.size());
-            }
-        }
-
-        // Check if all graphs had Hamiltonian paths
-        //
-        if (numberOfSpiralChain == 1) {
-            JOptionPane.showMessageDialog(null, "All graphs so far have an Hamiltonian path (using a default starting point)");
-        }
-    }
-
     public Action clearSpiralChainAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             if (map4CTCurrent != null) {
@@ -1472,27 +1380,37 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-    private final Runnable runnableFindIso = new Runnable() {
+    private final Runnable runnableRemoveIsoMaps = new Runnable() {
         public void run() {
-            findIsomorphicGraphs();
+            if (map4CTCurrentIndex != -1) {
+                mapsGenerator.removeIsomorphicMaps(mapsGenerator.maps, map4CTCurrentIndex);
+            } else {
+                mapsGenerator.removeIsomorphicMaps(mapsGenerator.maps, 0);
+            }
         }
     };
 
-    public Action stopFindIsomorphicGraphsAction = new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {
-
-            // Stop finding isomorphism (request the stop to the thread)
-            //
-            stopFindIsomorphicGraphsRequested = true;
+    private final Runnable runnableRemoveIsoTodoList = new Runnable() {
+        public void run() {
+            mapsGenerator.removeIsomorphicMaps(mapsGenerator.todoList, 0);
         }
     };
 
-    public Action findIsomorphicGraphsAction = new AbstractAction() {
+    public Action stopRemovingIsoAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
-            // Stop finding isomorphism
+            // Stop removing isomorphic maps (request the stop to the thread)
             //
-            stopFindIsomorphicGraphsRequested = true;
+            mapsGenerator.stopRemovingIsoRequested = true;
+        }
+    };
+
+    public Action removeIsoMapsAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // Stop already running threads
+            //
+            mapsGenerator.stopRemovingIsoRequested = true;
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException interruptedException) {
@@ -1501,98 +1419,53 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
 
             // Reset the flag to stop the work
             //
-            stopFindIsomorphicGraphsRequested = false;
+            mapsGenerator.stopRemovingIsoRequested = false;
 
             // Create the thread ... if not created
             // Execute the thread ... if not already running
             //
             // Note: A java thread cannot be reused ... even if it terminated correctly
             //
-            if (findIsoThread == null) {
-                findIsoThread = new Thread(runnableFindIso);
-                findIsoThread.start();
-            } else if (findIsoThread.isAlive() == false) {
-                findIsoThread = new Thread(runnableFindIso);
-                findIsoThread.start();
+            if (removeIsoThread == null) {
+                removeIsoThread = new Thread(runnableRemoveIsoMaps);
+                removeIsoThread.start();
+            } else if (removeIsoThread.isAlive() == false) {
+                removeIsoThread = new Thread(runnableRemoveIsoMaps);
+                removeIsoThread.start();
             }
         }
     };
 
-    /**
-     * Find all isomorphic graphs
-     */
-    public void findIsomorphicGraphs() {
+    public Action removeIsoTodoListAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
 
-        // Loop
-        //
-        for (int iMapOuter = 0; (iMapOuter < (mapsGenerator.maps.size() - 1)) && (stopFindIsomorphicGraphsRequested == false); iMapOuter++) {
-            Map4CT map4CTOuter = mapsGenerator.maps.get(iMapOuter);
-
-            // Update the outer counter
+            // Stop already running threads
             //
-            // SwingUtilities.invokeLater(new Runnable() {
-            // public void run() {
-            // outerLoopTextField.setText("" + iMapOuter + "/" + mapsGenerator.maps.size());
-            // }
-            // }); xxx come passo dei parametri ad un Runnable?
-            System.out.println("" + (iMapOuter + 1) + "/" + mapsGenerator.maps.size());
+            mapsGenerator.stopRemovingIsoRequested = true;
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
 
-            // First graph
+            // Reset the flag to stop the work
             //
-            Graph4CT graph4CTOuter = new Graph4CT();
-            graph4CTOuter.init();
-            graph4CTOuter.drawGraph(map4CTOuter);
-            UndirectedGraph<String, DefaultEdge> graphT4CTOuter = graph4CTOuter.getJGraphT();
+            mapsGenerator.stopRemovingIsoRequested = false;
 
-            // Loop
+            // Create the thread ... if not created
+            // Execute the thread ... if not already running
             //
-            for (int iMapInner = iMapOuter + 1; (iMapInner < mapsGenerator.maps.size()) && (stopFindIsomorphicGraphsRequested == false); iMapInner++) {
-                Map4CT map4CTInner = mapsGenerator.maps.get(iMapInner);
-
-                if ((iMapInner % 100) == 0) {
-
-                    // Update the inner counter
-                    //
-                    // innerLoopTextField.setText("" + iMapInner + "/" + mapsGenerator.maps.size());
-                    System.out.println("" + (iMapInner + 1) + "/" + mapsGenerator.maps.size());
-                }
-
-                // Maps have different number of vertices?
-                //
-                if (map4CTOuter.faces.size() == map4CTInner.faces.size()) {
-
-                    // Second graph
-                    //
-                    Graph4CT graph4CTInner = new Graph4CT();
-                    graph4CTInner.init();
-                    graph4CTInner.drawGraph(map4CTInner);
-                    UndirectedGraph<String, DefaultEdge> graphT4CTInner = graph4CTInner.getJGraphT();
-
-                    // To speed up the process and to avoid a problem with JGraphT (exception of graphs with different number of edges), I used these checks
-                    //
-                    if (graph4CTOuter.getJGraphT().edgeSet().size() == graph4CTInner.getJGraphT().edgeSet().size()) {
-
-                        // Iso?
-                        //
-                        try {
-                            GraphIsomorphismInspector iso = AdaptiveIsomorphismInspectorFactory.createIsomorphismInspector(graphT4CTOuter, graphT4CTInner, null, null);
-                            if (iso.isIsomorphic() == true) {
-                                System.out.println("Debug: iso found: " + iMapOuter + " " + iMapInner);
-                            }
-                        } catch (Exception exception) {
-
-                            // In case of an exception, I want to analyze the graphs ... so I'm about to save them
-                            //
-                            JOptionPane.showMessageDialog(this, "Error in verifying the isomorphism. Graphs will be saved for analysis");
-                            saveGraphToGraphML(graph4CTOuter);
-                            saveGraphToGraphML(graph4CTInner);
-                            exception.printStackTrace();
-                        }
-                    }
-                }
+            // Note: A java thread cannot be reused ... even if it terminated correctly
+            //
+            if (removeIsoThread == null) {
+                removeIsoThread = new Thread(runnableRemoveIsoTodoList);
+                removeIsoThread.start();
+            } else if (removeIsoThread.isAlive() == false) {
+                removeIsoThread = new Thread(runnableRemoveIsoTodoList);
+                removeIsoThread.start();
             }
         }
-    }
+    };
 
     public Action saveMapToImageAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
@@ -1687,6 +1560,91 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 } catch (IOException exception) {
                     exception.printStackTrace();
                 }
+            }
+        }
+    };
+
+    public Action saveAllMapsAndTodoListAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            try {
+                String fileName = "save-all-maps.serialized";
+                fileChooser.setSelectedFile(new File(fileName));
+                if (fileChooser.showOpenDialog(graphExplorerPanel) == JFileChooser.APPROVE_OPTION) {
+
+                    // Choose the filename
+                    //
+                    File fileToSave = fileChooser.getSelectedFile();
+                    File fileToSaveMaps = new File(fileToSave.getAbsolutePath() + ".maps");
+                    File fileToSaveTodoList = new File(fileToSave.getAbsolutePath() + ".todoList");
+
+                    // Write the maps to the output file and close the file stream
+                    //
+                    FileOutputStream outputStreamMaps = new FileOutputStream(fileToSaveMaps);
+                    ObjectOutputStream objectOutputStreamMaps = new ObjectOutputStream(outputStreamMaps);
+                    objectOutputStreamMaps.writeObject(mapsGenerator.maps);
+                    objectOutputStreamMaps.flush();
+                    outputStreamMaps.close();
+
+                    FileOutputStream outputStreamTodoList = new FileOutputStream(fileToSaveTodoList);
+                    ObjectOutputStream objectOutputStreamTodoList = new ObjectOutputStream(outputStreamTodoList);
+                    objectOutputStreamTodoList.writeObject(mapsGenerator.todoList);
+                    objectOutputStreamTodoList.flush();
+                    outputStreamTodoList.close();
+                }
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+    };
+
+    public Action loadAllMapsAndTodoListAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // Read the metadata from a saved image
+            //
+            fileChooser.setSelectedFile(new File("The name without .maps and .todoList"));
+            if (fileChooser.showOpenDialog(gWindow.getCanvas()) == JFileChooser.APPROVE_OPTION) {
+
+                // Choose the filename
+                //
+                File fileToRead = fileChooser.getSelectedFile();
+                File fileToReadMaps = new File(fileToRead.getAbsolutePath() + ".maps");
+                File fileToReadTodoList = new File(fileToRead.getAbsolutePath() + ".todoList");
+                try {
+
+                    // Read the maps
+                    //
+                    FileInputStream inputStreamMaps = new FileInputStream(fileToReadMaps);
+                    ObjectInputStream objectInputStreamMaps = new ObjectInputStream(inputStreamMaps);
+                    mapsGenerator.maps = (ArrayList<Map4CT>) objectInputStreamMaps.readObject();
+                    inputStreamMaps.close();
+
+                    // Read the todoList
+                    //
+                    FileInputStream inputStreamTodoList = new FileInputStream(fileToReadTodoList);
+                    ObjectInputStream objectInputStreamTodoList = new ObjectInputStream(inputStreamTodoList);
+                    mapsGenerator.todoList = (ArrayList<Map4CT>) objectInputStreamTodoList.readObject();
+                    inputStreamTodoList.close();
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+
+                // It behaves as the play (generation) action - At the end of the generation thread
+                //
+                startElaborationButton.setEnabled(!(mapsGenerator.todoList.size() == 0));
+                pauseElaborationButton.setEnabled(false);
+                resetElaborationButton.setEnabled(true);
+                filterLessThanFourElaborationButton.setEnabled(true);
+                filterLessThanFiveElaborationButton.setEnabled(true);
+                filterLessThanFacesElaborationButton.setEnabled(true);
+                copyMapsToTodoElaborationButton.setEnabled(true);
+                createMapFromTextRepresentationButton.setEnabled(true);
+                getTextRepresentationOfCurrentMapButton.setEnabled(true);
+                loadMapFromAPreviouslySavedImageButton.setEnabled(true);
+
+                refreshInfo();
+                drawCurrentMap();
             }
         }
     };
@@ -2436,6 +2394,15 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         // Return the style
         //
         return faceStyle;
+    }
+
+    /**
+     * Refresh runtime iso info
+     */
+    public synchronized void refreshIsoInfo() {
+        isoOuterLoopTextField.setText("" + mapsGenerator.isoOuterLoop);
+        isoInnerLoopTextField.setText("" + mapsGenerator.isoInnerLoop);
+        isoRemovedTextField.setText("" + mapsGenerator.isoRemoved);
     }
 
     /**

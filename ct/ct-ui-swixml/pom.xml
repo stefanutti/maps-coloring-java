@@ -69,37 +69,6 @@
             <artifactId>ui</artifactId>
             <version>1.2</version>
         </dependency>
-        <!-- JUNG -->
-        <dependency>
-            <groupId>it.tac.edu.jung</groupId>
-            <artifactId>jung-algorithms</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>it.tac.edu.jung</groupId>
-            <artifactId>jung-api</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>it.tac.edu.jung</groupId>
-            <artifactId>jung-graph-impl</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>it.tac.edu.jung</groupId>
-            <artifactId>jung-io</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>it.tac.edu.jung</groupId>
-            <artifactId>jung-visualization</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>it.tac.larvalabs</groupId>
-            <artifactId>collections-generic</artifactId>
-            <version>4.01</version>
-        </dependency>
         <!-- JGRAPHT -->
         <dependency>
             <groupId>it.tac.org.jgrapht</groupId>
@@ -107,15 +76,16 @@
             <version>0.8.3</version>
         </dependency>
         <!-- JGRAPHX -->
-        <!-- dependency>
-            <groupId>it.tac.org.jgraph</groupId>
-            <artifactId>jgraph</artifactId>
-            <version>0.8.3</version>
-        </dependency -->
         <dependency>
             <groupId>it.tac.org.jgraph</groupId>
             <artifactId>jgraphx</artifactId>
             <version>1.10.0.3</version>
+        </dependency>
+        <!-- SSPACE -->
+        <dependency>
+            <groupId>it.tac.edu.ucla</groupId>
+            <artifactId>sspace</artifactId>
+            <version>2.0.3</version>
         </dependency>
     </dependencies>
 

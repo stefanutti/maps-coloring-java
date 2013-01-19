@@ -3,6 +3,7 @@
  */
 package it.tac.ct.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
  *          The regular map
  *          </p>
  */
-public class Map4CT implements Cloneable {
+public class Map4CT implements Cloneable, Serializable {
 
     // The Faces of the map (ordered as inserted)
     //
@@ -25,6 +26,10 @@ public class Map4CT implements Cloneable {
     // b = begin e = end - = not visible
     //
     public SequenceOfCoordinates sequenceOfCoordinates = new SequenceOfCoordinates();
+
+    // Mark this map to be removed (used when removing lots of maps to avoid shifting of list elements every time an item is removed)
+    //
+    public boolean removeLater = false;
 
     /**
      * Standard constructor
@@ -310,8 +315,7 @@ public class Map4CT implements Cloneable {
     /**
      * @return The deep cloned map
      */
-    @Override
-    public Map4CT clone() throws CloneNotSupportedException {
+    @Override public Map4CT clone() throws CloneNotSupportedException {
 
         // The cloned map to return
         //
@@ -328,8 +332,7 @@ public class Map4CT implements Cloneable {
         return clonedMap;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return sequenceOfCoordinates.sequence.toString().substring(1, sequenceOfCoordinates.sequence.toString().length() - 1);
     }
 }
