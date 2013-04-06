@@ -17,6 +17,10 @@ import java.util.List;
  */
 public class Map4CT implements Cloneable, Serializable {
 
+    // For serialization
+    //
+    private static final long serialVersionUID = 6027642330284734500L;
+
     // The Faces of the map (ordered as inserted)
     //
     public List<F> faces = new ArrayList<F>();
@@ -31,8 +35,19 @@ public class Map4CT implements Cloneable, Serializable {
     //
     public boolean removeLater = false;
 
+    // When graphs are isomorphic they not only have the same number of faces, but also the same number of F2, F3, ...
+    // This condition is not sufficient ... but necessary ... and it speed the iso check
+    //
+    // These values are updated only when required by setInvariantToSpeedIsoCheck()
+    //
+    public int nF2 = 0;
+    public int nF3 = 0;
+    public int nF4 = 0;
+    public int nF5 = 0;
+    public int nF6 = 0;
+
     /**
-     * Standard constructor
+     * Constructor
      */
     public Map4CT() {
 
@@ -120,8 +135,55 @@ public class Map4CT implements Cloneable, Serializable {
     }
 
     /**
+     * When graphs are isomorphic they not only have the same number of faces, but also the same number of F2, F3, ...
+     * This condition is not sufficient ... but necessary ... and it speed the iso check
+     */
+    public void setInvariantToSpeedIsoCheck() {
+
+        // Reset the invariants
+        //
+        nF2 = 0;
+        nF3 = 0;
+        nF4 = 0;
+        nF5 = 0;
+        nF6 = 0;
+
+        // Set the invariants of each face type
+        //
+        for (int iF = 0; iF < faces.size(); iF++) {
+            F face = faces.get(iF);
+
+            if (face.cardinality == 2)
+                nF2++;
+            else if (face.cardinality == 3)
+                nF3++;
+            else if (face.cardinality == 4)
+                nF4++;
+            else if (face.cardinality == 5)
+                nF5++;
+            else if (face.cardinality == 6)
+                nF6++;
+        }
+
+        // Set the invariant for the cardinality of the ocean
+        //
+        int oceanCardinality = sequenceOfCoordinates.numberOfVisibleEdgesAtBorders();
+
+        if (oceanCardinality == 2)
+            nF2++;
+        else if (oceanCardinality == 3)
+            nF3++;
+        else if (oceanCardinality == 4)
+            nF4++;
+        else if (oceanCardinality == 5)
+            nF5++;
+        else if (oceanCardinality == 6)
+            nF6++;
+    }
+
+    /**
      * @param map
-     *            The map to print
+     *            The map to print to standard output
      */
     public static void printDetailedMap(Map4CT map) {
 
@@ -229,6 +291,8 @@ public class Map4CT implements Cloneable, Serializable {
      */
     public boolean isFaceCorrectlyColoredRespectToPreviousNeighbors(F faceToAnalyze) {
 
+        // For each face check the neighbors
+        //
         boolean isCorrectlyColored = true;
 
         for (int i = 0; ((i < faceToAnalyze.neighbors.size()) && (isCorrectlyColored == true)); i++) {
@@ -243,13 +307,13 @@ public class Map4CT implements Cloneable, Serializable {
     /**
      * @param faceNumber
      * @return true if the face has an access to the ocean
+     * 
+     * TODO: Document it better
      */
     public boolean isFaceFacingTheOcean(int faceNumber) {
 
         boolean isFaceFacingTheOcean = false;
 
-        // Loop the list of coordinates, skipping the Begin and End of the first F (Face that is always visible)
-        //
         for (int iCoordinate = 0; (iCoordinate < sequenceOfCoordinates.sequence.size()) && (isFaceFacingTheOcean == false); iCoordinate++) {
             if (sequenceOfCoordinates.fNumberAtIndex(iCoordinate, 0) == faceNumber) {
                 isFaceFacingTheOcean = true;
@@ -259,6 +323,9 @@ public class Map4CT implements Cloneable, Serializable {
         return isFaceFacingTheOcean;
     }
 
+    /**
+     * Reset the colors of this map
+     */
     public void resetColors() {
 
         for (int i = 0; i < faces.size(); i++) {
@@ -282,6 +349,31 @@ public class Map4CT implements Cloneable, Serializable {
             if (faces.get(iF).cardinality == cardinality) {
                 numberOfFWithGivenCardinality++;
             }
+        }
+
+        // Return
+        //
+        return numberOfFWithGivenCardinality;
+    }
+
+    /**
+     * @param cardinality
+     * @return Returns the number of F with a given cardinality (considering the ocean)
+     */
+    public int numberOfFWithGivenCardinalityConsideringTheOcean(int cardinality) {
+
+        // Some variables
+        //
+        int numberOfFWithGivenCardinality = 0;
+
+        // Count the Fs with a given cardinality
+        //
+        numberOfFWithGivenCardinality = numberOfFWithGivenCardinality(cardinality);
+
+        // Add the cardinality of the ocean
+        //
+        if (cardinality == sequenceOfCoordinates.numberOfVisibleEdgesAtBorders()) {
+            numberOfFWithGivenCardinality++;
         }
 
         // Return
@@ -315,7 +407,8 @@ public class Map4CT implements Cloneable, Serializable {
     /**
      * @return The deep cloned map
      */
-    @Override public Map4CT clone() throws CloneNotSupportedException {
+    @Override
+    public Map4CT clone() throws CloneNotSupportedException {
 
         // The cloned map to return
         //
@@ -332,7 +425,8 @@ public class Map4CT implements Cloneable, Serializable {
         return clonedMap;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return sequenceOfCoordinates.sequence.toString().substring(1, sequenceOfCoordinates.sequence.toString().length() - 1);
     }
 }

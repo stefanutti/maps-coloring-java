@@ -71,6 +71,6 @@ public final class SSpaceGraphIsomorphicTest {
     }
 
     public static void main(String[] args) {
-        SSpaceGraphIsomorphicTest test = new SSpaceGraphIsomorphicTest();
+        new SSpaceGraphIsomorphicTest();
     }
 }

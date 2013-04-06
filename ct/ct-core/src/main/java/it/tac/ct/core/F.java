@@ -16,7 +16,11 @@ import java.util.List;
  */
 public class F implements Cloneable, Serializable {
 
-    // Number of Edges of the F (type of F in the Euler formula): F = F2 + F3 + F4 + F5 + ...
+	// For serialization
+    //
+	private static final long serialVersionUID = -467955001091349161L;
+
+	// Number of Edges of the F (type of F in the Euler formula): F = F2 + F3 + F4 + F5 + ...
     //
     public short cardinality = 0;
 

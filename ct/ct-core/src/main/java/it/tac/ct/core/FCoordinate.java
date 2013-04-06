@@ -14,7 +14,11 @@ import java.io.Serializable;
  */
 public class FCoordinate implements Cloneable, Serializable {
 
-    // Possible TYPEs of coordinates
+	// For serialization
+    //
+	private static final long serialVersionUID = -3384159842935599015L;
+
+	// Possible TYPEs of coordinates
     //
     public static enum TYPE {
         BEGIN, END

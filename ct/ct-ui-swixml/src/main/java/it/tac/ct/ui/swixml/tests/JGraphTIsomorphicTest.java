@@ -7,7 +7,8 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.SimpleGraph;
 
 public final class JGraphTIsomorphicTest {
-    private JGraphTIsomorphicTest() {
+    @SuppressWarnings("rawtypes")
+	private JGraphTIsomorphicTest() {
 
         // Bug: In this case with number of egdes different, it goes in exception instead of returning false
         //
@@ -24,10 +25,10 @@ public final class JGraphTIsomorphicTest {
 
         // Bug: Infinite loop?
         //
-        UndirectedGraph<String, DefaultEdge> graph04 = createGraph04();
-        UndirectedGraph<String, DefaultEdge> graph05 = createGraph05();
+        UndirectedGraph<String, DefaultEdge> graph01 = createGraph01();
+        UndirectedGraph<String, DefaultEdge> graph02 = createGraph02();
 
-        GraphIsomorphismInspector iso3_4 = AdaptiveIsomorphismInspectorFactory.createIsomorphismInspector(graph04, graph05, null, null);
+        GraphIsomorphismInspector iso3_4 = AdaptiveIsomorphismInspectorFactory.createIsomorphismInspector(graph01, graph02, null, null);
         boolean isoResult3_4 = iso3_4.isIsomorphic();
         if (isoResult3_4) {
             System.out.println("Graphs are isomorphic.");
@@ -37,96 +38,10 @@ public final class JGraphTIsomorphicTest {
     }
 
     public static void main(String[] args) {
-        JGraphTIsomorphicTest test = new JGraphTIsomorphicTest();
+        new JGraphTIsomorphicTest();
     }
 
     private UndirectedGraph<String, DefaultEdge> createGraph01() {
-        UndirectedGraph<String, DefaultEdge> g = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
-
-        String v1 = "1";
-        String v2 = "2";
-        String v3 = "3";
-        String v4 = "4";
-        String v5 = "5";
-        String v6 = "6";
-
-        g.addVertex(v1);
-        g.addVertex(v2);
-        g.addVertex(v3);
-        g.addVertex(v4);
-        g.addVertex(v5);
-        g.addVertex(v6);
-
-        g.addEdge(v1, v2);
-        g.addEdge(v3, v1);
-        g.addEdge(v1, v4);
-        g.addEdge(v5, v3);
-        g.addEdge(v3, v6);
-        g.addEdge(v5, v6);
-        g.addEdge(v6, v4);
-        g.addEdge(v4, v2);
-        g.addEdge(v5, v2);
-
-        return g;
-    }
-
-    private UndirectedGraph<String, DefaultEdge> createGraph02() {
-        UndirectedGraph<String, DefaultEdge> g = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
-
-        String v1 = "1";
-        String v2 = "2";
-        String v3 = "3";
-        String v4 = "4";
-        String v5 = "5";
-        String v6 = "6";
-
-        g.addVertex(v1);
-        g.addVertex(v2);
-        g.addVertex(v3);
-        g.addVertex(v4);
-        g.addVertex(v5);
-        g.addVertex(v6);
-
-        g.addEdge(v1, v2);
-        g.addEdge(v3, v4);
-        g.addEdge(v5, v6);
-        g.addEdge(v3, v5);
-        g.addEdge(v6, v4);
-        g.addEdge(v4, v1);
-        g.addEdge(v3, v2);
-
-        return g;
-    }
-
-    private UndirectedGraph<String, DefaultEdge> createGraph02a() {
-        UndirectedGraph<String, DefaultEdge> g = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
-
-        String v1 = "1";
-        String v2 = "2";
-        String v3 = "3";
-        String v4 = "4";
-        String v5 = "5";
-        String v6 = "6";
-
-        g.addVertex(v1);
-        g.addVertex(v2);
-        g.addVertex(v3);
-        g.addVertex(v4);
-        g.addVertex(v5);
-        g.addVertex(v6);
-
-        g.addEdge(v1, v2);
-        g.addEdge(v3, v4);
-        g.addEdge(v5, v6);
-        g.addEdge(v3, v5);
-        g.addEdge(v6, v4);
-        g.addEdge(v4, v1);
-        g.addEdge(v3, v2);
-
-        return g;
-    }
-
-    private UndirectedGraph<String, DefaultEdge> createGraph04() {
         UndirectedGraph<String, DefaultEdge> g = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
 
         String v1 = "1";
@@ -191,7 +106,7 @@ public final class JGraphTIsomorphicTest {
         return g;
     }
 
-    private UndirectedGraph<String, DefaultEdge> createGraph05() {
+    private UndirectedGraph<String, DefaultEdge> createGraph02() {
         UndirectedGraph<String, DefaultEdge> g = new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
 
         String v1 = "1";

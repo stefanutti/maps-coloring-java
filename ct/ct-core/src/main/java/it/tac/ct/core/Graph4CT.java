@@ -215,6 +215,9 @@ public class Graph4CT {
         jGraph4CTStylesheet.putCellStyle("MyEdgeStyle", edgeStyle);
     }
 
+    /**
+     * @return the graph layout
+     */
     public GRAPH_LAYOUT getGraphLayouts() {
         return graphLayout;
     }
@@ -460,6 +463,11 @@ public class Graph4CT {
         return spiralChainNumber;
     }
 
+    /**
+     * Set the color of the first vertex. It may be colored differently
+     * 
+     * @param currentVertex
+     */
     public void setColorOfUsedFirstVertex(Vertex currentVertex) {
         currentVertex.color = Vertex.FIRST_USED_FILL_COLOR;
         mxCell vertexToColor = (mxCell) ((mxGraphModel) jGraph4CT.getModel()).getCell(currentVertex.toString());
@@ -468,6 +476,11 @@ public class Graph4CT {
         jGraph4CTComponent.refresh();
     }
 
+    /**
+     * Set the color of the vertex
+     * 
+     * @param currentVertex
+     */
     public void setColorOfUsedVertex(Vertex currentVertex) {
         currentVertex.color = Vertex.USED_COLOR;
         mxCell vertexToColor = (mxCell) ((mxGraphModel) jGraph4CT.getModel()).getCell(currentVertex.toString());
@@ -476,6 +489,11 @@ public class Graph4CT {
         jGraph4CTComponent.refresh();
     }
 
+    /**
+     * Set the color of the edge
+     * 
+     * @param currentEdge
+     */
     public void setColorOfUsedEdge(Edge currentEdge) {
         currentEdge.color = Edge.USED_COLOR;
         mxCell edgeToColor = (mxCell) ((mxGraphModel) jGraph4CT.getModel()).getCell(currentEdge.toString());
@@ -530,13 +548,15 @@ public class Graph4CT {
     }
 
     /**
-     * Create the graph (update jGraph4CT) from the sequence of coordinates of the current map: 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
+     * Draw the graph to the model
+     * 
+     * @param map4CTToDraw
      */
-    public void drawGraph(Map4CT map4CTToElaborate) {
+    public void drawGraph(Map4CT map4CTToDraw) {
 
         // Set the map to elaborate
         //
-        map4CT = map4CTToElaborate;
+        map4CT = map4CTToDraw;
 
         // Temp variable
         //
@@ -727,7 +747,7 @@ public class Graph4CT {
      * @param verticesMapToUpdate
      * @param iFace
      * @param fCoordinateType
-     * @return
+     * @return the new vertex
      */
     public Vertex addVertexToGraph(Map<String, Vertex> verticesMapToUpdate, int iFace, FCoordinate.TYPE fCoordinateType) {
 

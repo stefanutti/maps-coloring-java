@@ -13,9 +13,12 @@ import javax.swing.DefaultComboBoxModel;
  */
 public class SwixmlComboboxInstrument extends DefaultComboBoxModel {
 
-    private static final long serialVersionUID = 1L;
-
     /**
+	 * For serialization
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * Constructor.
      */
     public SwixmlComboboxInstrument() {

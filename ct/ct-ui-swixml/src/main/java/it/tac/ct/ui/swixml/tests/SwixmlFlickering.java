@@ -8,7 +8,6 @@ import java.awt.Font;
 import java.net.URL;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.RepaintManager;
 
 import no.geosoft.cc.geometry.Geometry;
@@ -17,22 +16,21 @@ import no.geosoft.cc.graphics.GPosition;
 import no.geosoft.cc.graphics.GSegment;
 import no.geosoft.cc.graphics.GStyle;
 import no.geosoft.cc.graphics.GText;
-import no.geosoft.cc.graphics.GWindow;
 
 import org.swixml.SwingEngine;
 
 public class SwixmlFlickering extends JFrame {
 
-    private final JPanel mapExplorer = null;
+    /**
+	 * For serialization
+	 */
+	private static final long serialVersionUID = 1L;
 
     public SwixmlFlickering() {
         try {
             SwingEngine<SwixmlFlickering> engine = new SwingEngine<SwixmlFlickering>(this);
             URL configFileURL = this.getClass().getClassLoader().getResource("config/tests/4ct-test-flickering.xml");
             engine.render(configFileURL);
-
-            // Create the graphic canvas
-            GWindow window = new GWindow();
 
             // HERE IS THE WORKAROUND
             //

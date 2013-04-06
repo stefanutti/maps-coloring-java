@@ -16,7 +16,11 @@ import java.util.List;
  */
 public class SequenceOfCoordinates implements Cloneable, Serializable {
 
-    // The structure that represents the sequence of coordinates
+	// For serialization
+    //
+	private static final long serialVersionUID = 4054291256638132187L;
+
+	// The structure that represents the sequence of coordinates
     //
     public List<FCoordinate> sequence = new ArrayList<FCoordinate>();
 

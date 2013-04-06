@@ -23,16 +23,21 @@
                         <titledseparator constraints="1,1,3,1" />
                         <label constraints="1,3" text="slowdownMillisec" />
                         <textfield constraints="3,3,1,1" toolTipText="Slowdown activities" text="0" id="slowdownMillisecTextField" />
-                        <label constraints="1,5" text="elaration" />
+                        <label constraints="1,5" text="elaboration" />
                         <hbox constraints="3,5,1,1">
                             <checkbox toolTipText="Log debugging info to stdout" text="logWhilePopulate" selected="false" id="logWhilePopulate" action="logWhilePopulateAction" />
                             <checkbox toolTipText="Random generation of maps" text="random" selected="false" id="randomElaboration" />
                             <checkbox toolTipText="Process all maps" text="processAll" selected="true" id="processAll" />
                         </hbox>
-                        <label constraints="1,7" text="maxMethod" />
-                        <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxMaxMethod" constraints="3,7,1,1" id="maxMethod" />
-                        <label constraints="1,9" text="maxNumber" />
-                        <textfield constraints="3,9,1,1" text="12" id="maxNumberTextField" />
+                        <label constraints="1,7" text="max Method/#" />
+                        <hbox constraints="3,7,1,1">
+	                        <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxMaxMethod" id="maxMethod" />
+	                        <textfield text="20" id="maxNumberTextField" />
+                        </hbox>
+                        <label constraints="1,9" text="isomorphic" />
+                        <hbox constraints="3,9,1,1">
+                            <checkbox toolTipText="Remove isomorphic maps while generating maps" text="removeIsoWhilePopulate" selected="true" id="removeIsoWhilePopulate" action="removeIsoWhilePopulateAction" />
+                        </hbox>
 
                         <titledseparator constraints="1,11,3,1" />
                         <label constraints="1,13" text="generate" />
@@ -62,8 +67,9 @@
                             <button toolTipText="Load the map from a previously saved image (with metadata)" text="load" enabled="true" action="loadMapFromAPreviouslySavedImageAction" id="loadMapFromAPreviouslySavedImageButton" />
                         </hbox>
                         <hbox constraints="3,21,1,1">
-                            <button toolTipText="Save maps and todoList" text="Save maps + todoList" enabled="true" action="saveAllMapsAndTodoListAction" />
-                            <button toolTipText="Load maps and todoList" text="Load maps + todoList" enabled="true" action="loadAllMapsAndTodoListAction" />                            
+                            <button text="save maps + todo" toolTipText="Save maps and todoList" enabled="true" action="saveAllMapsAndTodoListAction" />
+                            <button text="load maps" toolTipText="Load maps" enabled="true" action="loadAllMapsAction" />
+                            <button text="load todo" toolTipText="Load todoList" enabled="true" action="loadAllTodoListAction" />
                         </hbox>
 
                         <titledseparator constraints="1,23,3,1" />
@@ -98,20 +104,23 @@
                             <textfield text="0" toolTipText="Maps removed" editable="false" id="mapsRemovedTextField" />
                             <textfield text="1" toolTipText="Size of the list of maps to elaborate" editable="false" id="todoListSizeTextField" />
                         </hbox>
+                        <label constraints="1,37" text="memory info" />
                         <hbox constraints="3,37,1,1">
                             <textfield text="0" toolTipText="totalMemory" editable="false" id="totalMemoryTextField" />
                             <textfield text="0" toolTipText="maxMemory" editable="false" id="maxMemoryTextField" />
                             <textfield text="0" toolTipText="freeMemory" editable="false" id="freeMemoryTextField" />
                         </hbox>
+                        <label constraints="1,39" text="isomorphic" />
                         <hbox constraints="3,39,1,1">
                             <button text="- iso in maps" enabled="true" toolTipText="Remove isomorphic maps" action="removeIsoMapsAction" />
-                            <button text="- iso in todoList" enabled="true" toolTipText="Remove isomorphic todoList maps" action="removeIsoTodoListAction" />
+                            <button text="- iso in todo" enabled="true" toolTipText="Remove isomorphic todoList maps" action="removeIsoTodoListAction" />
                             <button text="stop" enabled="true" toolTipText="stop removing isomorphic maps" action="stopRemovingIsoAction" />
                          </hbox>
+                        <label constraints="1,41" text="counters" />
                         <hbox constraints="3,41,1,1">
-                            <textfield text="0" toolTipText="Outer loop" editable="false" id="isoOuterLoopTextField" />
-                            <textfield text="0" toolTipText="Inner loop" editable="false" id="isoInnerLoopTextField" />
-                            <textfield text="0" toolTipText="Removed duplicated graphs (isomorphic)" editable="0" id="isoRemovedTextField" />
+                            <textfield text="0" toolTipText="Outer loop counter to show progression" editable="false" id="isoOuterLoopTextField" />
+                            <textfield text="0" toolTipText="Inner loop counter to show progression" editable="false" id="isoInnerLoopTextField" />
+                            <textfield text="0" toolTipText="Removed duplicated graphs (isomorphic) during last generation" editable="0" id="isoRemovedTextField" />
                          </hbox>
 
                         <titledseparator constraints="1,43,3,1" />
@@ -182,6 +191,7 @@
                         <hbox constraints="3,13,1,1">
                             <button text="png" action="saveGraphToImageAction" />
                             <button text="GraphML" action="saveGraphToGraphMLAction" />
+                            <button text="all to GraphML" action="saveAllGraphToGraphMLAction" />
                          </hbox>
                         <!-- hbox constraints="3,19,1,1">
                             <button text="Hamiltonian?" enabled="true" toolTipText="Check if all graphs have Hamiltonian paths" action="hamiltonialCheckAction" />

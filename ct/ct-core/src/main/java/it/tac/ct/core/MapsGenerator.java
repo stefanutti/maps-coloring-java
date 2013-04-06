@@ -18,17 +18,20 @@ import edu.ucla.sspace.graph.isomorphism.TypedVF2IsomorphismTester;
  */
 public class MapsGenerator {
 
+    // How the elaboration has to be carried
+    //
     public enum MAX_METHOD {
-        MAPS, F, FIXED_MAPS_LEN
+        F, MAPS, FIXED_MAPS_LEN
     };
 
-    // Control parameters
+    // Various control parameters
     //
-    public int slowdownMillisec = 0; // May be needed to slow down the process (what for? I don't know)
+    public int slowdownMillisec = 0; // May be needed to slow down the process (what for? I don't know :-))
     public boolean logWhilePopulate = false;
     public boolean randomElaboration = false;
     public boolean processAll = true;
-    public MAX_METHOD maxMethod = MAX_METHOD.MAPS;
+    public MAX_METHOD maxMethod = MAX_METHOD.F;
+    public boolean removeIsoWhilePopulate = true;
     public int maxNumber = 0;
 
     // Maps removed during elaboration. These would have been removed anyway running removeMapsWithCardinalityLessThanFour after elaboration
@@ -52,7 +55,7 @@ public class MapsGenerator {
     public ArrayList<Map4CT> todoList = new ArrayList<Map4CT>();
 
     /**
-     * Defaut constructor. A map is initialized with two F and the ocean surrounding the two Fs
+     * Constructor. A map is initialized with two F and the ocean surrounding the two Fs
      */
     public MapsGenerator() {
 
@@ -63,8 +66,7 @@ public class MapsGenerator {
         //
         Map4CT map = new Map4CT();
 
-        // Add this map to the things to do.
-        // This map is not added to the calculated maps because I'm looking for maps without F2 and F3 (and also F4)
+        // Add this map to the things to do. This map is not added to the calculated maps because I'm looking for maps without F2 and F3 (and also F4)
         //
         maps.add(map);
         todoList.add(map);
@@ -75,10 +77,15 @@ public class MapsGenerator {
      */
     public void generate() throws Exception {
 
-        // If you just started generate, it means you don't want to stop it
-        // This flag is used when you execute this method in a multi thread
+        // If you just started generate, it means you don't want to stop it. This flag is used when you execute this method in a multi thread environment
         //
         stopRequested = false;
+
+        // Reset this commodity variable to show progression in external GUI
+        //
+        isoOuterLoop = 0;
+        isoInnerLoop = 0;
+        isoRemoved = 0;
 
         // Begin the main loop
         //
@@ -124,6 +131,10 @@ public class MapsGenerator {
                 int numberOfEToTouch = -1;
                 while ((numberOfEToTouch = numberOfEToTouchLoopManager.getValue(randomElaboration)) != -1) {
 
+                    // Show progression in external GUI
+                    //
+                    isoOuterLoop++;
+
                     // Clone the old map, to build the new one
                     //
                     Map4CT newMap = currentMap.clone();
@@ -140,6 +151,9 @@ public class MapsGenerator {
                     // number of F3 * 2 > number of faces missing to the end * 2
                     // number of F4 * 1 > number of faces missing to the end * 2
                     //
+                    // maxNumber - (fNumberToAdd + 1); 20 - (18 + 1) = 1 (means that another face has to be inserted)
+                    //
+                    //
                     int removeCase = 0;
                     int facesToTheEnd = maxNumber - (fNumberToAdd + 1);
 
@@ -151,30 +165,46 @@ public class MapsGenerator {
                         }
                     }
 
-                    // If needs to be removed
+                    // If it needs to be removed
                     //
                     if (removeCase > 0) {
 
-                        // Increase the number of removed maps (optimization for memory and speed)
+                        // Increase the number of removed maps
                         //
                         numberOfRemovedMaps++;
 
                         // Log
                         //
                         if (logWhilePopulate == true) {
-                            System.out.print("REMOVED-" + removeCase + ": " + numberOfRemovedMaps + ": ");
+                            System.out.print("Debug: REMOVED-" + removeCase + ": " + numberOfRemovedMaps + ": ");
                             Map4CT.printDetailedMap(newMap);
                         }
                     } else {
 
-                        // Check if the new map is isomorphic to an already map in the todoList (that is also a created map)
-                        // TODO: Do I have to check both todoList and maps? Answer: I think I should, but to go faster I can postpone the check of isomorphic maps at the end of the generation process (todoList empty)
+                        // When graphs are isomorphic they not only have the same number of faces, but also the same number of faces of the same cardinality
+                        // If two graphs are equal this sum has to be equal. This condition is not sufficient ... but necessary ... and it speed the iso check
                         //
-                        if (checkIsomorphic(todoList, newMap) == true) {
+                        newMap.setInvariantToSpeedIsoCheck();
+
+                        // Check if the new map is isomorphic to an already map in the todoList (that is also a created map)
+                        //
+                        // NOTE:
+                        // Question: Do I have to check both todoList and maps?
+                        // Answer: Theoretically I should, but to go faster I can postpone the check of isomorphic maps (maps list) at the end of the generation process (when todoList is empty)
+                        //
+                        if (removeIsoWhilePopulate && (checkIsomorphic(todoList, newMap) == true)) {
                             isoRemoved++;
+                            numberOfRemovedMaps++;
+
+                            // Log
+                            //
+                            if (logWhilePopulate == true) {
+                                System.out.print("Debug: REMOVED-ISO: " + isoRemoved + ": ");
+                                Map4CT.printDetailedMap(newMap);
+                            }
                         } else {
 
-                            // I have to update the todoList
+                            // I have to update maps and the todoList
                             // Have I finished? It depends on the generation method used
                             //
                             if (maxMethod == MAX_METHOD.MAPS) {
@@ -187,7 +217,7 @@ public class MapsGenerator {
                                 //
                                 if (maps.size() < maxNumber) {
 
-                                    // There is work to do
+                                    // There is other work to do
                                     //
                                     todoList.add(newMap);
                                 } else {
@@ -202,34 +232,23 @@ public class MapsGenerator {
                                 //
                                 if (fNumberToAdd < (maxNumber - 1)) {
 
-                                    // Add the new map into the list of all generated maps
+                                    // Add the new map into the list of all generated maps and into the todoList
                                     //
                                     maps.add(newMap);
                                     todoList.add(newMap);
-                                } else {
+                                } else { // It enters here if it was the last map to insert (es: 19a face out of a map of 20)
 
-                                    // Add the new map into the list of all generated maps (only if survives the filtering)
-                                    // fNumberToAdd < (12 - 1) means that the map has less than 12 faces (considering the ocean), and in this case I don't need to check hasFWithCardinalityLessThanFiveConsideringTheOcean()
+                                    // When F is 12 or greater maps may have faces with less than 5 or not
+                                    // For maps with less than 12 faces, the check will return always true (Euler: 4F2 + 3F3 + 2F4 + 1F5 + 0F6 = 12 + 1F7 ...)
+                                    // Only maps without faces with cardinality less than five will be stored
                                     //
-                                    if (fNumberToAdd < (12 - 1)) {
+                                    if (newMap.hasFWithCardinalityLessThanFiveConsideringTheOcean() == false) {
                                         maps.add(newMap);
-                                    } else if (newMap.hasFWithCardinalityLessThanFiveConsideringTheOcean() == false) {
-                                        maps.add(newMap);
-                                    } else {
-                                        // System.out.println("Debug: unexpected condition? I don remember why I did not use an else condition here");
-                                        // System.out.println("Debug: fNumberToAdd = " + fNumberToAdd + ", maxNumber = " + maxNumber);
-                                        // Map4CT.printDetailedMap(newMap);
-
-                                        // NOTE:
-                                        // - else condition is when the new map has the number of faces we want (MAX_METHOD.F) and the map hasFWithCardinalityLessThanFiveConsideringTheOcean()
-                                        // - The previous else-if condition is == false
-                                        //
                                     }
                                 }
                             } else if (maxMethod == MAX_METHOD.FIXED_MAPS_LEN) {
 
-                                // Add the new map into the list of all generated maps
-                                // If this generation method is used, I need to work night and day
+                                // Add the new map into the list of all generated maps If this generation method is used, I need to work night and day
                                 //
                                 maps.add(newMap);
                                 todoList.add(newMap);
@@ -416,9 +435,8 @@ public class MapsGenerator {
         return mapToProcess;
     }
 
-    /**
-     * Create a new map from the text representation (for debugging)
-     */
+    // Temp
+    //
     public Map4CT createMapFromTextRepresentationTest(String mapTextRepresentation, int facesToCreate) {
 
         Map4CT newMap = new Map4CT();
@@ -481,8 +499,8 @@ public class MapsGenerator {
         maps.add(newMap);
         todoList.add(newMap);
 
-        System.out.println("DEBUG: " + newMap.sequenceOfCoordinates.sequence);
-        System.out.println("DEBUG: " + mapTextRepresentation);
+        System.out.println("Debug: " + newMap.sequenceOfCoordinates.sequence);
+        System.out.println("Debug: " + mapTextRepresentation);
 
         // Return the new map
         //
@@ -495,7 +513,8 @@ public class MapsGenerator {
      * @param mapTextRepresentation
      *            Example: 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
      * @param facesToCreate
-     *            Values permitted go from 2 to the number of faces of the map (max is: tokensOfTheMapTextRepresentation.length / 2;) not considering the ocean
+     *            Values permitted go from 2 to the number of faces of the map (max is: tokensOfTheMapTextRepresentation.length / 2;) not considering the ocean. This parameter is used to show the map construction process (slow motion)
+     * @return the map from its text representation
      */
     public static Map4CT createMapFromTextRepresentation(String mapTextRepresentation, int facesToCreate) {
 
@@ -581,8 +600,14 @@ public class MapsGenerator {
 
     /**
      * Check if the new map is isomorphic to an existing map
+     * 
+     * @param listOfMaps
+     *            The list of maps to analyze
+     * @param mapToCheck
+     *            The map to check
+     * @return if the given map is isomorphic to another map of the list
      */
-    public boolean checkIsomorphic(ArrayList<Map4CT> theListOfExistingMaps, Map4CT theNewMap) {
+    public boolean checkIsomorphic(ArrayList<Map4CT> listOfMaps, Map4CT mapToCheck) {
 
         // Iso tester
         //
@@ -594,34 +619,49 @@ public class MapsGenerator {
 
         // From the map to check I need to create a graph (evviva SSpace)
         //
-        Graph4CT theNew4CTGraph = new Graph4CT();
-        theNew4CTGraph.init();
-        theNew4CTGraph.drawGraph(theNewMap);
-        Graph<edu.ucla.sspace.graph.Edge> theNewGraph = theNew4CTGraph.getSSpaceGraph4CT();
+        Graph4CT graphToCheckTmp = new Graph4CT();
+        graphToCheckTmp.init();
+        graphToCheckTmp.drawGraph(mapToCheck);
+        Graph<edu.ucla.sspace.graph.Edge> graphToCheck = graphToCheckTmp.getSSpaceGraph4CT();
 
-        // Loop
+        // Loop ... from the end to 0. New maps are more easily found isomorphic at the end of the todoList
         //
-        for (int iMap = 0; (iMap < theListOfExistingMaps.size()) && (isoFound == false); iMap++) {
-            Map4CT map4CTToCheck = theListOfExistingMaps.get(iMap);
+        for (int iMap = listOfMaps.size() - 1; (iMap >= 0) && (isoFound == false); iMap--) {
+            Map4CT aMapOfTheListOfMaps = listOfMaps.get(iMap);
+
+            // Commodity variable to show progression in external GUI
+            //
+            isoInnerLoop = iMap;
 
             // Have maps different number of vertices? In this case they cannot be isomorphic!
             //
-            if (map4CTToCheck.faces.size() == theNewMap.faces.size()) {
+            if (aMapOfTheListOfMaps.faces.size() == mapToCheck.faces.size()) {
 
-                // Second graph
+                // If also this is equal I'm forced to check iso using VF2
                 //
-                Graph4CT existing4CTGraph = new Graph4CT();
-                existing4CTGraph.init();
-                existing4CTGraph.drawGraph(map4CTToCheck);
-                Graph<edu.ucla.sspace.graph.Edge> existingGraph = existing4CTGraph.getSSpaceGraph4CT();
+                if ((aMapOfTheListOfMaps.nF2 == mapToCheck.nF2) && (aMapOfTheListOfMaps.nF3 == mapToCheck.nF3) && (aMapOfTheListOfMaps.nF4 == mapToCheck.nF4) && (aMapOfTheListOfMaps.nF5 == mapToCheck.nF5) && (aMapOfTheListOfMaps.nF6 == mapToCheck.nF6)) {
 
-                // Iso?
-                //
-                if (isoTester.areIsomorphic(theNewGraph, existingGraph)) {
-
-                    // Update the iso removed counter
+                    // Second graph
                     //
-                    isoFound = true;
+                    Graph4CT aGraphOfTheListOfMapsTmp = new Graph4CT();
+                    aGraphOfTheListOfMapsTmp.init();
+                    aGraphOfTheListOfMapsTmp.drawGraph(aMapOfTheListOfMaps);
+                    Graph<edu.ucla.sspace.graph.Edge> aGraphOfTheListOfMaps = aGraphOfTheListOfMapsTmp.getSSpaceGraph4CT();
+
+                    // Iso?
+                    //
+                    if (isoTester.areIsomorphic(graphToCheck, aGraphOfTheListOfMaps)) {
+
+                        // Update the iso removed counter
+                        //
+                        isoFound = true;
+
+                        // Log: to see at what point of the list the iso has been found
+                        //
+                        if (logWhilePopulate) {
+                            System.out.println("Debug: iso found at = " + iMap + "/" + (listOfMaps.size() - 1));
+                        }
+                    }
                 }
             }
         }
@@ -632,7 +672,16 @@ public class MapsGenerator {
     }
 
     /**
-     * Remove isomorphic maps NOTE: I decided to elaborate separately the maps and the todoList maps. This is because depending on various factors and status of elaboration the two lists may have few or many shared maps TODO: I should implement a cache (limited in size) of already created and reusable graphs
+     * Remove isomorphic maps (duplicates)
+     * 
+     * @param maps
+     *            the list that may contains duplicates
+     * @param startingMap
+     *            the starting map
+     * 
+     * NOTE: I decided to elaborate separately the maps and the todoList maps. This is because depending on various factors and status of elaboration the two lists may have few or many shared maps
+     * 
+     * TODO: I should implement a cache (limited in size) of already created and reusable graphs
      */
     public void removeIsomorphicMaps(ArrayList<Map4CT> maps, int startingMap) {
 
@@ -679,26 +728,32 @@ public class MapsGenerator {
                 //
                 isoInnerLoop = iMapInner;
 
-                // Have maps different number of vertices? In this case they cannot be isomorphic!
+                // Have maps different number of vertices? In this case they
+                // cannot be isomorphic!
                 //
                 if (map4CTOuter.faces.size() == map4CTInner.faces.size()) {
 
-                    // Second graph
+                    // If also this is equal I'm forced to check iso using VF2
                     //
-                    Graph4CT graph4CTInner = new Graph4CT();
-                    graph4CTInner.init();
-                    graph4CTInner.drawGraph(map4CTInner);
-                    Graph<edu.ucla.sspace.graph.Edge> sSpaceGraph4CTInner = graph4CTInner.getSSpaceGraph4CT();
+                    if ((map4CTOuter.nF2 == map4CTInner.nF2) && (map4CTOuter.nF3 == map4CTInner.nF3) && (map4CTOuter.nF4 == map4CTInner.nF4) && (map4CTOuter.nF5 == map4CTInner.nF5) && (map4CTOuter.nF6 == map4CTInner.nF6)) {
 
-                    // Iso?
-                    //
-                    if (isoTester.areIsomorphic(sSpaceGraph4CTOuter, sSpaceGraph4CTInner)) {
-
-                        // Update the iso removed counter
+                        // Second graph
                         //
-                        isoRemoved++;
-                        map4CTInner.removeLater = true;
-                        atLeastOneMapHasBeenRemoved = true;
+                        Graph4CT graph4CTInner = new Graph4CT();
+                        graph4CTInner.init();
+                        graph4CTInner.drawGraph(map4CTInner);
+                        Graph<edu.ucla.sspace.graph.Edge> sSpaceGraph4CTInner = graph4CTInner.getSSpaceGraph4CT();
+
+                        // Iso?
+                        //
+                        if (isoTester.areIsomorphic(sSpaceGraph4CTOuter, sSpaceGraph4CTInner)) {
+
+                            // Update the iso removed counter
+                            //
+                            isoRemoved++;
+                            map4CTInner.removeLater = true;
+                            atLeastOneMapHasBeenRemoved = true;
+                        }
                     }
                 }
             }
@@ -724,18 +779,16 @@ public class MapsGenerator {
     }
 
     /**
-     * Main program
+     * Main program (test)
      * 
      * @param args
      */
     public static void main(String[] args) throws Exception {
-        MapsGenerator mapsGenerator = new MapsGenerator();
-
         String mapString = "1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+";
-        Map4CT map = mapsGenerator.createMapFromTextRepresentation(mapString, 2);
+        Map4CT map = MapsGenerator.createMapFromTextRepresentation(mapString, 2);
         System.out.println("Debug: map = " + map.toString());
 
-        map = mapsGenerator.createMapFromTextRepresentation(mapString, 3);
+        map = MapsGenerator.createMapFromTextRepresentation(mapString, 3);
         System.out.println("Debug: map = " + map.toString());
     }
 }

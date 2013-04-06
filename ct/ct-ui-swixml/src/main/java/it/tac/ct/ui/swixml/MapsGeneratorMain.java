@@ -69,6 +69,7 @@ import no.geosoft.cc.graphics.GText;
 import no.geosoft.cc.graphics.GWindow;
 
 import org.jgrapht.ext.GraphMLExporter;
+import org.jgrapht.graph.DefaultEdge;
 import org.swixml.SwingEngine;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -81,12 +82,15 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 // TODO: Remove unused libraries: JUNG, ...
 // TODO: Spiral chains with sleep(), save to svg, manual vertex selection for spiral start vertex
 // TODO: saveAllGraphs ... choose the directory where to save all graphs
+// TODO: Load soundbanks on the fly
+// TODO: Debug (print) info on demand (button)
 
 /**
  * @author Mario Stefanutti
  * @version September 2007
  */
-@SuppressWarnings("serial") public class MapsGeneratorMain extends JFrame implements GInteraction {
+@SuppressWarnings("serial")
+public class MapsGeneratorMain extends JFrame implements GInteraction {
 
     // The main class to generate maps
     //
@@ -124,6 +128,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
     private final JCheckBox randomElaboration = null;
     private final JCheckBox processAll = null;
     private final JComboBox maxMethod = null;
+    private final JCheckBox removeIsoWhilePopulate = null;
     private final JTextField maxNumberTextField = null;
     private final JButton startElaborationButton = null;
     private final JButton pauseElaborationButton = null;
@@ -176,13 +181,14 @@ import com.sun.imageio.plugins.png.PNGMetadata;
     private Color colorFour = null;
     private Thread colorItThread = null;
     private Thread colorAllThread = null;
-    private boolean stopColorAllRequested = false;
+    private boolean stopColoringRequested = false;
     private int transparencyValue = 255; // See swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54)
     private Soundbank soundbank = null;
     private Synthesizer synthesizer = null;
     private Instrument[] instruments = null;
     private MidiChannel[] midiChannels = null;
     private JFileChooser fileChooser = null;
+    private JFileChooser directoryChooser = null;
 
     // TAB: Graph theory
     //
@@ -204,221 +210,6 @@ import com.sun.imageio.plugins.png.PNGMetadata;
     //
     private Graph4CT graph4CTCurrent = null;
     private Thread removeIsoThread = null;
-
-    // private boolean stopHamiltonialCheckRequested = false; // I used it only to verify something. All graphs simplified with 12 faces are all isomorphic
-
-    /**
-     * Main program
-     * 
-     * @param args
-     */
-    public static void main(String[] args) throws Exception {
-        new MapsGeneratorMain();
-    }
-
-    /**
-     * Constructor
-     */
-    private MapsGeneratorMain() throws Exception {
-
-        // Initialize Swixml
-        //
-        SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
-        URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct.xml");
-        engine.render(configFileURL).setVisible(false); // Has to become visible at the end, not now
-
-        // Initialize the fileChooser to desktop
-        //
-        FileSystemView fileSystemView = FileSystemView.getFileSystemView();
-        fileChooser = new JFileChooser();
-        fileChooser.setCurrentDirectory(fileSystemView.getRoots()[0]);
-
-        // Initialize the sound system and load all instruments
-        //
-        URL soundbankURL = this.getClass().getClassLoader().getResource("config/soundbank-vintage_dreams_waves.sf2");
-        if (soundbankURL.getProtocol().equals("jar")) {
-            soundbank = MidiSystem.getSoundbank(soundbankURL);
-        } else {
-            File soundbankFile = new File(soundbankURL.toURI());
-            soundbank = MidiSystem.getSoundbank(soundbankFile);
-        }
-        synthesizer = MidiSystem.getSynthesizer();
-        synthesizer.open();
-        synthesizer.loadAllInstruments(soundbank);
-        instruments = synthesizer.getLoadedInstruments();
-        midiChannels = synthesizer.getChannels();
-
-        // Set instruments for the combos (I wasn't able to do it through JComboBox's constructor, because soundbanks cannot be closed and then re-opened
-        //
-        setInstrumentsNames(colorOneInstrument, instruments);
-        setInstrumentsNames(colorTwoInstrument, instruments);
-        setInstrumentsNames(colorThreeInstrument, instruments);
-        setInstrumentsNames(colorFourInstrument, instruments);
-
-        // Initialize colors = Some colors I liked ... instead of using RGBW
-        //
-        colorOne = new Color(255, 99, 71);
-        colorTwo = new Color(50, 205, 50);
-        colorThree = new Color(238, 238, 0);
-        colorFour = new Color(176, 196, 222);
-
-        selectColorOneButton.setForeground(colorOne);
-        selectColorTwoButton.setForeground(colorTwo);
-        selectColorThreeButton.setForeground(colorThree);
-        selectColorFourButton.setForeground(colorFour);
-
-        // StartUp refresh manager (Runtime info, memory, etc.) - poller
-        //
-        new Thread(refreshManager).start();
-
-        // Get visible
-        //
-        initMapExplorerForGraphic();
-
-        // Bug fixed: flickering
-        //
-        // When GCanvas from geosoft gets mixed with swing code, it causes flickering of objects
-        // I found this solution (re-enabling double buffering) and I hape it does not have counter effects. I didn't find any
-        //
-        RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
-
-        // Get visible
-        //
-        validate();
-        setVisible(true);
-
-        // Useful to workaround a swing problem I can't and I don't want to solve
-        //
-        graphExplorerOriginalWidth = graphExplorerPanel.getWidth();
-        graphExplorerOriginalHeight = graphExplorerPanel.getHeight();
-
-        // When the JFrame will be resized, I'll update also these two variables (used for the jGraphX objects)
-        // NOTE: It does not work well when I resize to smaller dimension. Should be solved in another way (xxx)
-        //
-        mainframe.addComponentListener(new ComponentListener() {
-            public void componentResized(ComponentEvent componentEvent) {
-                graphExplorerOriginalWidth = graphExplorerPanel.getWidth();
-                graphExplorerOriginalHeight = graphExplorerPanel.getHeight();
-            }
-
-            public void componentHidden(ComponentEvent componentEvent) {
-            }
-
-            public void componentMoved(ComponentEvent componentEvent) {
-            }
-
-            public void componentShown(ComponentEvent componentEvent) {
-            }
-        });
-    }
-
-    /**
-     * Set the instruments name taken from an internet bank
-     * 
-     * @param jComboBox
-     * @param instruments
-     */
-    public void setInstrumentsNames(JComboBox jComboBox, Instrument[] instruments) {
-        for (int i = 0; i < instruments.length; i++) {
-            jComboBox.addItem(instruments[i].getName());
-        }
-    }
-
-    /**
-     * Init the MapExplorer to visualize G graphics
-     */
-    public void initMapExplorerForGraphic() {
-
-        // G lib initialization (link window canvas to JPanel)
-        //
-        gWindow = new GWindow(colorFour); // The background is the ocean, that is always colored with the fourth color ... or the 4ct would be wrong!
-        gScene = new GScene(gWindow);
-        mapExplorerPanel.removeAll();
-        mapExplorerPanel.add(gWindow.getCanvas());
-
-        // Use a normalized world extent (adding a safety border)
-        //
-        // @param x0 X coordinate of world extent origin.
-        // @param y0 Y coordinate of world extent origin.
-        // @param width Width of world extent.
-        // @param height Height of world extent.
-        //
-        gScene.setWorldExtent(-0.1, -0.1, 1.2, 1.2);
-
-        // Set interaction
-        //
-        // window.startInteraction(new ZoomInteraction(scene)); Zoom or mouse selection for coloring. Is it possible to have both?
-        gWindow.startInteraction(this);
-    }
-
-    /**
-     * Init the GraphExplorer to visualize mxGraph (jgraph) graphics
-     */
-    public void initGraphExplorerForGraphic() {
-
-        // Init (or re-init) all
-        //
-        graph4CTCurrent = new Graph4CT();
-        graph4CTCurrent.init();
-        graph4CTCurrent.setDimension(graphExplorerOriginalHeight, graphExplorerOriginalWidth);
-        if (graphLayout.getSelectedIndex() == 0) {
-            graph4CTCurrent.setGraphLayouts(Graph4CT.GRAPH_LAYOUT.RECTANGULAR);
-        } else if (graphLayout.getSelectedIndex() == 1) {
-            graph4CTCurrent.setGraphLayouts(Graph4CT.GRAPH_LAYOUT.MX_HIERARCHICAL_LAYOUT);
-            // } else if (graphLayout.getSelectedIndex() == 2) {
-            // graph4CTCurrent.setGraphLayouts(Graph4CT.GRAPH_LAYOUT.MX_CIRCLE_LAYOUT);
-        }
-
-        // Attach (or re-attach) it to the JPanel
-        //
-        graphExplorerPanel.removeAll();
-        graphExplorerPanel.setSize(graphExplorerOriginalWidth, graphExplorerOriginalHeight);
-        graphExplorerPanel.add(graph4CTCurrent.getComponent());
-    }
-
-    /**
-     * Utility class to refresh info about memory, etc.
-     */
-    private final Runnable refreshManager = new Runnable() {
-        public void run() {
-
-            while (true) {
-                refreshInfo();
-                refreshMemoryInfo();
-                refreshIsoInfo();
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
-                }
-            }
-        }
-    };
-
-    /**
-     * Utility class to run the generate() method of the MapsGenerator
-     */
-    private final Runnable runnableGenerate = new Runnable() {
-        public void run() {
-            try {
-                mapsGenerator.generate();
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            } finally {
-                startElaborationButton.setEnabled(!(mapsGenerator.todoList.size() == 0));
-                pauseElaborationButton.setEnabled(false);
-                resetElaborationButton.setEnabled(true);
-                filterLessThanFourElaborationButton.setEnabled(true);
-                filterLessThanFiveElaborationButton.setEnabled(true);
-                filterLessThanFacesElaborationButton.setEnabled(true);
-                copyMapsToTodoElaborationButton.setEnabled(true);
-                createMapFromTextRepresentationButton.setEnabled(true);
-                getTextRepresentationOfCurrentMapButton.setEnabled(true);
-                loadMapFromAPreviouslySavedImageButton.setEnabled(true);
-                refreshInfo();
-            }
-        }
-    };
 
     /**
      * Inner class: The G map to draw
@@ -455,7 +246,8 @@ import com.sun.imageio.plugins.png.PNGMetadata;
         /**
          * draw the map
          */
-        @Override public void draw() {
+        @Override
+        public void draw() {
 
             // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
             //
@@ -634,7 +426,8 @@ import com.sun.imageio.plugins.png.PNGMetadata;
         /**
          * draw the map
          */
-        @Override public void draw() {
+        @Override
+        public void draw() {
 
             // 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
             //
@@ -844,6 +637,267 @@ import com.sun.imageio.plugins.png.PNGMetadata;
         }
     };
 
+    /**
+     * Utility class to refresh info about memory, etc.
+     */
+    private final Runnable refreshManager = new Runnable() {
+        public void run() {
+
+            while (true) {
+                refreshInfo();
+                refreshMemoryInfo();
+                refreshIsoInfo();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+            }
+        }
+    };
+
+    /**
+     * Utility class to run the generate() method of the MapsGenerator
+     */
+    private final Runnable runnableGenerate = new Runnable() {
+        public void run() {
+            try {
+                mapsGenerator.generate();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            } finally {
+                startElaborationButton.setEnabled(!(mapsGenerator.todoList.size() == 0));
+                pauseElaborationButton.setEnabled(false);
+                resetElaborationButton.setEnabled(true);
+                filterLessThanFourElaborationButton.setEnabled(true);
+                filterLessThanFiveElaborationButton.setEnabled(true);
+                filterLessThanFacesElaborationButton.setEnabled(true);
+                copyMapsToTodoElaborationButton.setEnabled(true);
+                createMapFromTextRepresentationButton.setEnabled(true);
+                getTextRepresentationOfCurrentMapButton.setEnabled(true);
+                loadMapFromAPreviouslySavedImageButton.setEnabled(true);
+                refreshInfo();
+            }
+        }
+    };
+
+    private final Runnable runnableRemoveIsoMaps = new Runnable() {
+        public void run() {
+            if (map4CTCurrentIndex != -1) {
+                mapsGenerator.removeIsomorphicMaps(mapsGenerator.maps, map4CTCurrentIndex);
+            } else {
+                mapsGenerator.removeIsomorphicMaps(mapsGenerator.maps, 0);
+            }
+        }
+    };
+
+    private final Runnable runnableRemoveIsoTodoList = new Runnable() {
+        public void run() {
+            mapsGenerator.removeIsomorphicMaps(mapsGenerator.todoList, 0);
+        }
+    };
+
+    private final Runnable runnableColorIt = new Runnable() {
+        public void run() {
+            colorIt();
+        }
+    };
+
+    private final Runnable runnableColorAll = new Runnable() {
+        public void run() {
+            colorAll();
+        }
+    };
+
+    /**
+     * Main program
+     * 
+     * @param args
+     */
+    public static void main(String[] args) throws Exception {
+        new MapsGeneratorMain();
+    }
+
+    /**
+     * Constructor
+     */
+    private MapsGeneratorMain() throws Exception {
+
+        // Initialize Swixml
+        //
+        SwingEngine<MapsGeneratorMain> engine = new SwingEngine<MapsGeneratorMain>(this);
+        URL configFileURL = this.getClass().getClassLoader().getResource("config/4ct.xml");
+        engine.render(configFileURL).setVisible(false); // Has to become visible at the end, not now
+
+        // Initialize the fileChooser to desktop
+        //
+        FileSystemView fileSystemView = FileSystemView.getFileSystemView();
+
+        fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(fileSystemView.getRoots()[0]);
+        directoryChooser = new JFileChooser();
+        directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        directoryChooser.setCurrentDirectory(fileSystemView.getRoots()[0]);
+
+        // Initialize the sound system and load all instruments
+        // Check both if Java 1.5, 1.6, 1.7 and if it is running within a jar
+        //
+        // .sf2 are not supported for 1.5 e 1.6
+        // .gm are no longer supporte for 1.7
+        //
+        String soundbankName = null;
+        String javaVersion = System.getProperty("java.version");
+        System.out.println("Debug: java.version = " + javaVersion);
+        if (javaVersion.startsWith("1.5")) {
+            soundbankName = "config/soundbank-deluxe.gm";
+        } else if (javaVersion.startsWith("1.6")) {
+            soundbankName = "config/soundbank-deluxe.gm";
+        } else if (javaVersion.startsWith("1.7")) {
+            soundbankName = "config/soundbank-vintage_dreams_waves.sf2";
+        } else {
+            soundbankName = "config/soundbank-deluxe.gm";
+        }
+        URL soundbankURL = this.getClass().getClassLoader().getResource(soundbankName);
+        if (soundbankURL.getProtocol().equals("jar")) {
+            soundbank = MidiSystem.getSoundbank(soundbankURL);
+        } else {
+            File soundbankFile = new File(soundbankURL.toURI());
+            soundbank = MidiSystem.getSoundbank(soundbankFile);
+        }
+        synthesizer = MidiSystem.getSynthesizer();
+        synthesizer.open();
+        synthesizer.loadAllInstruments(soundbank);
+        instruments = synthesizer.getLoadedInstruments();
+        midiChannels = synthesizer.getChannels();
+
+        // Set instruments for the combos (I wasn't able to do it through JComboBox's constructor, because soundbanks cannot be closed and then re-opened
+        //
+        setInstrumentsNames(colorOneInstrument, instruments);
+        setInstrumentsNames(colorTwoInstrument, instruments);
+        setInstrumentsNames(colorThreeInstrument, instruments);
+        setInstrumentsNames(colorFourInstrument, instruments);
+
+        // Initialize colors = Some colors I liked ... instead of using RGBW
+        //
+        colorOne = new Color(255, 99, 71);
+        colorTwo = new Color(50, 205, 50);
+        colorThree = new Color(238, 238, 0);
+        colorFour = new Color(176, 196, 222);
+
+        selectColorOneButton.setForeground(colorOne);
+        selectColorTwoButton.setForeground(colorTwo);
+        selectColorThreeButton.setForeground(colorThree);
+        selectColorFourButton.setForeground(colorFour);
+
+        // StartUp refresh manager (Runtime info, memory, etc.) - poller
+        //
+        new Thread(refreshManager).start();
+
+        // Get visible
+        //
+        initMapExplorerForGraphic();
+
+        // Bug fixed: flickering
+        //
+        // When GCanvas from geosoft gets mixed with swing code, it causes flickering of objects
+        // I found this solution (re-enabling double buffering) and I hape it does not have counter effects. I didn't find any
+        //
+        RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
+
+        // Get visible
+        //
+        validate();
+        setVisible(true);
+
+        // Useful to workaround a swing problem I can't and I don't want to solve
+        //
+        graphExplorerOriginalWidth = graphExplorerPanel.getWidth();
+        graphExplorerOriginalHeight = graphExplorerPanel.getHeight();
+
+        // When the JFrame will be resized, I'll update also these two variables (used for the jGraphX objects)
+        // FIXME: It does not work well when I resize to smaller dimension. Should be solved in another way
+        //
+        mainframe.addComponentListener(new ComponentListener() {
+            public void componentResized(ComponentEvent componentEvent) {
+                graphExplorerOriginalWidth = graphExplorerPanel.getWidth();
+                graphExplorerOriginalHeight = graphExplorerPanel.getHeight();
+            }
+
+            public void componentHidden(ComponentEvent componentEvent) {
+            }
+
+            public void componentMoved(ComponentEvent componentEvent) {
+            }
+
+            public void componentShown(ComponentEvent componentEvent) {
+            }
+        });
+    }
+
+    /**
+     * Set the instruments name taken from an internet bank
+     * 
+     * @param jComboBox
+     * @param instruments
+     */
+    public void setInstrumentsNames(JComboBox jComboBox, Instrument[] instruments) {
+        for (int i = 0; i < instruments.length; i++) {
+            jComboBox.addItem(instruments[i].getName());
+        }
+    }
+
+    /**
+     * Init the MapExplorer to visualize G graphics
+     */
+    public void initMapExplorerForGraphic() {
+
+        // G lib initialization (link window canvas to JPanel)
+        //
+        gWindow = new GWindow(colorFour); // The background is the ocean, that is always colored with the fourth color ... or the 4ct would be wrong!
+        gScene = new GScene(gWindow);
+        mapExplorerPanel.removeAll();
+        mapExplorerPanel.add(gWindow.getCanvas());
+
+        // Use a normalized world extent (adding a safety border)
+        //
+        // @param x0 X coordinate of world extent origin.
+        // @param y0 Y coordinate of world extent origin.
+        // @param width Width of world extent.
+        // @param height Height of world extent.
+        //
+        gScene.setWorldExtent(-0.1, -0.1, 1.2, 1.2);
+
+        // Set interaction
+        //
+        // window.startInteraction(new ZoomInteraction(scene)); Zoom or mouse selection for coloring. Is it possible to have both?
+        gWindow.startInteraction(this);
+    }
+
+    /**
+     * Init the GraphExplorer to visualize mxGraph (jgraph) graphics
+     */
+    public void initGraphExplorerForGraphic() {
+
+        // Init (or re-init) all
+        //
+        graph4CTCurrent = new Graph4CT();
+        graph4CTCurrent.init();
+        graph4CTCurrent.setDimension(graphExplorerOriginalHeight, graphExplorerOriginalWidth);
+        if (graphLayout.getSelectedIndex() == 0) {
+            graph4CTCurrent.setGraphLayouts(Graph4CT.GRAPH_LAYOUT.RECTANGULAR);
+        } else if (graphLayout.getSelectedIndex() == 1) {
+            graph4CTCurrent.setGraphLayouts(Graph4CT.GRAPH_LAYOUT.MX_HIERARCHICAL_LAYOUT);
+            // } else if (graphLayout.getSelectedIndex() == 2) {
+            // graph4CTCurrent.setGraphLayouts(Graph4CT.GRAPH_LAYOUT.MX_CIRCLE_LAYOUT);
+        }
+
+        // Attach (or re-attach) it to the JPanel
+        //
+        graphExplorerPanel.removeAll();
+        graphExplorerPanel.setSize(graphExplorerOriginalWidth, graphExplorerOriginalHeight);
+        graphExplorerPanel.add(graph4CTCurrent.getComponent());
+    }
+
     // EVENTS EVENTS EVENTS ...
     //
     public Action quitAction = new AbstractAction() {
@@ -858,6 +912,12 @@ import com.sun.imageio.plugins.png.PNGMetadata;
         }
     };
 
+    public Action removeIsoWhilePopulateAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+            mapsGenerator.removeIsoWhilePopulate = removeIsoWhilePopulate.isSelected();
+        }
+    };
+
     public Action startElaborationAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
@@ -867,13 +927,14 @@ import com.sun.imageio.plugins.png.PNGMetadata;
             mapsGenerator.randomElaboration = randomElaboration.isSelected();
             mapsGenerator.logWhilePopulate = logWhilePopulate.isSelected();
             mapsGenerator.processAll = processAll.isSelected();
+            mapsGenerator.removeIsoWhilePopulate = removeIsoWhilePopulate.isSelected();
 
             if (maxMethod.getSelectedIndex() == 0) {
-                mapsGenerator.maxMethod = MapsGenerator.MAX_METHOD.FIXED_MAPS_LEN;
+                mapsGenerator.maxMethod = MapsGenerator.MAX_METHOD.F;
             } else if (maxMethod.getSelectedIndex() == 1) {
                 mapsGenerator.maxMethod = MapsGenerator.MAX_METHOD.MAPS;
             } else if (maxMethod.getSelectedIndex() == 2) {
-                mapsGenerator.maxMethod = MapsGenerator.MAX_METHOD.F;
+                mapsGenerator.maxMethod = MapsGenerator.MAX_METHOD.FIXED_MAPS_LEN;
             }
             mapsGenerator.maxNumber = Integer.parseInt(maxNumberTextField.getText());
 
@@ -1087,7 +1148,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
             // Update the map list and the todoList + set the current map
             //
-            Map4CT newMap = mapsGenerator.createMapFromTextRepresentation(mapTextRepresentationTextField.getText(), -1);
+            Map4CT newMap = MapsGenerator.createMapFromTextRepresentation(mapTextRepresentationTextField.getText(), -1);
             mapsGenerator.maps.add(newMap);
             mapsGenerator.todoList.add(newMap);
             map4CTCurrentIndex = mapsGenerator.maps.size() - 1;
@@ -1155,7 +1216,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
                     // Create the map
                     //
-                    Map4CT newMap = mapsGenerator.createMapFromTextRepresentation(mapRepresentation, -1);
+                    Map4CT newMap = MapsGenerator.createMapFromTextRepresentation(mapRepresentation, -1);
                     mapsGenerator.maps.add(newMap);
                     mapsGenerator.todoList.add(newMap);
                     map4CTCurrentIndex = mapsGenerator.maps.size() - 1;
@@ -1206,11 +1267,12 @@ import com.sun.imageio.plugins.png.PNGMetadata;
     /**
      * Set the Transparency value
      * 
-     * For a swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54) I needed to change this and use setter and getter methods
+     * @param value
      */
     public final void setTransparencyValue(int value) {
 
         // Read the transparency to use
+        // FIXME: For a swixml2 bug (http://code.google.com/p/swixml2/issues/detail?id=54) I needed to change this and use setter and getter methods
         //
         drawCurrentMap();
         transparencyValue = value;
@@ -1380,22 +1442,6 @@ import com.sun.imageio.plugins.png.PNGMetadata;
         }
     };
 
-    private final Runnable runnableRemoveIsoMaps = new Runnable() {
-        public void run() {
-            if (map4CTCurrentIndex != -1) {
-                mapsGenerator.removeIsomorphicMaps(mapsGenerator.maps, map4CTCurrentIndex);
-            } else {
-                mapsGenerator.removeIsomorphicMaps(mapsGenerator.maps, 0);
-            }
-        }
-    };
-
-    private final Runnable runnableRemoveIsoTodoList = new Runnable() {
-        public void run() {
-            mapsGenerator.removeIsomorphicMaps(mapsGenerator.todoList, 0);
-        }
-    };
-
     public Action stopRemovingIsoAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
@@ -1468,6 +1514,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
     };
 
     public Action saveMapToImageAction = new AbstractAction() {
+        @SuppressWarnings("unchecked")
         public void actionPerformed(ActionEvent e) {
             String fileName = null;
             String drawMethodName = "unknown";
@@ -1523,6 +1570,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
     };
 
     public Action saveGraphToImageAction = new AbstractAction() {
+        @SuppressWarnings("unchecked")
         public void actionPerformed(ActionEvent e) {
 
             if (graph4CTCurrent != null) {
@@ -1598,34 +1646,75 @@ import com.sun.imageio.plugins.png.PNGMetadata;
         }
     };
 
-    public Action loadAllMapsAndTodoListAction = new AbstractAction() {
+    public Action loadAllMapsAction = new AbstractAction() {
+        @SuppressWarnings("unchecked")
         public void actionPerformed(ActionEvent e) {
 
-            // Read the metadata from a saved image
+            // Select the file to load
             //
-            fileChooser.setSelectedFile(new File("The name without .maps and .todoList"));
             if (fileChooser.showOpenDialog(gWindow.getCanvas()) == JFileChooser.APPROVE_OPTION) {
 
-                // Choose the filename
+                // Get the selected filename
                 //
                 File fileToRead = fileChooser.getSelectedFile();
-                File fileToReadMaps = new File(fileToRead.getAbsolutePath() + ".maps");
-                File fileToReadTodoList = new File(fileToRead.getAbsolutePath() + ".todoList");
                 try {
 
                     // Read the maps
                     //
-                    FileInputStream inputStreamMaps = new FileInputStream(fileToReadMaps);
+                    FileInputStream inputStreamMaps = new FileInputStream(fileToRead);
                     ObjectInputStream objectInputStreamMaps = new ObjectInputStream(inputStreamMaps);
                     mapsGenerator.maps = (ArrayList<Map4CT>) objectInputStreamMaps.readObject();
                     inputStreamMaps.close();
 
+                    // setInvariantToSpeedIsoCheck
+                    // TODO: This one can be removed, because there was a bug in the java program that did not consider the ocean for the invariantToSpeedIsoCheck (saved maps may have the problem, and this will fix it)
+                    //
+                    for (int iMap = 0; iMap < mapsGenerator.maps.size(); iMap++) {
+                        mapsGenerator.maps.get(iMap).setInvariantToSpeedIsoCheck();
+                    }
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+
+                // It behaves as the play (generation) action - At the end of the generation thread
+                //
+                filterLessThanFourElaborationButton.setEnabled(true);
+                filterLessThanFiveElaborationButton.setEnabled(true);
+                filterLessThanFacesElaborationButton.setEnabled(true);
+                copyMapsToTodoElaborationButton.setEnabled(true);
+
+                refreshInfo();
+                drawCurrentMap();
+            }
+        }
+    };
+
+    public Action loadAllTodoListAction = new AbstractAction() {
+        @SuppressWarnings("unchecked")
+        public void actionPerformed(ActionEvent e) {
+
+            // Select the file to load
+            //
+            if (fileChooser.showOpenDialog(gWindow.getCanvas()) == JFileChooser.APPROVE_OPTION) {
+
+                // Get the selected filename
+                //
+                File fileToRead = fileChooser.getSelectedFile();
+                try {
+
                     // Read the todoList
                     //
-                    FileInputStream inputStreamTodoList = new FileInputStream(fileToReadTodoList);
+                    FileInputStream inputStreamTodoList = new FileInputStream(fileToRead);
                     ObjectInputStream objectInputStreamTodoList = new ObjectInputStream(inputStreamTodoList);
                     mapsGenerator.todoList = (ArrayList<Map4CT>) objectInputStreamTodoList.readObject();
                     inputStreamTodoList.close();
+
+                    // setInvariantToSpeedIsoCheck
+                    // TODO: This one can be removed, because there was a bug in the java program that did not consider the ocean for the invariantToSpeedIsoCheck (saved maps may have the problem, and this will fix it)
+                    //
+                    for (int iMap = 0; iMap < mapsGenerator.todoList.size(); iMap++) {
+                        mapsGenerator.todoList.get(iMap).setInvariantToSpeedIsoCheck();
+                    }
                 } catch (Exception exception) {
                     exception.printStackTrace();
                 }
@@ -1635,13 +1724,6 @@ import com.sun.imageio.plugins.png.PNGMetadata;
                 startElaborationButton.setEnabled(!(mapsGenerator.todoList.size() == 0));
                 pauseElaborationButton.setEnabled(false);
                 resetElaborationButton.setEnabled(true);
-                filterLessThanFourElaborationButton.setEnabled(true);
-                filterLessThanFiveElaborationButton.setEnabled(true);
-                filterLessThanFacesElaborationButton.setEnabled(true);
-                copyMapsToTodoElaborationButton.setEnabled(true);
-                createMapFromTextRepresentationButton.setEnabled(true);
-                getTextRepresentationOfCurrentMapButton.setEnabled(true);
-                loadMapFromAPreviouslySavedImageButton.setEnabled(true);
 
                 refreshInfo();
                 drawCurrentMap();
@@ -1665,10 +1747,9 @@ import com.sun.imageio.plugins.png.PNGMetadata;
             if (fileChooser.showOpenDialog(graphExplorerPanel) == JFileChooser.APPROVE_OPTION) {
                 File fileToSave = fileChooser.getSelectedFile();
                 FileWriter fileToSaveWriter = new FileWriter(fileToSave);
-                GraphMLExporter graphMLExporter = new GraphMLExporter();
+                GraphMLExporter<String, DefaultEdge> graphMLExporter = new GraphMLExporter<String, DefaultEdge>();
                 graphMLExporter.export(fileToSaveWriter, graphToSave.getJGraphT());
                 fileToSaveWriter.close();
-
             }
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -1676,36 +1757,47 @@ import com.sun.imageio.plugins.png.PNGMetadata;
     }
 
     /**
-     * TODO: For now is disables. Choose the directory xxx
+     * TODO: For now is disables. Find a way to choose the directory
      */
     public Action saveAllGraphToGraphMLAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
 
-            // Loop
+            // If the map list is not empty
             //
-            for (int iMap = 0; iMap < mapsGenerator.maps.size(); iMap++) {
+            if (mapsGenerator.maps.size() != 0) {
 
-                // Move to map
+                // Select a directory
                 //
-                map4CTCurrentIndex = iMap;
-                map4CTCurrent = mapsGenerator.maps.get(iMap);
+                if (directoryChooser.showOpenDialog(graphExplorerPanel) == JFileChooser.APPROVE_OPTION) {
+                    String selectedDirectory = directoryChooser.getSelectedFile().getAbsolutePath();
 
-                // Draw the graph
-                //
-                drawCurrentGraph(false);
+                    // Loop all graphs (to save all of them)
+                    //
+                    for (int iMap = 0; iMap < mapsGenerator.maps.size(); iMap++) {
 
-                // Save the graph and give it a name
-                //
-                String fileName = "D:\\Temp\\maps\\save-graph-" + iMap + ".graphml";
-                File fileToSave = new File(fileName);
-                FileWriter fileToSaveWriter;
-                try {
-                    fileToSaveWriter = new FileWriter(fileToSave);
-                    GraphMLExporter graphMLExporter = new GraphMLExporter();
-                    graphMLExporter.export(fileToSaveWriter, graph4CTCurrent.getJGraphT());
-                    fileToSaveWriter.close();
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                        // Move to map
+                        //
+                        map4CTCurrentIndex = iMap;
+                        map4CTCurrent = mapsGenerator.maps.get(iMap);
+
+                        // Draw the graph
+                        //
+                        drawCurrentGraph(false);
+
+                        // And save the graph
+                        //
+                        String fileName = selectedDirectory + "/save-graph-" + (map4CTCurrent.faces.size() + 1) + "-" + map4CTCurrent.hashCode() + ".graphml";
+                        File fileToSave = new File(fileName);
+                        FileWriter fileToSaveWriter;
+                        try {
+                            fileToSaveWriter = new FileWriter(fileToSave);
+                            GraphMLExporter<String, DefaultEdge> graphMLExporter = new GraphMLExporter<String, DefaultEdge>();
+                            graphMLExporter.export(fileToSaveWriter, graph4CTCurrent.getJGraphT());
+                            fileToSaveWriter.close();
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                 }
             }
         }
@@ -1722,7 +1814,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
             // Stop auto coloring if running. It waits few millesec to be sure the thread understands the request
             //
-            stopColorAllRequested = true;
+            stopColoringRequested = true;
             try {
                 Thread.sleep(120);
             } catch (InterruptedException interruptedException) {
@@ -1731,7 +1823,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
             // Reset the stop auto color it request
             //
-            stopColorAllRequested = false;
+            stopColoringRequested = false;
 
             // Create the thread ... if not created
             // If previously executed and not running, create a new thread
@@ -1753,7 +1845,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
             // Stop auto coloring if running. It waits few millesec to be sure the thread understands the request
             //
-            stopColorAllRequested = true;
+            stopColoringRequested = true;
             try {
                 Thread.sleep(120);
             } catch (InterruptedException interruptedException) {
@@ -1762,19 +1854,19 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
             // Reset the stop auto color it request ("X" button)
             //
-            stopColorAllRequested = false;
+            stopColoringRequested = false;
 
             // Create the thread ... if not created
             // Execute the thread ... if not already running
             //
             // Note: A java thread cannot be reused ... even if it terminated correctly
             //
-            if (colorAllThread == null) {
-                colorAllThread = new Thread(runnableColorAll);
-                colorAllThread.start();
-            } else if (colorAllThread.isAlive() == false) {
-                colorAllThread = new Thread(runnableColorAll);
-                colorAllThread.start();
+            if (colorItThread == null) {
+                colorItThread = new Thread(runnableColorAll);
+                colorItThread.start();
+            } else if (colorItThread.isAlive() == false) {
+                colorItThread = new Thread(runnableColorAll);
+                colorItThread.start();
             }
         }
     };
@@ -1784,7 +1876,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
             // Stop auto coloring if running. It waits few millesec to be sure the thread understands the request
             //
-            stopColorAllRequested = true;
+            stopColoringRequested = true;
             try {
                 Thread.sleep(120);
             } catch (InterruptedException interruptedException) {
@@ -1941,18 +2033,6 @@ import com.sun.imageio.plugins.png.PNGMetadata;
         }
     }
 
-    private final Runnable runnableColorIt = new Runnable() {
-        public void run() {
-            colorIt();
-        }
-    };
-
-    private final Runnable runnableColorAll = new Runnable() {
-        public void run() {
-            colorAll();
-        }
-    };
-
     /**
      * Color a single map
      */
@@ -1999,7 +2079,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
             // While not end of job (loop all faces)
             //
-            while (!endOfJob && !stopColorAllRequested) {
+            while (!endOfJob && !stopColoringRequested) {
 
                 // Reset colorFound and moveBackOneFace
                 //
@@ -2157,7 +2237,7 @@ import com.sun.imageio.plugins.png.PNGMetadata;
 
             // Start from current position to the end
             //
-            for (int map4CTCurrentIndexTemp = map4CTCurrentIndex; (map4CTCurrentIndexTemp < mapsGenerator.maps.size()) && (stopColorAllRequested == false); map4CTCurrentIndexTemp++) {
+            for (int map4CTCurrentIndexTemp = map4CTCurrentIndex; (map4CTCurrentIndexTemp < mapsGenerator.maps.size()) && (stopColoringRequested == false); map4CTCurrentIndexTemp++) {
                 map4CTCurrentIndex = map4CTCurrentIndexTemp;
                 map4CTCurrent = mapsGenerator.maps.get(map4CTCurrentIndex);
                 colorIt();
@@ -2251,15 +2331,6 @@ import com.sun.imageio.plugins.png.PNGMetadata;
             // Draw & Refresh
             //
             gScene.refresh();
-
-            // // Update the string map representation field
-            // // xxx DrawCurrentMap is called to many times and I cannot update the mapTextRepresentation here
-            // //
-            // SwingUtilities.invokeLater(new Runnable() {
-            // public void run() {
-            // mapTextRepresentationTextField.setText(map4CTCurrent.toString());
-            // }
-            // });
 
             // After "add" a container has to be validated
             //
@@ -2400,8 +2471,8 @@ import com.sun.imageio.plugins.png.PNGMetadata;
      * Refresh runtime iso info
      */
     public synchronized void refreshIsoInfo() {
-        isoOuterLoopTextField.setText("" + mapsGenerator.isoOuterLoop);
-        isoInnerLoopTextField.setText("" + mapsGenerator.isoInnerLoop);
+        isoOuterLoopTextField.setText("" + mapsGenerator.isoOuterLoop + 1);
+        isoInnerLoopTextField.setText("" + mapsGenerator.isoInnerLoop + 1);
         isoRemovedTextField.setText("" + mapsGenerator.isoRemoved);
     }
 
