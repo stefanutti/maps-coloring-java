@@ -159,9 +159,6 @@
             <panel layout="borderLayout" constraints="BorderLayout.CENTER" id="mapExplorerPanel">
             </panel>
         </panel>
-        <panel name="Manual creation" layout="borderLayout">
-            <label constraints="BorderLayout.CENTER" text="To be implemented" />
-        </panel>
         <panel name="Graph theory" layout="borderLayout">
             <panel preferredSize="410" constraints="BorderLayout.WEST" layout="BorderLayout" >
                 <scrollpane>
@@ -193,10 +190,19 @@
                             <button text="GraphML" action="saveGraphToGraphMLAction" />
                             <button text="all to GraphML" action="saveAllGraphToGraphMLAction" />
                          </hbox>
-                        <!-- hbox constraints="3,19,1,1">
-                            <button text="Hamiltonian?" enabled="true" toolTipText="Check if all graphs have Hamiltonian paths" action="hamiltonialCheckAction" />
-                            <button text="stop" enabled="true" toolTipText="stop checking Hamilton-icity" action="stopHamiltonialCheckAction" />
-                         </hbox -->
+                         <label constraints="1,15" toolTipText="Kempe's coloring swich: first color = edge selected, second color = this" text="Kempe 2nd color" />
+                         <hbox constraints="3,15,1,1">
+                            <combobox initclass="it.tac.ct.ui.swixml.SwixmlComboboxSecondColorOfKempeSwitch" action="secondColorOfKempeSwitchAction" id="secondColorOfKempeSwitch" />
+                         </hbox>
+                        <titledseparator constraints="1,17,3,1" />
+                        <button constraints="1,19,1,1" text="refreshInfo" action="refreshInfoAction" />
+                        <hbox constraints="3,19,1,1">
+                            <textfield text="-1" toolTipText="Current map" editable="false" id="currentMapTextField2" />
+                            <textfield text="0" toolTipText="Size of the list of created maps" editable="false" id="mapsSizeTextField2" />
+                            <textfield text="0" toolTipText="Maps removed" editable="false" id="mapsRemovedTextField2" />
+                            <textfield text="1" toolTipText="Size of the list of maps to elaborate" editable="false" id="todoListSizeTextField2" />
+                        </hbox>
+
                     </panel>
                 </scrollpane>
             </panel>

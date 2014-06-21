@@ -5,6 +5,7 @@ package it.tac.ct.core;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -75,6 +76,8 @@ public class Graph4CT {
     private Map<String, Vertex> verticesMap = null;
     private Map<String, Edge> edgesMap = null;
 
+    private Color secondColorOfKempeSwitch = Color.red; // Red should be the default also for the UI
+
     /**
      * Defaut constructor
      */
@@ -96,6 +99,14 @@ public class Graph4CT {
 
     public Graph<edu.ucla.sspace.graph.Edge> getSSpaceGraph4CT() {
         return sSpaceGraph4CT;
+    }
+
+    public Color getSecondColorOfKempeSwitch() {
+        return secondColorOfKempeSwitch;
+    }
+
+    public void setSecondColorOfKempeSwitch(Color secondColorOfKempeSwitchToSet) {
+        secondColorOfKempeSwitch = secondColorOfKempeSwitchToSet;
     }
 
     /**
@@ -152,7 +163,8 @@ public class Graph4CT {
         // Listener to edge detection: mouse has been clicked on an edge
         //
         jGraph4CTComponent.getGraphControl().addMouseListener(new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) {
+            @Override
+            public void mousePressed(MouseEvent e) {
                 Object cell = jGraph4CTComponent.getCellAt(e.getX(), e.getY());
                 if ((cell != null) && ((((mxCell) cell).getValue()) instanceof Edge)) {
 
@@ -160,23 +172,262 @@ public class Graph4CT {
                     //
                     Edge edge = (Edge) ((mxCell) cell).getValue();
 
-                    // Rotate colors and change it
+                    // Reset the color
                     //
-                    if (edge.color == Color.lightGray) {
-                        edge.color = Color.red;
-                    } else if (edge.color == Edge.USED_COLOR) {
-                        edge.color = Color.red;
-                    } else if (edge.color == Color.red) {
-                        edge.color = Color.green;
-                    } else if (edge.color == Color.green) {
-                        edge.color = Color.blue;
-                    } else if (edge.color == Color.blue) {
+                    if (e.getButton() == MouseEvent.BUTTON3) {
                         edge.color = Color.lightGray;
+
+                        jGraph4CT.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(edge.color), new Object[] { (mxCell) cell });
+                        jGraph4CT.clearSelection();
+                        jGraph4CTComponent.refresh();
                     }
-                    jGraph4CT.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(edge.color), new Object[] { (mxCell) cell });
-                    jGraph4CT.clearSelection();
-                    jGraph4CTComponent.refresh();
+
+                    // Kempe's color switch
+                    //
+                    if (e.getButton() == MouseEvent.BUTTON2) {
+
+                        // The color of the chain are
+                        // one = the color of the edge selected with the mouse
+                        // two = the property set by the used (UI)
+                        //
+                        // To check:
+                        // - If the chain is a loop
+                        // - if the selected edge.color is equal to second color or not colored
+                        //
+                        boolean chainSwitched = false;
+                        boolean isTheChainALoop = false;
+
+                        Color currentColorToSwitch = edge.color;
+                        Color nextColorToSwitch = secondColorOfKempeSwitch;
+
+                        Edge currentEdge = edge;
+
+                        // Check if you started switching color from the middle of a chain
+                        //
+                        Edge nextEdgeAtTheOtherDirection = null;
+                        Color nextColorForTheOtherDirectionToUseLater = edge.color;
+
+                        // If the selected edge has no color, switch cannot start
+                        // If the selected edge has the same color of the second color that has been set, switch cannot start
+                        //
+                        if ((edge.color == Color.lightGray) || (edge.color == nextColorToSwitch)) {
+                            chainSwitched = true;
+                        } else {
+
+                            // Check if you started switching color from the middle of a chain
+                            //
+                            Edge nextEdgeAtOneDirectionTmp = null;
+                            if ((nextEdgeAtOneDirectionTmp = findTheEdgeWithTheNextColorOfTheChain(currentEdge, nextColorToSwitch)) != null) {
+
+                                // In case is null, it means that you started switching form one end (not in the middle)
+                                //
+                                nextEdgeAtTheOtherDirection = findTheOtherEdgeWithTheNextColorOfTheChain(edge, nextColorToSwitch, nextEdgeAtOneDirectionTmp);
+                            }
+                            else {
+                                // This is in the case the chain was only made of one edge (not a chain)
+                                //
+                                chainSwitched = true;
+                            }
+                        }
+
+                        while (!chainSwitched) {
+                            Edge nextEdge = findTheEdgeWithTheNextColorOfTheChain(currentEdge, nextColorToSwitch);
+
+                            // Chain (or loop) if finished, I didn't find another color to switch
+                            //
+                            if (nextEdge == null) {
+
+                                chainSwitched = true;
+                                currentEdge.color = nextColorToSwitch;
+
+                                Object cellToModify = getTheCellOfAGivenEdge(currentEdge);
+                                jGraph4CT.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(currentEdge.color), new Object[] { (mxCell) cellToModify });
+
+                                // This is in case of loops
+                                // In this case I did't find the next edge, because in loops at the end you have
+                                //
+                                if (currentEdge == nextEdgeAtTheOtherDirection) {
+                                    isTheChainALoop = true;
+                                }
+                            } else {
+
+                                // Change color and move to the next edge
+                                //
+                                currentEdge.color = nextColorToSwitch;
+
+                                Object cellToModify = getTheCellOfAGivenEdge(currentEdge);
+                                jGraph4CT.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(currentEdge.color), new Object[] { (mxCell) cellToModify });
+
+                                currentEdge = nextEdge;
+                                nextColorToSwitch = currentColorToSwitch;
+                                currentColorToSwitch = currentEdge.color;
+                            }
+                        }
+
+                        // If I had to continue the other side
+                        //
+                        if ((nextEdgeAtTheOtherDirection != null) && (isTheChainALoop != true)) {
+
+                            // Reset the flag and continue the other side
+                            //
+                            chainSwitched = false;
+                            currentEdge = nextEdgeAtTheOtherDirection;
+                            nextColorToSwitch = nextColorForTheOtherDirectionToUseLater;
+                            currentColorToSwitch = currentEdge.color;
+
+                            // Up to the end of the chain
+                            //
+                            while (!chainSwitched) {
+                                Edge nextEdge = findTheEdgeWithTheNextColorOfTheChain(currentEdge, nextColorToSwitch);
+                                if (nextEdge == null) {
+
+                                    // Chain if finished, I didn't find another color to switch
+                                    //
+                                    chainSwitched = true;
+                                    currentEdge.color = nextColorToSwitch;
+
+                                    Object cellToModify = getTheCellOfAGivenEdge(currentEdge);
+                                    jGraph4CT.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(currentEdge.color), new Object[] { (mxCell) cellToModify });
+                                } else {
+
+                                    // Change color and move to the next edge
+                                    //
+                                    currentEdge.color = nextColorToSwitch;
+
+                                    Object cellToModify = getTheCellOfAGivenEdge(currentEdge);
+                                    jGraph4CT.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(currentEdge.color), new Object[] { (mxCell) cellToModify });
+
+                                    currentEdge = nextEdge;
+                                    nextColorToSwitch = currentColorToSwitch;
+                                    currentColorToSwitch = currentEdge.color;
+                                }
+                            }
+                        }
+
+                        jGraph4CT.clearSelection();
+                        jGraph4CTComponent.refresh();
+                    }
+
+                    // Color the edge
+                    //
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+
+                        // Rotate colors and change it
+                        // If a color has already be used by the neighbours ... don't use it
+                        //
+                        boolean colorFound = false;
+                        Color originalColor = edge.color;
+                        for (int i = 0; (i < 3) && (colorFound == false); i++) {
+                            if (edge.color == Color.lightGray) {
+                                colorFound = !isTheColorInTheNeighood(edge, Color.red);
+                                edge.color = Color.red;
+                            } else if (edge.color == Edge.USED_COLOR) {
+                                colorFound = !isTheColorInTheNeighood(edge, Color.red);
+                                edge.color = Color.red;
+                            } else if (edge.color == Color.red) {
+                                colorFound = !isTheColorInTheNeighood(edge, Color.green);
+                                edge.color = Color.green;
+                            } else if (edge.color == Color.green) {
+                                colorFound = !isTheColorInTheNeighood(edge, Color.blue);
+                                edge.color = Color.blue;
+                            } else if (edge.color == Color.blue) {
+                                colorFound = !isTheColorInTheNeighood(edge, Color.lightGray);
+                                edge.color = Color.lightGray;
+                            }
+                        }
+
+                        // If a color has already be used by the neighbours ... don't use it
+                        // if I tryed all possibilities ... reset
+                        //
+                        if (colorFound == false) {
+                            edge.color = originalColor;
+                        }
+
+                        jGraph4CT.setCellStyles(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(edge.color), new Object[] { (mxCell) cell });
+                        jGraph4CT.clearSelection();
+                        jGraph4CTComponent.refresh();
+                    }
                 }
+            }
+
+            private Object getTheCellOfAGivenEdge(Edge currentEdge) {
+
+                Object cellToReturn = null;
+                boolean cellFound = false;
+
+                // Select all (I don't know to do it differently)
+                //
+                Object[] objs = jGraph4CTComponent.getCells(new Rectangle(0, 0, 10000, 10000));
+
+                // Check all objects
+                //
+                for (int i = 0; (i < objs.length) && (cellFound == false); i++) {
+                    if ((((mxCell) objs[i]).getValue()) instanceof Edge) {
+
+                        // The Object is an Edge
+                        //
+                        Edge edge = (Edge) ((mxCell) objs[i]).getValue();
+
+                        // Found? Is the current edge
+                        //
+                        if (edge == currentEdge) {
+                            cellToReturn = objs[i];
+                            cellFound = true;
+                        }
+                    }
+                }
+
+                return cellToReturn;
+            }
+
+            private Edge findTheEdgeWithTheNextColorOfTheChain(Edge currentEdge, Color nextColorToSwitch) {
+                Edge edgeToReturn = null;
+
+                if (currentEdge.firstVertex.edgeAtBottom.color == nextColorToSwitch) {
+                    edgeToReturn = currentEdge.firstVertex.edgeAtBottom;
+                } else if (currentEdge.firstVertex.edgeAtLeft.color == nextColorToSwitch) {
+                    edgeToReturn = currentEdge.firstVertex.edgeAtLeft;
+                } else if (currentEdge.firstVertex.edgeAtRight.color == nextColorToSwitch) {
+                    edgeToReturn = currentEdge.firstVertex.edgeAtRight;
+                } else if (currentEdge.secondVertex.edgeAtBottom.color == nextColorToSwitch) {
+                    edgeToReturn = currentEdge.secondVertex.edgeAtBottom;
+                } else if (currentEdge.secondVertex.edgeAtLeft.color == nextColorToSwitch) {
+                    edgeToReturn = currentEdge.secondVertex.edgeAtLeft;
+                } else if (currentEdge.secondVertex.edgeAtRight.color == nextColorToSwitch) {
+                    edgeToReturn = currentEdge.secondVertex.edgeAtRight;
+                }
+
+                return edgeToReturn;
+            }
+
+            private Edge findTheOtherEdgeWithTheNextColorOfTheChain(Edge currentEdge, Color nextColorToSwitch, Edge edgeNotToSelect) {
+                Edge edgeToReturn = null;
+
+                if ((currentEdge.firstVertex.edgeAtBottom.color == nextColorToSwitch) && (currentEdge.firstVertex.edgeAtBottom != edgeNotToSelect)) {
+                    edgeToReturn = currentEdge.firstVertex.edgeAtBottom;
+                } else if ((currentEdge.firstVertex.edgeAtLeft.color == nextColorToSwitch) && (currentEdge.firstVertex.edgeAtLeft != edgeNotToSelect)) {
+                    edgeToReturn = currentEdge.firstVertex.edgeAtLeft;
+                } else if ((currentEdge.firstVertex.edgeAtRight.color == nextColorToSwitch) && (currentEdge.firstVertex.edgeAtRight != edgeNotToSelect)) {
+                    edgeToReturn = currentEdge.firstVertex.edgeAtRight;
+                } else if ((currentEdge.secondVertex.edgeAtBottom.color == nextColorToSwitch) && (currentEdge.secondVertex.edgeAtBottom != edgeNotToSelect)) {
+                    edgeToReturn = currentEdge.secondVertex.edgeAtBottom;
+                } else if ((currentEdge.secondVertex.edgeAtLeft.color == nextColorToSwitch) && (currentEdge.secondVertex.edgeAtLeft != edgeNotToSelect)) {
+                    edgeToReturn = currentEdge.secondVertex.edgeAtLeft;
+                } else if ((currentEdge.secondVertex.edgeAtRight.color == nextColorToSwitch) && (currentEdge.secondVertex.edgeAtRight != edgeNotToSelect)) {
+                    edgeToReturn = currentEdge.secondVertex.edgeAtRight;
+                }
+
+                return edgeToReturn;
+            }
+
+            private boolean isTheColorInTheNeighood(Edge edge, Color colorToCheck) {
+                boolean colorFound = false;
+
+                if ((edge.firstVertex.edgeAtBottom.color == colorToCheck) || (edge.firstVertex.edgeAtLeft.color == colorToCheck) || (edge.firstVertex.edgeAtRight.color == colorToCheck) || (edge.secondVertex.edgeAtBottom.color == colorToCheck) || (edge.secondVertex.edgeAtLeft.color == colorToCheck) || (edge.secondVertex.edgeAtRight.color == colorToCheck)) {
+                    colorFound = true;
+                }
+
+                return colorFound;
             }
         });
 

@@ -150,10 +150,14 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JButton selectColorThreeButton = null;
     private final JButton selectColorFourButton = null;
     private final JButton taitButton = null;
-    private final JTextField mapsSizeTextField = null;
     private final JTextField currentMapTextField = null;
+    private final JTextField mapsSizeTextField = null;
     private final JTextField mapsRemovedTextField = null;
     private final JTextField todoListSizeTextField = null;
+    private final JTextField currentMapTextField2 = null;
+    private final JTextField mapsSizeTextField2 = null;
+    private final JTextField mapsRemovedTextField2 = null;
+    private final JTextField todoListSizeTextField2 = null;
     private final JTextField totalMemoryTextField = null;
     private final JTextField maxMemoryTextField = null;
     private final JTextField freeMemoryTextField = null;
@@ -200,6 +204,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JTextField isoOuterLoopTextField = null;
     private final JTextField isoInnerLoopTextField = null;
     private final JTextField isoRemovedTextField = null;
+
+    private final JComboBox secondColorOfKempeSwitch = null;
 
     // Variables to solve some swings problem, I don't know how to completely solve
     //
@@ -743,7 +749,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         // Check both if Java 1.5, 1.6, 1.7 and if it is running within a jar
         //
         // .sf2 are not supported for 1.5 e 1.6
-        // .gm are no longer supporte for 1.7
+        // .gm are no longer supported for 1.7
         //
         String soundbankName = null;
         String javaVersion = System.getProperty("java.version");
@@ -1988,6 +1994,22 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
+    public Action secondColorOfKempeSwitchAction = new AbstractAction() {
+        public void actionPerformed(ActionEvent e) {
+
+            // Read the second color of the chain
+            //
+            if (secondColorOfKempeSwitch.getSelectedIndex() == 0) {
+                graph4CTCurrent.setSecondColorOfKempeSwitch(Color.red);
+            } else if (secondColorOfKempeSwitch.getSelectedIndex() == 1) {
+                graph4CTCurrent.setSecondColorOfKempeSwitch(Color.green);
+            } else {
+                graph4CTCurrent.setSecondColorOfKempeSwitch(Color.blue);
+            }
+        }
+    };
+
+
     /**
      * Create the graph (update graph4CTCurrent) from the sequence of coordinates of the current map: 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
      */
@@ -2253,6 +2275,11 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         mapsSizeTextField.setText("" + mapsGenerator.maps.size());
         mapsRemovedTextField.setText("" + mapsGenerator.numberOfRemovedMaps);
         todoListSizeTextField.setText("" + mapsGenerator.todoList.size());
+
+        currentMapTextField2.setText("" + (map4CTCurrentIndex + 1));
+        mapsSizeTextField2.setText("" + mapsGenerator.maps.size());
+        mapsRemovedTextField2.setText("" + mapsGenerator.numberOfRemovedMaps);
+        todoListSizeTextField2.setText("" + mapsGenerator.todoList.size());
     }
 
     /**
@@ -2501,21 +2528,42 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 //
                 F face = (F) interactionSegment.getUserData();
 
-                if (face.color == COLORS.UNCOLORED) {
-                    colorToUse = new Color(colorOne.getRed(), colorOne.getGreen(), colorOne.getBlue(), transparency.getValue());
-                    face.color = COLORS.ONE;
-                } else if (face.color == COLORS.ONE) {
-                    colorToUse = new Color(colorTwo.getRed(), colorTwo.getGreen(), colorTwo.getBlue(), transparency.getValue());
-                    face.color = COLORS.TWO;
-                } else if (face.color == COLORS.TWO) {
-                    colorToUse = new Color(colorThree.getRed(), colorThree.getGreen(), colorThree.getBlue(), transparency.getValue());
-                    face.color = COLORS.THREE;
-                } else if (face.color == COLORS.THREE) {
-                    colorToUse = new Color(colorFour.getRed(), colorFour.getGreen(), colorFour.getBlue(), transparency.getValue());
-                    face.color = COLORS.FOUR;
-                } else if (face.color == COLORS.FOUR) {
-                    colorToUse = new Color(255, 255, 255, transparency.getValue());
-                    face.color = COLORS.UNCOLORED;
+                // Rotate colors and change it
+                // If a color has already be used by the neighbours ... don't use it
+                //
+                // FIXME: neighbors --> List of neighbors of the previous levels
+                //
+                boolean colorFound = false;
+                COLORS originalColor = face.color;
+                for (int i = 0; (i < 4) && (colorFound == false); i++) {
+
+                    if (face.color == COLORS.UNCOLORED) {
+                        colorFound = !isTheColorInTheNeighood(face, COLORS.ONE);
+                        colorToUse = new Color(colorOne.getRed(), colorOne.getGreen(), colorOne.getBlue(), transparency.getValue());
+                        face.color = COLORS.ONE;
+                    } else if (face.color == COLORS.ONE) {
+                        colorFound = !isTheColorInTheNeighood(face, COLORS.TWO);
+                        colorToUse = new Color(colorTwo.getRed(), colorTwo.getGreen(), colorTwo.getBlue(), transparency.getValue());
+                        face.color = COLORS.TWO;
+                    } else if (face.color == COLORS.TWO) {
+                        colorFound = !isTheColorInTheNeighood(face, COLORS.THREE);
+                        colorToUse = new Color(colorThree.getRed(), colorThree.getGreen(), colorThree.getBlue(), transparency.getValue());
+                        face.color = COLORS.THREE;
+                    } else if (face.color == COLORS.THREE) {
+                        colorFound = !isTheColorInTheNeighood(face, COLORS.FOUR);
+                        colorToUse = new Color(colorFour.getRed(), colorFour.getGreen(), colorFour.getBlue(), transparency.getValue());
+                        face.color = COLORS.FOUR;
+                    } else if (face.color == COLORS.FOUR) {
+                        colorToUse = new Color(255, 255, 255, transparency.getValue());
+                        face.color = COLORS.UNCOLORED;
+                    }
+                }
+
+                // If a color has already be used by the neighbours ... don't use it
+                // if I tryed all possibilities ... reset
+                //
+                if (colorFound == false) {
+                    face.color = originalColor;
                 }
 
                 // Set the style of this object
@@ -2528,5 +2576,17 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
                 scene.refresh();
             }
         }
+    }
+
+    private boolean isTheColorInTheNeighood(F face, COLORS colorToCheck) {
+        boolean colorFound = false;
+
+        for (int i = 0; ((i < face.neighbors.size()) && (colorFound == false)); i++) {
+            if (colorToCheck == map4CTCurrent.faces.get(face.neighbors.get(i)).color) {
+                colorFound = true;
+            }
+        }
+
+        return colorFound;
     }
 }
