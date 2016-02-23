@@ -201,6 +201,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     private final JComboBox graphLayout = null;
     private final JTextField startingVertexTextField = null;
     private final JCheckBox autoSpiral = null;
+    private final JCheckBox autoColor = null;
     private final JTextField isoOuterLoopTextField = null;
     private final JTextField isoInnerLoopTextField = null;
     private final JTextField isoRemovedTextField = null;
@@ -754,14 +755,14 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         String soundbankName = null;
         String javaVersion = System.getProperty("java.version");
         System.out.println("Debug: java.version = " + javaVersion);
-        if (javaVersion.startsWith("1.5")) {
+        if (javaVersion.startsWith("1.4")) {
+            soundbankName = "config/soundbank-deluxe.gm";
+        } else if (javaVersion.startsWith("1.5")) {
             soundbankName = "config/soundbank-deluxe.gm";
         } else if (javaVersion.startsWith("1.6")) {
             soundbankName = "config/soundbank-deluxe.gm";
-        } else if (javaVersion.startsWith("1.7")) {
-            soundbankName = "config/soundbank-vintage_dreams_waves.sf2";
         } else {
-            soundbankName = "config/soundbank-deluxe.gm";
+            soundbankName = "config/soundbank-vintage_dreams_waves.sf2";
         }
         URL soundbankURL = this.getClass().getClassLoader().getResource(soundbankName);
         if (soundbankURL.getProtocol().equals("jar")) {
@@ -806,7 +807,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         // Bug fixed: flickering
         //
         // When GCanvas from geosoft gets mixed with swing code, it causes flickering of objects
-        // I found this solution (re-enabling double buffering) and I hape it does not have counter effects. I didn't find any
+        // I found this solution (re-enabling double buffering) and I hope it does not have counter effects. I didn't find any other solution
         //
         RepaintManager.currentManager(this).setDoubleBufferingEnabled(true);
 
@@ -1435,7 +1436,8 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
     public Action spiralChainAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             if (graph4CTCurrent != null) {
-                graph4CTCurrent.drawSpiralChain(startingVertexTextField.getText());
+                drawCurrentGraph(true);
+                graph4CTCurrent.drawSpiralChain(startingVertexTextField.getText(), autoColor.isSelected());
             }
         }
     };
@@ -2009,7 +2011,6 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
         }
     };
 
-
     /**
      * Create the graph (update graph4CTCurrent) from the sequence of coordinates of the current map: 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
      */
@@ -2044,7 +2045,7 @@ public class MapsGeneratorMain extends JFrame implements GInteraction {
             // Draw the spiral chain
             //
             if (autoSpiral.isSelected()) {
-                graph4CTCurrent.drawSpiralChain(startingVertexTextField.getText());
+                graph4CTCurrent.drawSpiralChain(startingVertexTextField.getText(), autoColor.isSelected());
             }
 
             // Validate the graph panel (show the graph)
