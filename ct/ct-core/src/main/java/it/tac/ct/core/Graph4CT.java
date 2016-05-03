@@ -384,8 +384,8 @@ public class Graph4CT {
             ((mxHierarchicalLayout) jGraph4CTLayout).setIntraCellSpacing(100);
             ((mxHierarchicalLayout) jGraph4CTLayout).setFineTuning(true);
             ((mxHierarchicalLayout) jGraph4CTLayout).setOrientation(SwingConstants.WEST);
-            ((mxHierarchicalLayout) jGraph4CTLayout).setLayoutFromSinks(false);
-            ((mxHierarchicalLayout) jGraph4CTLayout).setFixRoots(false);
+//            ((mxHierarchicalLayout) jGraph4CTLayout).setLayoutFromSinks(false);
+//            ((mxHierarchicalLayout) jGraph4CTLayout).setFixRoots(false);
         }
     }
 

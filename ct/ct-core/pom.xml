@@ -14,16 +14,26 @@
 
 	<dependencies>
         <!-- JGRAPHT used only by Graph4CT.java -->
-        <dependency>
+        <!-- dependency>
             <groupId>it.tac.org.jgrapht</groupId>
             <artifactId>jgrapht</artifactId>
             <version>0.8.3</version>
+        </dependency -->
+        <dependency>
+            <groupId>it.tac.org.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>it.tac.org.jgrapht</groupId>
+            <artifactId>jgrapht-ext</artifactId>
+            <version>0.9.1</version>
         </dependency>
         <!-- JGRAPHX used only by Graph4CT.java -->
         <dependency>
             <groupId>it.tac.org.jgraph</groupId>
             <artifactId>jgraphx</artifactId>
-            <version>1.10.0.3</version>
+            <version>3.5.0.0</version>
         </dependency>
         <!-- SSPACE used only by Graph4CT.java-->
         <dependency>

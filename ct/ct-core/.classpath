@@ -1,8 +1,9 @@
 <classpath>
   <classpathentry kind="src" path="src/main/java" including="**/*.java"/>
   <classpathentry kind="output" path="target/classes"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/org/jgrapht/jgrapht/0.8.3/jgrapht-0.8.3.jar"/>
-  <classpathentry kind="var" path="M2_REPO/it/tac/org/jgraph/jgraphx/1.10.0.3/jgraphx-1.10.0.3.jar"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/org/jgrapht/jgrapht-core/0.9.1/jgrapht-core-0.9.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/org/jgrapht/jgrapht-ext/0.9.1/jgrapht-ext-0.9.1.jar"/>
+  <classpathentry kind="var" path="M2_REPO/it/tac/org/jgraph/jgraphx/3.5.0.0/jgraphx-3.5.0.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/it/tac/edu/ucla/sspace/2.0.3/sspace-2.0.3.jar"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 </classpath>

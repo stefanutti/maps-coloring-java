@@ -513,7 +513,7 @@ public class MapsGenerator {
      * @param mapTextRepresentation
      *            Example: 1b+, 11b+, 11e+, 8b+, 2b-, 9b+, 8e-, 3b-, 9e+, 6b+, 10b+, 10e+, 7b+, 7e+, 4b-, 5b-, 6e+, 5e+, 4e+, 3e+, 2e+, 1e+
      * @param facesToCreate
-     *            Values permitted go from 2 to the number of faces of the map (max is: tokensOfTheMapTextRepresentation.length / 2;) not considering the ocean. This parameter is used to show the map construction process (slow motion)
+     *            Values permitted go from 2 to the number of faces of the map (max is: tokensOfTheMapTextRepresentation.length / 2;) not considering the ocean. This parameter is used to show the map construction process (slow motion). -1 means all faces
      * @return the map from its text representation
      */
     public static Map4CT createMapFromTextRepresentation(String mapTextRepresentation, int facesToCreate) {
