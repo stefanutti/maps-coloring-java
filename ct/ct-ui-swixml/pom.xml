@@ -33,6 +33,7 @@
             <groupId>it.tac.com.jgoodies</groupId>
             <artifactId>forms</artifactId>
             <version>1.1.0</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>it.tac.geosoft</groupId>
@@ -44,11 +45,11 @@
             <artifactId>jdom</artifactId>
             <version>1.0</version>
         </dependency>
-        <dependency>
+        <!-- dependency Non sembra servire>
             <groupId>it.tac.javax.jnlp</groupId>
             <artifactId>jnlp</artifactId>
             <version>1.6</version>
-        </dependency>
+        </dependency -->
         <dependency>
             <groupId>it.tac.org.swixml</groupId>
             <artifactId>swixml</artifactId>
@@ -63,6 +64,7 @@
             <groupId>it.tac.com.fifesoft</groupId>
             <artifactId>rsyntaxtextarea</artifactId>
             <version>1.4.1</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>it.tac.com.apple</groupId>
@@ -70,16 +72,26 @@
             <version>1.2</version>
         </dependency>
         <!-- JGRAPHT -->
-        <dependency>
+        <!-- dependency>
             <groupId>it.tac.org.jgrapht</groupId>
             <artifactId>jgrapht</artifactId>
             <version>0.8.3</version>
+        </dependency -->
+        <dependency>
+            <groupId>it.tac.org.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>it.tac.org.jgrapht</groupId>
+            <artifactId>jgrapht-ext</artifactId>
+            <version>0.9.1</version>
         </dependency>
         <!-- JGRAPHX -->
         <dependency>
             <groupId>it.tac.org.jgraph</groupId>
             <artifactId>jgraphx</artifactId>
-            <version>1.10.0.3</version>
+            <version>3.5.0.0</version>
         </dependency>
         <!-- SSPACE -->
         <dependency>
