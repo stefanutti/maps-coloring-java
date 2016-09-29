@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * UnB - Universidade de BrasÃ­lia
+ * CIC - Departamento de CiÃªncia da ComputaÃ§Ã£o
+ * IA - IntroduÃ§Ã£o a InteligÃªncia Artificial
+ * 
+ * @author zidenis
+ * @version 0.1 (24/11/2014)
+-->
+
+<?import javafx.embed.swing.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!-- DeclaraÃ§Ã£o da Interface GrÃ¡fica de UsuÃ¡rio --> 
+<AnchorPane fx:id="AnchorPane" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="unb.ia.mapcoloring.GUIController">
+   <children>
+      <BorderPane layoutX="41.0" layoutY="75.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <center>
+            <SwingNode fx:id="graphSwingNode" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets bottom="10.0" right="10.0" top="10.0" />
+               </BorderPane.margin>
+            </SwingNode>
+         </center>
+         <left>
+            <VBox prefWidth="140.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Label text="Mapas:" textFill="#9d9d9d">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+                  <ListView fx:id="mapasListView" prefHeight="180.0">
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </ListView>
+                  <Label prefHeight="15.0" text="Ã�reas do Mapa:" textFill="#9d9d9d">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+                  <ListView fx:id="areasListView" prefHeight="180.0">
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </ListView>
+                  <Label text="Ã�reas Adjacentes:" textFill="#9d9d9d">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+                  <ListView fx:id="adjacenciasListView" prefHeight="180.0">
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </ListView>
+               </children>
+               <padding>
+                  <Insets left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </VBox>
+         </left>
+      </BorderPane>
+   </children>
+</AnchorPane>

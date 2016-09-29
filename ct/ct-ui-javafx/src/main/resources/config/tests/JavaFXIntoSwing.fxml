@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.web.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="519.0" prefWidth="719.0" xmlns:fx="http://javafx.com/fxml" fx:controller="it.tac.ct.ui.javafx.tests.combo_box.ComboBoxTest">
+	<children>
+		<ComboBox fx:id="comboBoxTest" onAction="#comboBoxAction">
+			<items>
+				<FXCollections fx:factory="observableArrayList">
+					<String fx:value="RECTANGULAR" />
+					<String fx:value="MX_HIERARCHICAL_LAYOUT" />
+				</FXCollections>
+			</items>
+			<value>
+				<String fx:value="RECTANGULAR" />
+			</value>
+		</ComboBox>
+	</children>
+</AnchorPane>
