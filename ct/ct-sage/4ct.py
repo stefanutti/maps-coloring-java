@@ -92,9 +92,9 @@ import argparse
 import copy
 import sys
 import collections
-from random import randint
-
+import pickle
 import logging.handlers
+from random import randint
 
 import networkx
 
@@ -882,13 +882,14 @@ logger.addHandler(logging_stream_handler)
 ###############
 # Read options:
 ###############
-# (-r <vertices> or -i <file>) -o <file>
+# (-r <vertices> or -i <file> or -p <planar embedding>) -o <file>
 #
 parser = argparse.ArgumentParser(description = '4ct args')
 
 group_input = parser.add_mutually_exclusive_group(required = True)
 group_input.add_argument("-r", "-random", help = "Random graph: dual of a triangulation of N vertices", nargs = 1, type = int)
 group_input.add_argument("-i", "-input", help = "Input edgelist filename (networkx)", nargs = 1)
+group_input.add_argument("-p", "-planar", help = "Load a planar embedding of the graph G.faces() - Automatically saved at each run: input_planar_file.serialized", nargs = 1)
 parser.add_argument("-o", "-output", help="Output edgelist filename (networkx)", nargs = 1, required = False)
 
 args = parser.parse_args()
@@ -931,7 +932,7 @@ logger.info("--------------------------------")
 # the_graph.add_edge(9,11)
 # the_graph.relabel()
 
-# Dual of a triangulation
+# Random - Dual of a triangulation
 #
 if args.r is not None:
     number_of_vertices_for_the_random_triangulation = args.r[0]
@@ -942,23 +943,42 @@ if args.r is not None:
     the_graph.allow_multiple_edges(True)  # During the reduction process the graph may have multiple edges - It is normal
     the_graph.relabel()  # The dual of a triangulation will have vertices represented by lists - triangles (v1, v2, v3) instead of a single value
 
-    # I need this (export + import) to be able to reproduce a test exactly in the same condition of a previous run
+    # I need this (export + import) to be able to reproduce this test exactly in the same condition in a future run
     # I cannot use the output file because it has different ordering of edges and vertices, and the execution would run differently (I experimented it on my skin)
     # The export function saves the graph using a different order for the edges (even if the graph are exactly the same graph)
     #
-    the_graph.export_to_file("input_random_file.edgelist", format = "edgelist")
-    the_graph = Graph(networkx.read_edgelist("input_random_file.edgelist"))
+    the_graph.export_to_file("temp.edgeList", format = "edgelist")
+    the_graph = Graph(networkx.read_edgelist("temp.edgeList"))
     the_graph.relabel()  # The dual of a triangulation will have vertices represented by lists - triangles (v1, v2, v3) instead of a single value
     the_graph.allow_loops(False)  # At the beginning and during the process I'll avoid this situation anyway
     the_graph.allow_multiple_edges(True)  # During the reduction process the graph may have multiple edges - It is normal
 
     logger.info("3-regular (cubic) planar graph of %s vertices created", the_graph.order())
 
+# Input - Load a graph stored in edgeList mode
+#
 if args.i is not None:
     the_graph = Graph(networkx.read_edgelist(args.i[0]))
-    the_graph.relabel()  # The dual of a triangulation will have vertices represented by lists - triangles (v1, v2, v3) instead of a single value
+    the_graph.relabel()  # I need to relabel it
     the_graph.allow_loops(False)  # At the beginning and during the process I'll avoid this situation anyway
     the_graph.allow_multiple_edges(True)  # During the reduction process the graph may have multiple edges - It is normal
+
+# Planar - Load a planar embedding of the graph
+#
+if args.p is not None:
+    with open(args.p[0], 'r') as fp: g_faces = pickle.load(fp)
+
+    # Create the graph from the list of faces
+    #
+    flattened_egdes = set([edge for face in g_faces for edge in face])
+    filtered_egdes = [edge for edge in flattened_egdes if (edge[1], edge[0]) not in flattened_egdes]
+
+    the_graph = Graph(sparse = True)
+    the_graph.allow_loops(False)
+    the_graph.allow_multiple_edges(True)
+
+    for edge_to_add in filtered_egdes:
+        the_graph.add_edge(edge_to_add)
 
 logger.info("------------------------------")
 logger.info("END: Create the graph to color")
@@ -977,9 +997,12 @@ logger.info("------------------------")
 
 check_graph_at_beginning(the_graph)
 
-logger.info("BEGIN: Embed the graph into the plane (Sage function is_planar(set_embedding = True). It may take a while")
-void = the_graph.is_planar(set_embedding = True, set_pos = True)
-logger.info("END: Embed the graph into the plane (is_planar(set_embedding = True)")
+# Compute the embedding only if it was non loaded withe the -p (planar) parameter
+#
+if args.p is None:
+    logger.info("BEGIN: Embed the graph into the plane (Sage function is_planar(set_embedding = True). It may take a while")
+    void = the_graph.is_planar(set_embedding = True, set_pos = True)
+    logger.info("END: Embed the graph into the plane (is_planar(set_embedding = True)")
 
 # Using sage built-in functions to color the map, may take a loooooooot of time :-)
 #
@@ -994,9 +1017,17 @@ logger.info("END: Embed the graph into the plane (is_planar(set_embedding = True
 # This is because the elaboration is faster and I don't have to deal with the limit of sage about multiple edges and loops
 # List it is sorted: means faces with len less than 6 are placed at the beginning
 #
-temp_g_faces = the_graph.faces()
-temp_g_faces.sort(key = len)
-g_faces = [face for face in temp_g_faces]
+
+# Save the face() representation only if it was non loaded with the -p (planar) parameter
+#
+if args.p is None:
+    temp_g_faces = the_graph.faces()
+    temp_g_faces.sort(key = len)
+    g_faces = [face for face in temp_g_faces]
+
+    # Save the face representation for later executions (if needed)
+    #
+    with open("input_planar_g_faces.serialized", 'wb') as fp: pickle.dump(g_faces, fp)
 
 # Override creation (mainly to debug previously elaborated maps)
 #
@@ -1100,10 +1131,6 @@ while is_the_end_of_the_reduction_process is False:
     #
     # log_faces(g_faces)
 
-    # Do one thing at a time and return at the beginning of this top level loop
-    #
-    is_one_thing_done = False
-
     # f1, f2, edge_to_remove, rotated_edge_to_remove, len_of_the_face_to_reduce will be valid during the rest of this "while" loop after the first block ("Select an edge") has been executed
     #
     selected_face = []
@@ -1115,7 +1142,6 @@ while is_the_end_of_the_reduction_process is False:
 
     # Select a face < F6
     # Since faces less then 6 always exist for any graph (Euler) AND faces are sorted by their length, I can take the first one
-    # f1 = next((face for face in g_faces if len(face) == 5), g_faces[0])  ## Test to elaborate F5 first
     #
     f1 = g_faces[0]
     len_of_the_face_to_reduce = len(f1)
@@ -1222,7 +1248,6 @@ while is_the_end_of_the_reduction_process is False:
 
         # Do one thing at a time and return at the beginning of the main loop
         #
-        is_one_thing_done = True
         logger.info("END %s: Remove a multiple edge (case: %s)", i_global_counter, len_of_the_face_to_reduce)
 
     # Remove an F3 or F4 or F5
@@ -1275,18 +1300,23 @@ while is_the_end_of_the_reduction_process is False:
 
         # Do one thing at a time and return at the beginning of the main loop
         #
-        is_one_thing_done = True
         logger.info("END %s: Remove an F3, F4 or F5 (case: %s)", i_global_counter, len_of_the_face_to_reduce)
 
     # A final sort will reorder the list for the next cycle (I need to process faces with 2 or 3 edges first, to avoid bad conditions ahead)
     #
     # NOTE:
     # - I tried to process F5 first but the problem is that you can risk to end up with particular cases like an F2 at the end
-    #   f1 = next((face for face in g_faces if len(face) == 2), next((face for face in g_faces if len(face) == 5), g_faces[0]))
-    #   g_faces.remove(f1)
-    #   g_faces.insert(0, f1)
+    #   f_temp = next((face for face in g_faces if len(face) == 2), next((face for face in g_faces if len(face) == 5), g_faces[0]))
+    #   g_faces.remove(f_temp)
+    #   g_faces.insert(0, f_temp)
     #
-    g_faces.sort(key = len)
+    # if len(g_faces[0]) != 2:
+    #    g_faces.sort(key = len)
+
+    if len(g_faces[0]) != 2:
+        f_temp = next((f for f in g_faces if len(f) == 2), next((f for f in g_faces if len(f) == 3), next((f for f in g_faces if len(f) == 4), next((f for f in g_faces if len(f) == 5), g_faces[0]))))
+        g_faces.remove(f_temp)
+        g_faces.insert(0, f_temp)
 
     # Check 3-regularity
     #
@@ -1297,6 +1327,8 @@ while is_the_end_of_the_reduction_process is False:
 
     # If the graph has been completely reduced, it will be a graph of four faces (an island with three lands) and six edges ... easily 3-edge-colorable
     # The graph is that of an island perfectly slit as a pie in 120 degree slices (just to visualize it)
+    #
+    # Note: With 4 faces is possible, in theory, to have other kind of maps, but since I removed always F2 faces first (multiple edge), this situation is not possible
     #
     if len(g_faces) == 4:
 
@@ -1315,8 +1347,6 @@ while is_the_end_of_the_reduction_process is False:
     #
     if is_the_end_of_the_reduction_process is False:
         i_global_counter += 1
-        # the_graph.plot()
-        # show(the_graph)
 
 logger.info("--------------------")
 logger.info("END: Reduction phase")
@@ -1827,7 +1857,7 @@ while is_the_end_of_the_rebuild_process is False:
                 #
                 if i_attempt == 1000:
                     the_colored_graph.allow_multiple_edges(False)  # At this point there are no multiple edge
-                    the_colored_graph.export_to_file("really_bad_case.edgelist", format = "edgelist")
+                    the_colored_graph.export_to_file("debug_really_bad_case.edgelist", format = "edgelist")
 
         # END F5 has been restored
         #
