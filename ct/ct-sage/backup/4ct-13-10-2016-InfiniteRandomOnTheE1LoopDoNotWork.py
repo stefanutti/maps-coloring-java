@@ -353,6 +353,100 @@ def kempe_chain_color_swap(graph, starting_edge, c1, c2):
 
 
 ######################################
+# Execute a Kempe chain color swapping
+# Works for chains and cycles
+#
+# I considered also multiedge cases
+######################################
+def get_random_edge_on_a_kempe_loop(graph, starting_edge, c1, c2):
+    if logger.isEnabledFor(logging.DEBUG): logger.debug("BEGIN: get_random_edge_on_a_kempe_loop: %s, %s, %s", starting_edge, c1, c2)
+
+    # First I save all edges and then I'll return a random edge (non considering the first two in the list
+    #
+    edges_of_the_loop = []
+
+    out_of_scope_color = get_the_other_colors([c1, c2])[0]
+    if logger.isEnabledFor(logging.DEBUG): logger.debug("out_of_scope_color: %s", out_of_scope_color)
+
+    # Start the loop at e1
+    #
+    current_edge = starting_edge
+    current_color = c1
+    next_color = get_the_other_colors([out_of_scope_color, current_color])[0]
+    if logger.isEnabledFor(logging.DEBUG): logger.debug("current_color: %s", current_color)
+
+    # Start saving the edges of the loop
+    #
+    edges_of_the_loop.append(starting_edge)
+
+    # From current edge, I'll search incident edges in one direction: 1 for the first edge, and then will decide the graph
+    # (v1, v2) if a search all incident edges to v2 I'll have (v2, vx) and (v2, vy). Next vertex to choose will be vx or vy ... depending on the next chain color
+    #
+    direction = 1
+    is_the_end_of_search_process = False
+    while is_the_end_of_search_process is False:
+
+        # Debug
+        #
+        if logger.isEnabledFor(logging.DEBUG): logger.debug("Loop: current_edge: %s, current_color: %s, next_color: %s", current_edge, current_color, next_color)
+
+        # From current edge, I'll search incident edges in one direction [0 or 1] - current_edge[direction] is a vertex
+        #
+        tmp_next_edges_to_check = graph.edges_incident(current_edge[direction])  # Still need to remove current edge
+        if logger.isEnabledFor(logging.DEBUG): logger.debug("tmp_next_edges_to_check: %s", tmp_next_edges_to_check)
+        edges_to_check = [(v1, v2, l) for (v1, v2, l) in tmp_next_edges_to_check if (v1, v2) != (current_edge[0], current_edge[1]) and (v2, v1) != (current_edge[0], current_edge[1])]
+        if logger.isEnabledFor(logging.DEBUG): logger.debug("vertex: %s, edges_to_check: %s", current_edge[direction], edges_to_check)
+
+        # Check the color of the two edges and find the next chain
+        #
+        next_e1_color = edges_to_check[0][2]
+        next_e2_color = edges_to_check[1][2]
+        previous_vertex = current_edge[direction]
+        if next_e1_color == next_color:
+            current_edge = edges_to_check[0]
+        elif next_e2_color == next_color:
+            current_edge = edges_to_check[1]
+        else:
+            logger.error("Unexpected condition (next color should exist). Mario you'd better go back to paper")
+            exit(-1)
+
+        # Update current and next color
+        #
+        current_color = next_color
+        next_color = get_the_other_colors([out_of_scope_color, current_color])[0]
+
+        # Update direction
+        #
+        if current_edge[0] == previous_vertex:
+            direction = 1
+        else:
+            direction = 0
+
+        # Check if I've looped an entire cycle
+        #
+        if are_the_same_edge(current_edge, starting_edge):
+            is_the_end_of_search_process = True
+        else:
+
+            # Save the edges of the loop
+            #
+            edges_of_the_loop.append(current_edge)
+
+        # Debug info for this loop
+        #
+        if logger.isEnabledFor(logging.DEBUG): logger.debug("current_color: %s, next_color: %s, current_edge: %s, are_edges_on_the_same_kempe_cycle: %s, is_the_end_of_search_process: %s", current_color, next_color, current_edge, are_edges_on_the_same_kempe_cycle, is_the_end_of_search_process)
+
+    # Get a random edge (skip the first two elements (hoping I'm not dealing with an F2)
+    #
+    if logger.isEnabledFor(logging.DEBUG): logger.debug("edges_of_the_loop: %s, len: %s", edges_of_the_loop, len(edges_of_the_loop))
+    random_edge_on_the_loop = edges_of_the_loop[randint(2, len(edges_of_the_loop) - 1)]
+
+    if logger.isEnabledFor(logging.DEBUG): logger.debug("END: get_random_edge_on_a_kempe_loop: %s", random_edge_on_the_loop)
+
+    return random_edge_on_the_loop
+
+
+######################################
 # Check if two edges are the same edge
 # (v1, v2) == (v2, v1)
 # (v1, v2, color) == (v1, v2)
@@ -1816,6 +1910,13 @@ while is_the_end_of_the_rebuild_process is False:
             c4 = get_edge_color(the_colored_graph, (vertex_in_the_top_middle, vertex_to_join_near_v2_on_the_face))
             c2 = get_edge_color(the_colored_graph, (vertex_to_join_near_v2_on_the_face, vertex_to_join_near_v2_not_on_the_face))
 
+            # If the two edges (e1 and e2) are not directly on the same Kempe loop (easy case), in the meanwhile I find the final piece of the puzzle, I need to try a random switch
+            # The switch of a Kempe loop will be done starting from a random edge of the current loop analyzed
+            #
+            impasse_color_a = "no-color"
+            impasse_color_b = "no-color"
+            impasse_color_c = "no-color"
+
             # F5-C1
             #
             if c1 == c2:
@@ -1836,19 +1937,29 @@ while is_the_end_of_the_rebuild_process is False:
                     #
                     stats['CASE-F5-C1==C2-SameKempeLoop-C1-C3'] += 1
                     if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C3")
-                elif are_edges_on_the_same_kempe_cycle(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), (vertex_to_join_near_v2_not_on_the_face, vertex_to_join_near_v2_on_the_face), c1, c4):
+                else:
+                    impasse_color_a = c1
+                    impasse_color_b = c3
+                    impasse_color_c = get_the_other_colors([impasse_color_a, impasse_color_b])[0]
 
-                    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
+                if end_of_f5_restore is False:
+                    if are_edges_on_the_same_kempe_cycle(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), (vertex_to_join_near_v2_not_on_the_face, vertex_to_join_near_v2_on_the_face), c1, c4):
 
-                    # Apply half Kempe loop color switching (c2==c1, c4)
-                    #
-                    apply_half_kempe_loop_color_switching(the_colored_graph, ariadne_step, c1, c1, c1, c4)
-                    end_of_f5_restore = True
+                        if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
 
-                    # Update stats
-                    #
-                    stats['CASE-F5-C1==C2-SameKempeLoop-C1-C4'] += 1
-                    if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
+                        # Apply half Kempe loop color switching (c2==c1, c4)
+                        #
+                        apply_half_kempe_loop_color_switching(the_colored_graph, ariadne_step, c1, c1, c1, c4)
+                        end_of_f5_restore = True
+
+                        # Update stats
+                        #
+                        stats['CASE-F5-C1==C2-SameKempeLoop-C1-C4'] += 1
+                        if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
+                    else:
+                        impasse_color_a = c1
+                        impasse_color_b = c4
+                        impasse_color_c = get_the_other_colors([impasse_color_a, impasse_color_b])[0]
             else:
 
                 # In case e1 and e2 are not on the same Kempe loop (c1, c2), the swap of c2, c1 at e2 will give the the first case
@@ -1867,6 +1978,10 @@ while is_the_end_of_the_rebuild_process is False:
                     stats['CASE-F5-C1!=C2-SameKempeLoop-C1-C2'] += 1
 
                     if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1!=C2-SameKempeLoop-C1-C2")
+                else:
+                    impasse_color_a = c1
+                    impasse_color_b = c2
+                    impasse_color_c = get_the_other_colors([impasse_color_a, impasse_color_b])[0]
 
             # Try random switches around the graph for a random few times
             #
@@ -1876,12 +1991,10 @@ while is_the_end_of_the_rebuild_process is False:
                 #
                 stats['RANDOM_KEMPE_SWITCHES'] += 1
 
-                random_other_color_number = randint(0, 1)
-                random_edge_to_fix_the_impasse = the_colored_graph.random_edge(labels = False)
+                random_edge_to_fix_the_impasse = get_random_edge_on_a_kempe_loop(the_colored_graph, (vertex_to_join_near_v1_on_the_face, vertex_to_join_near_v1_not_on_the_face), impasse_color_a, impasse_color_b)
                 color_of_the_random_edge = get_edge_color(the_colored_graph, random_edge_to_fix_the_impasse)
-                other_color = get_the_other_colors(color_of_the_random_edge)[random_other_color_number]
-                kempe_chain_color_swap(the_colored_graph, random_edge_to_fix_the_impasse, color_of_the_random_edge, other_color)
-                if logger.isEnabledFor(logging.INFO): logger.info("random_edge: %s, Kempe color switch: (%s, %s)", random_edge_to_fix_the_impasse, color_of_the_random_edge, other_color)
+                kempe_chain_color_swap(the_colored_graph, random_edge_to_fix_the_impasse, color_of_the_random_edge, impasse_color_c)
+                if logger.isEnabledFor(logging.INFO): logger.info("random_edge: %s, kenmpe_switch_colors: (%s, %s)", random_edge_to_fix_the_impasse, color_of_the_random_edge, impasse_color_c)
 
                 # Only for debug: which map is causing this impasse?
                 #

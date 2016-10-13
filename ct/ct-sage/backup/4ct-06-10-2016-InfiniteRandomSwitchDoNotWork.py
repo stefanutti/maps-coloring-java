@@ -1645,6 +1645,11 @@ while is_the_end_of_the_rebuild_process is False:
 
                 stats['RANDOM_LOOPS'] += 1
 
+                if stats['RANDOM_LOOPS'] == 1000:
+                    print_graph(the_colored_graph)
+                    logger.info("faces: %s", the_colored_graph.faces())
+                    exit(-1)
+
                 # if random_edge == 1:
                 #     kempe_chain_color_swap(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), c1, get_the_other_colors([c1])[random_color])
                 # elif random_edge == 2:

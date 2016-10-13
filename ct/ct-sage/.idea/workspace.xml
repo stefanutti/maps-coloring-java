@@ -6,12 +6,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="66956ec2-dcb8-4a51-81ad-74377d55d526" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/algo.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/backup/4ct-13-10-2016-InfiniteRandomOnTheE1LoopDoNotWork.py" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/python-tests/create_a_graph_from_embedding.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/python-tests/logger_test.py" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/f5_error.edgeList" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/input_planar_file.serialized" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/input_random_file.edgelist" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/really_bad_case.edgelist" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/4ct.py" afterPath="$PROJECT_DIR$/4ct.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/backup/4ct-06-10-2016-InfiniteRandomSwitchDoNotWork.py" afterPath="$PROJECT_DIR$/backup/4ct-06-10-2016-InfiniteRandomSwitchDoNotWork.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/input_planar_g_faces.serialized" afterPath="$PROJECT_DIR$/input_planar_g_faces.serialized" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/python-tests/parameters.py" afterPath="$PROJECT_DIR$/python-tests/parameters.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sage-tests/color_the_edges.py" afterPath="$PROJECT_DIR$/sage-tests/color_the_edges.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/temp.edgeList" afterPath="$PROJECT_DIR$/temp.edgeList" />
     </list>
     <ignored path="Sage.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -32,13 +41,55 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-      <file leaf-file-name="4ct.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="4ct.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/4ct.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="434">
-              <caret line="1012" column="2" selection-start-line="1012" selection-start-column="2" selection-end-line="1012" selection-end-column="2" />
+            <state relative-caret-position="374">
+              <caret line="1881" column="102" selection-start-line="1881" selection-start-column="102" selection-end-line="1881" selection-end-column="102" />
               <folding>
-                <element signature="e#4030#4045#0" expanded="true" />
+                <element signature="e#4169#4184#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="4ct-06-10-2016-InfiniteRandomSwitchDoNotWork.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/backup/4ct-06-10-2016-InfiniteRandomSwitchDoNotWork.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="462">
+              <caret line="1642" column="123" selection-start-line="1642" selection-start-column="103" selection-end-line="1642" selection-end-column="123" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="4ct-13-10-2016-InfiniteRandomOnTheE1LoopDoNotWork.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/backup/4ct-13-10-2016-InfiniteRandomOnTheE1LoopDoNotWork.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="algo.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/algo.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-3762">
+              <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="logger_test.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/python-tests/logger_test.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="44">
+              <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
+              <folding>
+                <element signature="e#0#23#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -113,6 +164,10 @@
         <option value="$PROJECT_DIR$/python-tests/sort_text.py" />
         <option value="$PROJECT_DIR$/input_random_file.edgelist" />
         <option value="$PROJECT_DIR$/python-tests/create_a_graph_from_embedding.py" />
+        <option value="$PROJECT_DIR$/python-tests/parameters.py" />
+        <option value="$PROJECT_DIR$/sage-tests/color_the_edges.py" />
+        <option value="$PROJECT_DIR$/python-tests/logger_test.py" />
+        <option value="$PROJECT_DIR$/algo.py" />
         <option value="$PROJECT_DIR$/4ct.py" />
       </list>
     </option>
@@ -184,14 +239,6 @@
               <option name="myItemId" value="ct-sage" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; Python 3.5.1 (C:\Users\m.stefanutti\AppData\Local\Programs\Python\Python35\python.exe) &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -213,7 +260,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="python-tests" />
+              <option name="myItemId" value="backup" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -228,54 +275,20 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\Mario\Programming\ct\ct\ct-sage\python-tests" />
-      <recent name="E:\Mario\Programming\ct\ct\ct-sage\backup" />
-      <recent name="E:\Mario\Programming\Sage\PythonTests" />
-      <recent name="E:\Mario\Programming\Sage\SageTests" />
-      <recent name="E:\Mario\Programming\Sage\Backup" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Mario\Programming\ct\ct\ct-sage\backup" />
       <recent name="E:\Mario\Programming\Sage\PythonTests" />
       <recent name="E:\Mario\Programming\Sage\SageTests" />
     </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Mario\Programming\ct\ct\ct-sage\backup" />
+      <recent name="E:\Mario\Programming\ct\ct\ct-sage" />
+      <recent name="E:\Mario\Programming\ct\ct\ct-sage\python-tests" />
+      <recent name="E:\Mario\Programming\Sage\PythonTests" />
+      <recent name="E:\Mario\Programming\Sage\SageTests" />
+    </key>
   </component>
-  <component name="RunManager" selected="Python.create_a_graph_from_embedding">
-    <configuration default="false" name="multiedge_tests" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sage-tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="Sage" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sage-tests/multiedge_tests.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="random" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="Sage" />
-      <option name="SCRIPT_NAME" value="E:\Mario\Programming\ct\ct\ct-sage\python-tests\test_random.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python.logger_test">
     <configuration default="false" name="sort_text" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -323,6 +336,40 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="Sage" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-tests/create_a_graph_from_embedding.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="parameters" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Sage" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-tests/parameters.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="logger_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/python-tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="Sage" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python-tests/logger_test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -462,19 +509,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.multiedge_tests" />
-      <item index="1" class="java.lang.String" itemvalue="Python.random" />
-      <item index="2" class="java.lang.String" itemvalue="Python.sort_text" />
-      <item index="3" class="java.lang.String" itemvalue="Python.4ct" />
-      <item index="4" class="java.lang.String" itemvalue="Python.create_a_graph_from_embedding" />
+      <item index="0" class="java.lang.String" itemvalue="Python.sort_text" />
+      <item index="1" class="java.lang.String" itemvalue="Python.4ct" />
+      <item index="2" class="java.lang.String" itemvalue="Python.create_a_graph_from_embedding" />
+      <item index="3" class="java.lang.String" itemvalue="Python.parameters" />
+      <item index="4" class="java.lang.String" itemvalue="Python.logger_test" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.create_a_graph_from_embedding" />
-        <item index="1" class="java.lang.String" itemvalue="Python.sort_text" />
-        <item index="2" class="java.lang.String" itemvalue="Python.4ct" />
-        <item index="3" class="java.lang.String" itemvalue="Python.random" />
-        <item index="4" class="java.lang.String" itemvalue="Python.multiedge_tests" />
+        <item index="0" class="java.lang.String" itemvalue="Python.logger_test" />
+        <item index="1" class="java.lang.String" itemvalue="Python.parameters" />
+        <item index="2" class="java.lang.String" itemvalue="Python.create_a_graph_from_embedding" />
+        <item index="3" class="java.lang.String" itemvalue="Python.sort_text" />
+        <item index="4" class="java.lang.String" itemvalue="Python.4ct" />
       </list>
     </recent_temporary>
   </component>
@@ -498,7 +545,7 @@
     <frame x="-9" y="-9" width="1938" height="1050" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19767442" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33078602" sideWeight="0.21145834" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35321638" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
@@ -510,7 +557,7 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3995633" sideWeight="0.6567708" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2619883" sideWeight="0.7885417" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.37360594" sideWeight="0.7885417" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32943925" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -523,13 +570,13 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33078602" sideWeight="0.21145834" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3995633" sideWeight="0.6567708" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.35321638" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35321638" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.26310045" sideWeight="0.7885417" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.37360594" sideWeight="0.7885417" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25208333" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2795983" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32969433" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32943925" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -565,10 +612,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/aaa.py" />
-    <entry file="file://$PROJECT_DIR$/color_the_edges.sage" />
-    <entry file="file://$PROJECT_DIR$/test.sage.py" />
-    <entry file="file://$PROJECT_DIR$/test.sage" />
     <entry file="file://$PROJECT_DIR$/backup/4ct.06-07-2016.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -624,13 +667,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sage-tests/color_the_edges.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="8" column="25" selection-start-line="8" selection-start-column="25" selection-end-line="8" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test-sonar/4ct.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -668,21 +704,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/aaaa.txt" />
     <entry file="file://$PROJECT_DIR$/infinite_loop.edgeList" />
-    <entry file="file://$PROJECT_DIR$/input_random_file.edgelist">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/input_random_file.edgelist" />
     <entry file="file://$PROJECT_DIR$/sage.out" />
-    <entry file="file://$PROJECT_DIR$/backup/4ct-06-10-2016-InfiniteRandomSwitchDoNotWork.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/python-tests/test_check_one_edge_connected_graph.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -711,13 +734,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/really_bad_case.edgelist">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/really_bad_case.edgelist" />
     <entry file="file://$PROJECT_DIR$/sonar-project.properties">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -725,13 +742,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/f5_error.edgeList">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="242">
-          <caret line="11" column="6" selection-start-line="0" selection-start-column="0" selection-end-line="594" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/f5_error.edgeList" />
     <entry file="file://$PROJECT_DIR$/python-tests/sort_text.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="154">
@@ -755,13 +766,61 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/sage-tests/color_the_edges.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1122">
+          <caret line="52" column="62" selection-start-line="52" selection-start-column="62" selection-end-line="52" selection-end-column="62" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-tests/parameters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="6" column="73" selection-start-line="6" selection-start-column="50" selection-end-line="6" selection-end-column="73" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/python-tests/logger_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="44">
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/algo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3762">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/backup/4ct-13-10-2016-InfiniteRandomOnTheE1LoopDoNotWork.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/4ct.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="434">
-          <caret line="1012" column="2" selection-start-line="1012" selection-start-column="2" selection-end-line="1012" selection-end-column="2" />
+        <state relative-caret-position="374">
+          <caret line="1881" column="102" selection-start-line="1881" selection-start-column="102" selection-end-line="1881" selection-end-column="102" />
           <folding>
-            <element signature="e#4030#4045#0" expanded="true" />
+            <element signature="e#4169#4184#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/backup/4ct-06-10-2016-InfiniteRandomSwitchDoNotWork.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="1642" column="123" selection-start-line="1642" selection-start-column="103" selection-end-line="1642" selection-end-column="123" />
+          <folding />
         </state>
       </provider>
     </entry>
