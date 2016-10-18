@@ -1975,6 +1975,13 @@ if args.output is not None:
     the_colored_graph.graphviz_to_file_named(args.output + ".dot", edge_labels=True, vertex_labels=False)
     if logger.isEnabledFor(logging.INFO): logger.info("File saved: %s", args.output)
 
+    # Replace label with color
+    #
+    filedata = None
+    with open(args.output + ".dot", 'r') as file: filedata = file.read()
+    filedata = filedata.replace('label', 'color')
+    with open(args.output + ".dot", 'w') as file: file.write(filedata)
+
     if logger.isEnabledFor(logging.INFO): logger.info("----------------------------------------------")
     if logger.isEnabledFor(logging.INFO): logger.info("END: Save the 4 colored map in edgelist format")
     if logger.isEnabledFor(logging.INFO): logger.info("----------------------------------------------")
