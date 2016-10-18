@@ -31,13 +31,15 @@
 # - 04/Jul/2016 - Restart from scratch. The only case that I have to consider is if I remove an edge that will leave the Graph 1-edge-connected
 # - 01/Aug/2016 - I still need to complete the reconstruction of the F5 case (Since restoration of F5 is not so frequent, the program already works most of the times)
 # - 06/Oct/2016 - The new algorithm to threat F5 cases in in place. It works verifying if the color at v1 and the color at c2 are on the same Kempe loop and, if not, trying a random switch
-#
-# TODOs:
-# - TODO: Something new (bad and good at the same time) happend the 06/Oct/2016:
+# - 06/Oct/2016 - Something new (bad and good at the same time) happened
 #   - Bad: Using this method You can encounter maps for which the method loops indefinitely
 #   - Good: Now that I know, at least I won't spend more time on this aspect. The other good thing is the this case is very rare, the the program can color almost all maps
+#
+#
+# TODOs:
 # - TODO: Realize a version in which faces are made of lists of ordered vertices [1, 4, 7, 8] not edges [(1,4),(4,7),(7,8),(8,1)]. Would it be faster?
 # - TODO: Realize the reconstruction phase with the lists of the edge representation instead of using the graph. It will probably be lot faster!
+# - TODO: Read and write multiple types of file formats: dot, edgelist, etc.
 #
 # Done:
 # - Logging system
@@ -95,6 +97,7 @@ import sys
 import collections
 import pickle
 import timeit
+from datetime import datetime
 import logging.handlers
 from random import randint
 
@@ -388,6 +391,7 @@ def initialize_statistics(stats):
 
     stats['time_ELABORATION_BEGIN'] = 0
     stats['time_ELABORATION_END'] = 0
+    stats['time_ELABORATION'] = 0
 
     return
 
@@ -514,7 +518,7 @@ def print_stats():
 
     ordered_stats = collections.OrderedDict(sorted(stats.items()))
     for stat in ordered_stats:
-        if logger.isEnabledFor(logging.INFO): logger.info("Stat: %s = %s times", stat, stats[stat])
+        if logger.isEnabledFor(logging.INFO): logger.info("Stat: %s = %s", stat, stats[stat])
 
     if logger.isEnabledFor(logging.INFO): logger.info("----------------")
     if logger.isEnabledFor(logging.INFO): logger.info("END: Print stats")
@@ -953,15 +957,15 @@ if args.random is not None:
     # I cannot use the output file because it has different ordering of edges and vertices, and the execution would run differently (I experimented it on my skin)
     # The export function saves the graph using a different order for the edges (even if the graph are exactly the same graph)
     #
-    the_graph.export_to_file("temp.edgeList", format = "edgelist")
-    the_graph = Graph(networkx.read_edgelist("temp.edgeList"))
+    the_graph.export_to_file("temp.edgelist", format = "edgelist")
+    the_graph = Graph(networkx.read_edgelist("temp.edgelist"))
     the_graph.relabel()  # The dual of a triangulation will have vertices represented by lists - triangles (v1, v2, v3) instead of a single value
     the_graph.allow_loops(False)  # At the beginning and during the process I'll avoid this situation anyway
     the_graph.allow_multiple_edges(True)  # During the reduction process the graph may have multiple edges - It is normal
 
     if logger.isEnabledFor(logging.INFO): logger.info("END: Create a random planar graph of %s vertices, from the dual of a RandomTriangulation of %s vertices", the_graph.order(), number_of_vertices_for_the_random_triangulation)
 
-# Input - Load a graph stored in edgeList mode
+# Input - Load a graph stored in edgelist mode
 #
 if args.input is not None:
     if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Load the graph from the external file: %s", args.input)
@@ -975,8 +979,7 @@ if args.input is not None:
 #
 if args.planar is not None:
     if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Load the planar embedding of a graph (output of the gfaces() function): %s", args.planar)
-    with open(args.planar, 'r') as fp:
-        g_faces = pickle.load(fp)
+    with open(args.planar, 'r') as fp: g_faces = pickle.load(fp)
 
     # Create the graph from the list of faces
     #
@@ -1135,6 +1138,7 @@ if logger.isEnabledFor(logging.INFO): logger.info("----------------------")
 if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Reduction phase")
 if logger.isEnabledFor(logging.INFO): logger.info("----------------------")
 stats['time_ELABORATION_BEGIN'] = time.ctime()
+stats['time_ELABORATION'] = datetime.now()
 
 # Start the reduction process
 #
@@ -1909,6 +1913,7 @@ while is_the_end_of_the_rebuild_process is False:
         is_the_end_of_the_rebuild_process = True
 
 stats['time_ELABORATION_END'] = time.ctime()
+stats['time_ELABORATION'] = (datetime.now() - stats['time_ELABORATION']).seconds
 if logger.isEnabledFor(logging.INFO): logger.info("-------------------------")
 if logger.isEnabledFor(logging.INFO): logger.info("END: Reconstruction phase")
 if logger.isEnabledFor(logging.INFO): logger.info("-------------------------")
@@ -1959,11 +1964,15 @@ if args.output is not None:
     # Possibilities: adjlist, dot, edgelist, gexf, gml, graphml, multiline_adjlist, pajek, yaml
     # Format chosen: edgelist
     #
+    # Additional note (17/Oct/2016): I decided to save the graph also as a .dot file
+    # The problem with dot file is that you can write .dot files directly, but you cannot read them back if you don't install an additional package
+    #
     if logger.isEnabledFor(logging.INFO): logger.info("------------------------------------------------")
     if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Save the 4 colored map in edgelist format")
     if logger.isEnabledFor(logging.INFO): logger.info("------------------------------------------------")
 
-    the_colored_graph.export_to_file(args.output, format = "edgelist")
+    the_colored_graph.export_to_file(args.output + ".edgelist", format = "edgelist")
+    the_colored_graph.graphviz_to_file_named(args.output + ".dot", edge_labels=True, vertex_labels=False)
     if logger.isEnabledFor(logging.INFO): logger.info("File saved: %s", args.output)
 
     if logger.isEnabledFor(logging.INFO): logger.info("----------------------------------------------")
