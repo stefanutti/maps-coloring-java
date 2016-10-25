@@ -382,7 +382,6 @@ def initialize_statistics(stats):
     stats['CASE-F5-C1!=C2-SameKempeLoop-C1-C2'] = 0
 
     stats['RANDOM_KEMPE_SWITCHES'] = 0
-    stats['MAX_RANDOM_KEMPE_SWITCHES'] = 0
 
     stats['time_GRAPH_CREATION_BEGIN'] = 0
     stats['time_GRAPH_CREATION_END'] = 0
@@ -1144,7 +1143,7 @@ stats['time_ELABORATION'] = datetime.now()
 # Start the reduction process
 #
 is_the_end_of_the_reduction_process = False
-f2_exist = True  # It is set to true only to force the search of F2 at the beginning of the algorithm
+f2_exist = False
 i_global_counter = 0
 while is_the_end_of_the_reduction_process is False:
 
@@ -1166,25 +1165,7 @@ while is_the_end_of_the_reduction_process is False:
     # Select a face < F6
     # Since faces less then 6 always exist for any graph (Euler) AND faces are sorted by their length, I can take the first one
     #
-    # A final sort will reorder the list for the next cycle (I need to process faces with 2 or 3 edges first, to avoid bad conditions ahead)
-    #
-    # NOTE:
-    # - I tried to process F5 first but the problem is that you can risk to end up with particular cases like an F2 at the end
-    #   f_temp = next((face for face in g_faces if len(face) == 2), next((face for face in g_faces if len(face) == 5), g_faces[0]))
-    #   g_faces.remove(f_temp)
-    #   g_faces.insert(0, f_temp)
-    #
-    if f2_exist is True:
-        if len(g_faces[0]) != 2:
-            f1 = next((f for f in g_faces if len(f) == 2), next((f for f in g_faces if len(f) == 3), next((f for f in g_faces if len(f) == 4), next((f for f in g_faces if len(f) == 5), g_faces[0]))))
-        else:
-            f1 = g_faces[0]
-    else:
-        if len(g_faces[0]) != 3:
-            f1 = next((f for f in g_faces if len(f) == 3), next((f for f in g_faces if len(f) == 4), next((f for f in g_faces if len(f) == 5), g_faces[0])))
-        else:
-            f1 = g_faces[0]
-
+    f1 = g_faces[0]
     len_of_the_face_to_reduce = len(f1)
 
     if logger.isEnabledFor(logging.INFO): logger.info("BEGIN %s: Search the right edge to remove (case: %s)", i_global_counter, len_of_the_face_to_reduce)
@@ -1356,6 +1337,28 @@ while is_the_end_of_the_reduction_process is False:
             f2_exist = True
         else:
             f2_exist = False
+
+    # A final sort will reorder the list for the next cycle (I need to process faces with 2 or 3 edges first, to avoid bad conditions ahead)
+    #
+    # NOTE:
+    # - I tried to process F5 first but the problem is that you can risk to end up with particular cases like an F2 at the end
+    #   f_temp = next((face for face in g_faces if len(face) == 2), next((face for face in g_faces if len(face) == 5), g_faces[0]))
+    #   g_faces.remove(f_temp)
+    #   g_faces.insert(0, f_temp)
+    #
+    # if len(g_faces[0]) != 2:
+    #    g_faces.sort(key = len)
+    #
+    if f2_exist is True:
+        if len(g_faces[0]) != 2:
+            f_temp = next((f for f in g_faces if len(f) == 2), next((f for f in g_faces if len(f) == 3), next((f for f in g_faces if len(f) == 4), next((f for f in g_faces if len(f) == 5), g_faces[0]))))
+            g_faces.remove(f_temp)
+            g_faces.insert(0, f_temp)
+    else:
+        if len(g_faces[0]) != 3:
+            f_temp = next((f for f in g_faces if len(f) == 3), next((f for f in g_faces if len(f) == 4), next((f for f in g_faces if len(f) == 5), g_faces[0])))
+            g_faces.remove(f_temp)
+            g_faces.insert(0, f_temp)
 
     # Check 3-regularity (I commented this slow procedure: I let it run for a while, now I feel confident about this first part of the code)
     #
@@ -1804,7 +1807,6 @@ while is_the_end_of_the_rebuild_process is False:
         # - If not, try a random swap
         #   - First try a swap starting from an edge on the face
         #   - Then try a swap starting from a random edge of the kempe loop on v1
-        #   - Then try a swap starting from a random edge of the entire graph
         #
         end_of_f5_restore = False
         i_attempt = 0
@@ -1823,10 +1825,7 @@ while is_the_end_of_the_rebuild_process is False:
             if c1 == c2:
 
                 # The four edges are: c1, c3, c4, c2==c1
-                #
-                # NOTE:
-                # - Next comment was not true:
-                #   - In case e1 and e2 are not on the same Kempe loop (c1, c3) or (c2, c4), the switch of the top colors (c3, c4) solves (I hope) the situation
+                # In case e1 and e2 are not on the same Kempe loop (c1, c3) or (c2, c4), the switch of the top colors (c3, c4) solves (I hope) the situation
                 #
                 if are_edges_on_the_same_kempe_cycle(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), (vertex_to_join_near_v2_not_on_the_face, vertex_to_join_near_v2_on_the_face), c1, c3):
 
@@ -1837,15 +1836,10 @@ while is_the_end_of_the_rebuild_process is False:
                     apply_half_kempe_loop_color_switching(the_colored_graph, ariadne_step, c1, c1, c1, c3)
                     end_of_f5_restore = True
 
-                    # Save the max
-                    #
-                    stats['MAX_RANDOM_KEMPE_SWITCHES'] = max(i_attempt, stats['MAX_RANDOM_KEMPE_SWITCHES'])
-
                     # Update stats
                     #
                     stats['CASE-F5-C1==C2-SameKempeLoop-C1-C3'] += 1
                     if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C3")
-
                 elif are_edges_on_the_same_kempe_cycle(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), (vertex_to_join_near_v2_not_on_the_face, vertex_to_join_near_v2_on_the_face), c1, c4):
 
                     if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
@@ -1855,20 +1849,13 @@ while is_the_end_of_the_rebuild_process is False:
                     apply_half_kempe_loop_color_switching(the_colored_graph, ariadne_step, c1, c1, c1, c4)
                     end_of_f5_restore = True
 
-                    # Save the max
-                    #
-                    stats['MAX_RANDOM_KEMPE_SWITCHES'] = max(i_attempt, stats['MAX_RANDOM_KEMPE_SWITCHES'])
-
                     # Update stats
                     #
                     stats['CASE-F5-C1==C2-SameKempeLoop-C1-C4'] += 1
                     if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
-
             else:
 
-                # NOTE:
-                # - Next comment was true, but not useful:
-                #   - In case e1 and e2 are not on the same Kempe loop (c1, c2), the swap of c2, c1 at e2 will give the the first case
+                # In case e1 and e2 are not on the same Kempe loop (c1, c2), the swap of c2, c1 at e2 will give the the first case
                 #
                 if are_edges_on_the_same_kempe_cycle(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), (vertex_to_join_near_v2_not_on_the_face, vertex_to_join_near_v2_on_the_face), c1, c2):
 
@@ -1878,10 +1865,6 @@ while is_the_end_of_the_rebuild_process is False:
                     #
                     apply_half_kempe_loop_color_switching(the_colored_graph, ariadne_step, c1, c2, c1, c2)
                     end_of_f5_restore = True
-
-                    # Save the max
-                    #
-                    stats['MAX_RANDOM_KEMPE_SWITCHES'] = max(i_attempt, stats['MAX_RANDOM_KEMPE_SWITCHES'])
 
                     # Update stats
                     #
@@ -1896,7 +1879,6 @@ while is_the_end_of_the_rebuild_process is False:
                 # Attempts to change (swap) something in the graph
                 #
                 stats['RANDOM_KEMPE_SWITCHES'] += 1
-                i_attempt += 1
 
                 random_other_color_number = randint(0, 1)
                 random_edge_to_fix_the_impasse = the_colored_graph.random_edge(labels = False)
