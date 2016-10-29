@@ -105,9 +105,7 @@ import networkx
 import time
 
 from sage.all import *
-
 from sage.graphs.graph_coloring import edge_coloring
-
 
 # This solves this issue: http://ask.sagemath.org/question/33727/logging-failing-after-a-while/
 #
@@ -198,7 +196,7 @@ def check_graph_at_beginning(graph):
         logger.error("Error: The graph is not 3-regular")
         exit(-1)
     else:
-        if logger.isEnabledFor(logging.INFO): logger.info("OK. The graph is 3-regular")
+        logger.info("OK. The graph is 3-regular")
 
     # Check loops
     #
@@ -206,7 +204,7 @@ def check_graph_at_beginning(graph):
         logger.error("ERROR: It seems that loops are difficult to handle during reduction and recoloring, so I'll start without them and avoid their creation during the reduction process")
         exit(-1)
     else:
-        if logger.isEnabledFor(logging.INFO): logger.info("OK. The graph does not have loops. Consider that this program will avoid their creation during the reduction process")
+        logger.info("OK. The graph does not have loops. Consider that this program will avoid their creation during the reduction process")
 
     # Check multiple edges
     #
@@ -214,7 +212,7 @@ def check_graph_at_beginning(graph):
         logger.error("ERROR: The graph has multiple edges. At the beginning multiple edges are not permitted")
         exit(-1)
     else:
-        if logger.isEnabledFor(logging.INFO): logger.info("OK. The graph does not have multiple edges. Consider that this program will also handle multiple edges during the reduction and reconstruction process")
+        logger.info("OK. The graph does not have multiple edges. Consider that this program will also handle multiple edges during the reduction and reconstruction process")
 
     # Check if the graph is planar
     #
@@ -222,11 +220,11 @@ def check_graph_at_beginning(graph):
         logger.error("ERROR: The graph is not planar")
         exit(-1)
     else:
-        if logger.isEnabledFor(logging.INFO): logger.info("OK. The graph is planar")
+        logger.info("OK. The graph is planar")
 
     # Additional info
     #
-    if logger.isEnabledFor(logging.INFO): logger.info("The graph has %s vertices and %s edges", graph.order(), graph.size())
+    logger.info("The graph has %s vertices and %s edges", graph.order(), graph.size())
 
     return
 
@@ -237,7 +235,7 @@ def check_graph_at_beginning(graph):
 def print_graph(graph):
     for vertex in graph.vertex_iterator():
         edges = graph.edges_incident(vertex)
-        if logger.isEnabledFor(logging.INFO): logger.info("vertex: %s, edges: %s, is well colored: %s", vertex, edges, are_incident_edges_well_colored(graph, vertex))
+        logger.info("vertex: %s, edges: %s, is well colored: %s", vertex, edges, are_incident_edges_well_colored(graph, vertex))
 
     return
 
@@ -513,17 +511,17 @@ def apply_half_kempe_loop_color_switching(graph, ariadne_step, color_at_v1, colo
 # Print stats
 #############
 def print_stats():
-    if logger.isEnabledFor(logging.INFO): logger.info("------------------")
-    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Print stats")
-    if logger.isEnabledFor(logging.INFO): logger.info("------------------")
+    logger.info("------------------")
+    logger.info("BEGIN: Print stats")
+    logger.info("------------------")
 
     ordered_stats = collections.OrderedDict(sorted(stats.items()))
     for stat in ordered_stats:
-        if logger.isEnabledFor(logging.INFO): logger.info("Stat: %s = %s", stat, stats[stat])
+        logger.info("Stat: %s = %s", stat, stats[stat])
 
-    if logger.isEnabledFor(logging.INFO): logger.info("----------------")
-    if logger.isEnabledFor(logging.INFO): logger.info("END: Print stats")
-    if logger.isEnabledFor(logging.INFO): logger.info("----------------")
+    logger.info("----------------")
+    logger.info("END: Print stats")
+    logger.info("----------------")
 
 
 #######################
@@ -800,7 +798,7 @@ def check_regularity(faces):
 ###################
 def log_faces(faces):
     for face in faces:
-        if logger.isEnabledFor(logging.INFO): logger.info("Face: %s", face)
+        logger.info("Face: %s", face)
 
     return
 
@@ -810,6 +808,40 @@ def log_faces(faces):
 ######################
 def get_the_other_colors(colors):
     return [x for x in ["red", "green", "blue"] if x not in colors]
+
+
+##############
+# Export graph
+##############
+def export_graph(graph_to_export, name_of_file_without_extension):
+
+    # Possibilities: adjlist, dot, edgelist, gexf, gml, graphml, multiline_adjlist, pajek, yaml
+    # Format chosen: edgelist
+    #
+    # Additional note (17/Oct/2016): I decided to save the graph also as a .dot file
+    # The problem with dot file is that you can write .dot files directly, but you cannot read them back if you don't install an additional package
+    #
+    logger.info("------------------------------------------------")
+    logger.info("BEGIN: Save the 4 colored map in edgelist format")
+    logger.info("------------------------------------------------")
+    graph_to_export.export_to_file(name_of_file_without_extension + ".edgelist", format = "edgelist")
+    graph_to_export.graphviz_to_file_named(name_of_file_without_extension + ".dot", edge_labels = True, vertex_labels = False)
+    logger.info("File saved: %s", name_of_file_without_extension)
+
+    # Replace label with color
+    #
+    filedata = None
+    with open(name_of_file_without_extension + ".dot", 'r') as file:
+        filedata = file.read()
+    filedata = filedata.replace('label', 'color')
+    with open(name_of_file_without_extension + ".dot", 'w') as file:
+        file.write(filedata)
+
+    logger.info("----------------------------------------------")
+    logger.info("END: Save the 4 colored map in edgelist format")
+    logger.info("----------------------------------------------")
+
+    return
 
 
 #######
@@ -912,9 +944,9 @@ initialize_statistics(stats)
 #
 ariadne_string = []
 
-if logger.isEnabledFor(logging.INFO): logger.info("--------------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Create the graph to color")
-if logger.isEnabledFor(logging.INFO): logger.info("--------------------------------")
+logger.info("--------------------------------")
+logger.info("BEGIN: Create the graph to color")
+logger.info("--------------------------------")
 stats['time_GRAPH_CREATION_BEGIN'] = time.ctime()
 
 # 1) Handmade
@@ -945,7 +977,7 @@ stats['time_GRAPH_CREATION_BEGIN'] = time.ctime()
 # Random - Dual of a triangulation
 #
 if args.random is not None:
-    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Create a random planar graph from the dual of a RandomTriangulation (Sage function) of %s vertices. It may take very long time depending on the number of vertices", args.random)
+    logger.info("BEGIN: Create a random planar graph from the dual of a RandomTriangulation (Sage function) of %s vertices. It may take very long time depending on the number of vertices", args.random)
     number_of_vertices_for_the_random_triangulation = args.random
     tmp_g = graphs.RandomTriangulation(number_of_vertices_for_the_random_triangulation)  # Random triangulation on the surface of a sphere
     void = tmp_g.is_planar(set_embedding = True, set_pos = True)  # Cannot calculate the dual if the graph has not been embedded
@@ -964,22 +996,22 @@ if args.random is not None:
     the_graph.allow_loops(False)  # At the beginning and during the process I'll avoid this situation anyway
     the_graph.allow_multiple_edges(True)  # During the reduction process the graph may have multiple edges - It is normal
 
-    if logger.isEnabledFor(logging.INFO): logger.info("END: Create a random planar graph of %s vertices, from the dual of a RandomTriangulation of %s vertices", the_graph.order(), number_of_vertices_for_the_random_triangulation)
+    logger.info("END: Create a random planar graph of %s vertices, from the dual of a RandomTriangulation of %s vertices", the_graph.order(), number_of_vertices_for_the_random_triangulation)
 
 # Input - Load a graph stored in edgelist mode
 #
 if args.input is not None:
-    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Load the graph from the external file: %s", args.input)
+    logger.info("BEGIN: Load the graph from the external file: %s", args.input)
     the_graph = Graph(networkx.read_edgelist(args.input))
     the_graph.relabel()  # I need to relabel it
     the_graph.allow_loops(False)  # At the beginning and during the process I'll avoid this situation anyway
     the_graph.allow_multiple_edges(True)  # During the reduction process the graph may have multiple edges - It is normal
-    if logger.isEnabledFor(logging.INFO): logger.info("END: Load the graph from the external file: %s", args.input)
+    logger.info("END: Load the graph from the external file: %s", args.input)
 
 # Planar - Load a planar embedding of the graph
 #
 if args.planar is not None:
-    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Load the planar embedding of a graph (output of the gfaces() function): %s", args.planar)
+    logger.info("BEGIN: Load the planar embedding of a graph (output of the gfaces() function): %s", args.planar)
     with open(args.planar, 'r') as fp: g_faces = pickle.load(fp)
 
     # Create the graph from the list of faces
@@ -994,13 +1026,13 @@ if args.planar is not None:
     for edge_to_add in filtered_egdes:
         the_graph.add_edge(edge_to_add)
 
-    if logger.isEnabledFor(logging.INFO): logger.info("END: Load the planar embedding of a graph (output of the gfaces() function): %s", args.planar)
+    logger.info("END: Load the planar embedding of a graph (output of the gfaces() function): %s", args.planar)
 
 stats['time_GRAPH_CREATION_END'] = time.ctime()
-if logger.isEnabledFor(logging.INFO): logger.info("------------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("END: Create the graph to color")
-if logger.isEnabledFor(logging.INFO): logger.info("------------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("")
+logger.info("------------------------------")
+logger.info("END: Create the graph to color")
+logger.info("------------------------------")
+logger.info("")
 
 #######
 #######
@@ -1008,27 +1040,27 @@ if logger.isEnabledFor(logging.INFO): logger.info("")
 #######
 #######
 
-if logger.isEnabledFor(logging.INFO): logger.info("------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Graph information")
-if logger.isEnabledFor(logging.INFO): logger.info("------------------------")
+logger.info("------------------------")
+logger.info("BEGIN: Graph information")
+logger.info("------------------------")
 
 check_graph_at_beginning(the_graph)
 
 # Compute the embedding only if it was non loaded withe the -p (planar) parameter
 #
 if args.planar is None:
-    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Embed the graph into the plane (Sage function is_planar(set_embedding = True)). It may take very long time depending on the number of vertices")
+    logger.info("BEGIN: Embed the graph into the plane (Sage function is_planar(set_embedding = True)). It may take very long time depending on the number of vertices")
     stats['time_PLANAR_EMBEDDING_BEGIN'] = time.ctime()
     void = the_graph.is_planar(set_embedding = True, set_pos = True)
     stats['time_PLANAR_EMBEDDING_END'] = time.ctime()
-    if logger.isEnabledFor(logging.INFO): logger.info("END: Embed the graph into the plane (is_planar(set_embedding = True)")
+    logger.info("END: Embed the graph into the plane (is_planar(set_embedding = True)")
 
 # Using sage built-in functions to color the map, may take a loooooooot of time :-)
 #
-# if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Coloring")
+# logger.info("BEGIN: Coloring")
 # the_graph.allow_multiple_edges(False)
 # edge_coloring(the_graph)
-# if logger.isEnabledFor(logging.INFO): logger.info("END: Coloring")
+# logger.info("END: Coloring")
 # Tests starting from triangulations with 100 vertices: 7, 73, 54, 65, 216, 142, 15, 14, 21, 73, 24, 15, 32, 72, 232 seconds
 #
 
@@ -1048,6 +1080,7 @@ if args.planar is None:
     # Save the face representation for later executions (if needed)
     #
     with open("input_planar_g_faces.serialized", 'wb') as fp: pickle.dump(g_faces, fp)
+    with open("input_planar_g_faces.embedding_list", 'wb') as fp: fp.writelines(str(line) + '\n' for line in g_faces)
 
 # Override creation (mainly to debug previously elaborated maps)
 #
@@ -1091,10 +1124,10 @@ if args.planar is None:
 #
 log_faces(g_faces)
 
-if logger.isEnabledFor(logging.INFO): logger.info("----------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("END: Graph information")
-if logger.isEnabledFor(logging.INFO): logger.info("----------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("")
+logger.info("----------------------")
+logger.info("END: Graph information")
+logger.info("----------------------")
+logger.info("")
 
 #######
 #######
@@ -1135,9 +1168,9 @@ if logger.isEnabledFor(logging.INFO): logger.info("")
 #######
 #######
 
-if logger.isEnabledFor(logging.INFO): logger.info("----------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Reduction phase")
-if logger.isEnabledFor(logging.INFO): logger.info("----------------------")
+logger.info("----------------------")
+logger.info("BEGIN: Reduction phase")
+logger.info("----------------------")
 stats['time_ELABORATION_BEGIN'] = time.ctime()
 stats['time_ELABORATION'] = datetime.now()
 
@@ -1148,7 +1181,7 @@ f2_exist = True  # It is set to true only to force the search of F2 at the begin
 i_global_counter = 0
 while is_the_end_of_the_reduction_process is False:
 
-    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN %s: Main loop", i_global_counter)
+    logger.info("BEGIN %s: Main loop", i_global_counter)
 
     # Deep debug: Log all faces
     #
@@ -1187,7 +1220,7 @@ while is_the_end_of_the_reduction_process is False:
 
     len_of_the_face_to_reduce = len(f1)
 
-    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN %s: Search the right edge to remove (case: %s)", i_global_counter, len_of_the_face_to_reduce)
+    logger.info("BEGIN %s: Search the right edge to remove (case: %s)", i_global_counter, len_of_the_face_to_reduce)
 
     # Select an edge, that if removed doesn't have to leave the graph as 1-edge-connected
     #
@@ -1241,17 +1274,17 @@ while is_the_end_of_the_reduction_process is False:
     #
     if is_the_edge_to_remove_found is False:
         logger.error("Unexpected condition (a suitable edge has not been found). Mario you'd better go back to paper")
-        if logger.isEnabledFor(logging.INFO): logger.info("For now I considered only the first face < F6. I may search the right edge in other faces < F6")
-        if logger.isEnabledFor(logging.INFO): logger.info("Should be easy to prove that among all faces < F6, an edge exist that if removed does not make the graph 1-edge-connected")
+        logger.info("For now I considered only the first face < F6. I may search the right edge in other faces < F6")
+        logger.info("Should be easy to prove that among all faces < F6, an edge exist that if removed does not make the graph 1-edge-connected")
         exit(-1)
 
-    if logger.isEnabledFor(logging.INFO): logger.info("END %s: Search the right edge to remove. Found: %s (case: %s)", i_global_counter, edge_to_remove, len_of_the_face_to_reduce)
+    logger.info("END %s: Search the right edge to remove. Found: %s (case: %s)", i_global_counter, edge_to_remove, len_of_the_face_to_reduce)
 
     # Remove the edge of an F2 (multiple edge)
     #
     if len_of_the_face_to_reduce == 2:
 
-        if logger.isEnabledFor(logging.INFO): logger.info("BEGIN %s: Remove a multiple edge (case: %s)", i_global_counter, len_of_the_face_to_reduce)
+        logger.info("BEGIN %s: Remove a multiple edge (case: %s)", i_global_counter, len_of_the_face_to_reduce)
 
         # Get the two vertices to join
         # It may also happen that at the end of the process, I'll get a loop: From ---CO to ---O
@@ -1285,11 +1318,11 @@ while is_the_end_of_the_reduction_process is False:
         #
         ariadne_step = [2, v1, v2, vertex_to_join_near_v1, vertex_to_join_near_v2]
         ariadne_string.append(ariadne_step)
-        if logger.isEnabledFor(logging.INFO): logger.info("ariadne_step: %s", ariadne_step)
+        logger.info("ariadne_step: %s", ariadne_step)
 
         # Do one thing at a time and return at the beginning of the main loop
         #
-        if logger.isEnabledFor(logging.INFO): logger.info("END %s: Remove a multiple edge (case: %s)", i_global_counter, len_of_the_face_to_reduce)
+        logger.info("END %s: Remove a multiple edge (case: %s)", i_global_counter, len_of_the_face_to_reduce)
 
         # f2_exist?
         #
@@ -1302,7 +1335,7 @@ while is_the_end_of_the_reduction_process is False:
     #
     else:
 
-        if logger.isEnabledFor(logging.INFO): logger.info("BEGIN %s: Remove an F3, F4 or F5 (case: %s)", i_global_counter, len_of_the_face_to_reduce)
+        logger.info("BEGIN %s: Remove an F3, F4 or F5 (case: %s)", i_global_counter, len_of_the_face_to_reduce)
 
         # Get the vertices at the ends of the edge to remove
         # And find the other four neighbors :>.---.<: (If the --- is the removed edge, the four external dots represent the vertices I'm looking for)
@@ -1344,11 +1377,11 @@ while is_the_end_of_the_reduction_process is False:
         #
         ariadne_step = [len_of_the_face_to_reduce, v1, v2, vertex_to_join_near_v1_on_the_face, vertex_to_join_near_v2_on_the_face, vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v2_not_on_the_face]
         ariadne_string.append(ariadne_step)
-        if logger.isEnabledFor(logging.INFO): logger.info("ariadne_step: %s", ariadne_step)
+        logger.info("ariadne_step: %s", ariadne_step)
 
         # Do one thing at a time and return at the beginning of the main loop
         #
-        if logger.isEnabledFor(logging.INFO): logger.info("END %s: Remove an F3, F4 or F5 (case: %s)", i_global_counter, len_of_the_face_to_reduce)
+        logger.info("END %s: Remove an F3, F4 or F5 (case: %s)", i_global_counter, len_of_the_face_to_reduce)
 
         # f2_exist?
         #
@@ -1379,32 +1412,32 @@ while is_the_end_of_the_reduction_process is False:
 
     # END of main loop (-1 because the counte has been just incremented)
     #
-    if logger.isEnabledFor(logging.INFO): logger.info("END %s: Main loop", i_global_counter)
-    if logger.isEnabledFor(logging.INFO): logger.info("")
+    logger.info("END %s: Main loop", i_global_counter)
+    logger.info("")
 
     # Something has been done! Plot it
     #
     if is_the_end_of_the_reduction_process is False:
         i_global_counter += 1
 
-if logger.isEnabledFor(logging.INFO): logger.info("--------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("END: Reduction phase")
-if logger.isEnabledFor(logging.INFO): logger.info("--------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("")
+logger.info("--------------------")
+logger.info("END: Reduction phase")
+logger.info("--------------------")
+logger.info("")
 
-if logger.isEnabledFor(logging.INFO): logger.info("-----------------------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Print Ariadne's string information")
-if logger.isEnabledFor(logging.INFO): logger.info("-----------------------------------------")
+logger.info("-----------------------------------------")
+logger.info("BEGIN: Print Ariadne's string information")
+logger.info("-----------------------------------------")
 
 # Log Ariadne's string information
 #
 for step in ariadne_string:
-    if logger.isEnabledFor(logging.INFO): logger.info("ariadne_string: %s", step)
+    logger.info("ariadne_string: %s", step)
 
-if logger.isEnabledFor(logging.INFO): logger.info("---------------------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("END: Print Ariadne's string information")
-if logger.isEnabledFor(logging.INFO): logger.info("---------------------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("")
+logger.info("---------------------------------------")
+logger.info("END: Print Ariadne's string information")
+logger.info("---------------------------------------")
+logger.info("")
 
 #######
 #######
@@ -1445,9 +1478,9 @@ if logger.isEnabledFor(logging.INFO): logger.info("")
 #######
 #######
 
-if logger.isEnabledFor(logging.INFO): logger.info("---------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Reconstruction phase")
-if logger.isEnabledFor(logging.INFO): logger.info("---------------------------")
+logger.info("---------------------------")
+logger.info("BEGIN: Reconstruction phase")
+logger.info("---------------------------")
 
 # At this point the graph has three faces (an island with two lands) and three edges ... easily 3-edge-colorable
 # WARNING: the color of the edges of a multiedge graph cannot be changed, so it is necessary to delete and re-insert the edge
@@ -1462,7 +1495,7 @@ all_vertices = [element for face in g_faces for edge in face for element in edge
 all_vertices = sorted(set(all_vertices))
 
 for v in all_vertices:
-    if logger.isEnabledFor(logging.INFO): logger.info("v: %s", v)
+    logger.info("v: %s", v)
 
 if len(all_vertices) != 4:
     logger.error("Unexpected condition (vertices left are not 4). Mario you'd better go back to paper")
@@ -1494,7 +1527,7 @@ while is_the_end_of_the_rebuild_process is False:
     # Get the string to walk back home
     #
     ariadne_step = ariadne_string.pop()
-    if logger.isEnabledFor(logging.INFO): logger.info("ariadne_step: %s", ariadne_step)
+    logger.info("ariadne_step: %s", ariadne_step)
 
     # F2 = [2, v1, v2, vertex_to_join_near_v1, vertex_to_join_near_v2]
     #
@@ -1505,7 +1538,7 @@ while is_the_end_of_the_rebuild_process is False:
         #
         stats['CASE-F2-01'] += 1
 
-        if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: restore an F2 (multiple edge)")
+        logger.info("BEGIN: restore an F2 (multiple edge)")
         if logger.isEnabledFor(logging.DEBUG): logger.debug("Edges: %s, is_regular: %s", list(the_colored_graph.edge_iterator(labels = True)), the_colored_graph.is_regular(3))
 
         v1 = ariadne_step[1]
@@ -1534,14 +1567,14 @@ while is_the_end_of_the_rebuild_process is False:
         the_colored_graph.add_edge(v1, v2, new_multiedge_color_one)
         the_colored_graph.add_edge(v2, v1, new_multiedge_color_two)
 
-        if logger.isEnabledFor(logging.INFO): logger.info("previous_edge_color: %s, new_multiedge_color_one: %s, new_multiedge_color_two: %s", previous_edge_color, new_multiedge_color_one, new_multiedge_color_two)
+        logger.info("previous_edge_color: %s, new_multiedge_color_one: %s, new_multiedge_color_two: %s", previous_edge_color, new_multiedge_color_one, new_multiedge_color_two)
 
         # if logger.isEnabledFor(logging.DEBUG): logger.debug("Edges: %s, is_regular: %s", list(the_colored_graph.edge_iterator(labels = True)), the_colored_graph.is_regular(3))
         # if is_well_colored(the_colored_graph) is False:
         #     logger.error("Unexpected condition (Not well colored). Mario you'd better go back to paper")
         #     exit(-1)
 
-        if logger.isEnabledFor(logging.INFO): logger.info("END: restore an F2 (multiple edge)")
+        logger.info("END: restore an F2 (multiple edge)")
 
     elif ariadne_step[0] == 3:
 
@@ -1550,7 +1583,7 @@ while is_the_end_of_the_rebuild_process is False:
         # Update stats
         #
         stats['CASE-F3-01'] += 1
-        if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: restore an F3")
+        logger.info("BEGIN: restore an F3")
         if logger.isEnabledFor(logging.DEBUG): logger.debug("Edges: %s, is_regular: %s", list(the_colored_graph.edge_iterator(labels = True)), the_colored_graph.is_regular(3))
 
         v1 = ariadne_step[1]
@@ -1611,14 +1644,14 @@ while is_the_end_of_the_rebuild_process is False:
         #     logger.error("Unexpected condition (Not well colored). Mario you'd better go back to paper")
         #     exit(-1)
 
-        if logger.isEnabledFor(logging.INFO): logger.info("END: restore an F3")
+        logger.info("END: restore an F3")
 
     elif ariadne_step[0] == 4:
 
         # CASE: F4
         # [x, v1, v2, vertex_to_join_near_v1_on_the_face, vertex_to_join_near_v2_on_the_face, vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v2_not_on_the_face]
         #
-        if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: restore an F4")
+        logger.info("BEGIN: restore an F4")
         if logger.isEnabledFor(logging.DEBUG): logger.debug("Edges: %s, is_regular: %s", list(the_colored_graph.edge_iterator(labels = True)), the_colored_graph.is_regular(3))
 
         v1 = ariadne_step[1]
@@ -1646,7 +1679,7 @@ while is_the_end_of_the_rebuild_process is False:
             # Update stats
             #
             stats['CASE-F4-01'] += 1
-            if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: restore an F4 - Same color at v1 and v2")
+            logger.info("BEGIN: restore an F4 - Same color at v1 and v2")
             if logger.isEnabledFor(logging.DEBUG): logger.debug("Edges: %s, is_regular: %s", list(the_colored_graph.edge_iterator(labels = True)), the_colored_graph.is_regular(3))
 
             # CASE: F4 SUBCASE: Same color at v1 and v2
@@ -1681,7 +1714,7 @@ while is_the_end_of_the_rebuild_process is False:
             #     logger.error("Unexpected condition (Not well colored). Mario you'd better go back to paper")
             #     exit(-1)
 
-            if logger.isEnabledFor(logging.INFO): logger.info("END: restore an F4 - Same color at v1 and v2")
+            logger.info("END: restore an F4 - Same color at v1 and v2")
         else:
 
             # In this case I have to check if the edges at v1 and v2 are on the same Kempe cycle
@@ -1692,7 +1725,7 @@ while is_the_end_of_the_rebuild_process is False:
                 #
                 stats['CASE-F4-02'] += 1
 
-                if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: restore an F4 - The two edges are on the same Kempe cycle")
+                logger.info("BEGIN: restore an F4 - The two edges are on the same Kempe cycle")
                 if logger.isEnabledFor(logging.DEBUG): logger.debug("Edges: %s, is_regular: %s", list(the_colored_graph.edge_iterator(labels = True)), the_colored_graph.is_regular(3))
 
                 # CASE: F4, SUBCASE: The two edges are on the same Kempe cycle
@@ -1720,7 +1753,7 @@ while is_the_end_of_the_rebuild_process is False:
                 #     logger.error("Unexpected condition (Not well colored). Mario you'd better go back to paper")
                 #     exit(-1)
 
-                if logger.isEnabledFor(logging.INFO): logger.info("END: restore an F4 - The two edges are on the same Kempe cycle")
+                logger.info("END: restore an F4 - The two edges are on the same Kempe cycle")
 
             else:
 
@@ -1728,7 +1761,7 @@ while is_the_end_of_the_rebuild_process is False:
                 #
                 stats['CASE-F4-03'] += 1
 
-                if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: restore an F4 - The two edges are NOT on the same Kempe cycle")
+                logger.info("BEGIN: restore an F4 - The two edges are NOT on the same Kempe cycle")
                 if logger.isEnabledFor(logging.DEBUG): logger.debug("Edges: %s, is_regular: %s", list(the_colored_graph.edge_iterator(labels = True)), the_colored_graph.is_regular(3))
 
                 # CASE: F4 SUBCASE: Worst case: The two edges are NOT on the same Kempe cycle
@@ -1768,16 +1801,16 @@ while is_the_end_of_the_rebuild_process is False:
                 #     logger.error("Unexpected condition (Not well colored). Mario you'd better go back to paper")
                 #     exit(-1)
 
-                if logger.isEnabledFor(logging.INFO): logger.info("END: restore an F4 - The two edges are NOT on the same Kempe cycle")
+                logger.info("END: restore an F4 - The two edges are NOT on the same Kempe cycle")
 
-        if logger.isEnabledFor(logging.INFO): logger.info("END: restore an F4")
+        logger.info("END: restore an F4")
 
     elif ariadne_step[0] == 5:
 
         # CASE: F5
         # [x, v1, v2, vertex_to_join_near_v1_on_the_face, vertex_to_join_near_v2_on_the_face, vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v2_not_on_the_face]
         #
-        if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: restore an F5")
+        logger.info("BEGIN: restore an F5")
 
         v1 = ariadne_step[1]
         v2 = ariadne_step[2]
@@ -1797,6 +1830,12 @@ while is_the_end_of_the_rebuild_process is False:
         tmp_v2 = [item for sublist in edges_at_vertices_near_v2_on_the_face for item in sublist]
         tmp_v2.remove(vertex_to_join_near_v2_not_on_the_face)
         vertex_in_the_top_middle = list(set.intersection(set(tmp_v1), set(tmp_v2)))[0]
+
+        # Useful to try to verify if the number of switches may be limited
+        #
+        restore_random_edge_to_fix_the_impasse = (0, 0)
+        restore_color_one = ""
+        restore_color_two = ""
 
         # The algorithm:
         #
@@ -1830,7 +1869,7 @@ while is_the_end_of_the_rebuild_process is False:
                 #
                 if are_edges_on_the_same_kempe_cycle(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), (vertex_to_join_near_v2_not_on_the_face, vertex_to_join_near_v2_on_the_face), c1, c3):
 
-                    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: CASE-F5-C1==C2-SameKempeLoop-C1-C3")
+                    logger.info("BEGIN: CASE-F5-C1==C2-SameKempeLoop-C1-C3")
 
                     # Apply half Kempe loop color switching (c1, c3)
                     #
@@ -1844,11 +1883,11 @@ while is_the_end_of_the_rebuild_process is False:
                     # Update stats
                     #
                     stats['CASE-F5-C1==C2-SameKempeLoop-C1-C3'] += 1
-                    if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C3")
+                    logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C3")
 
                 elif are_edges_on_the_same_kempe_cycle(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), (vertex_to_join_near_v2_not_on_the_face, vertex_to_join_near_v2_on_the_face), c1, c4):
 
-                    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
+                    logger.info("BEGIN: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
 
                     # Apply half Kempe loop color switching (c2==c1, c4)
                     #
@@ -1862,7 +1901,7 @@ while is_the_end_of_the_rebuild_process is False:
                     # Update stats
                     #
                     stats['CASE-F5-C1==C2-SameKempeLoop-C1-C4'] += 1
-                    if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
+                    logger.info("END: CASE-F5-C1==C2-SameKempeLoop-C1-C4")
 
             else:
 
@@ -1872,7 +1911,7 @@ while is_the_end_of_the_rebuild_process is False:
                 #
                 if are_edges_on_the_same_kempe_cycle(the_colored_graph, (vertex_to_join_near_v1_not_on_the_face, vertex_to_join_near_v1_on_the_face), (vertex_to_join_near_v2_not_on_the_face, vertex_to_join_near_v2_on_the_face), c1, c2):
 
-                    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: CASE-F5-C1!=C2-SameKempeLoop-C1-C4")
+                    logger.info("BEGIN: CASE-F5-C1!=C2-SameKempeLoop-C1-C4")
 
                     # Apply half Kempe loop color switching (c1, c2)
                     #
@@ -1887,9 +1926,11 @@ while is_the_end_of_the_rebuild_process is False:
                     #
                     stats['CASE-F5-C1!=C2-SameKempeLoop-C1-C2'] += 1
 
-                    if logger.isEnabledFor(logging.INFO): logger.info("END: CASE-F5-C1!=C2-SameKempeLoop-C1-C2")
+                    logger.info("END: CASE-F5-C1!=C2-SameKempeLoop-C1-C2")
 
             # Try random switches around the graph for a random few times
+            #
+            # TODO: If the switch didn't solve the problem, reset the color and try another random switch. I need to verify if a single switch may fix am impasse
             #
             if end_of_f5_restore is False:
 
@@ -1898,26 +1939,41 @@ while is_the_end_of_the_rebuild_process is False:
                 stats['RANDOM_KEMPE_SWITCHES'] += 1
                 i_attempt += 1
 
+                # Useful to try to verify if the number of switches may be limited
+                #
+                if i_attempt > 1:
+                    kempe_chain_color_swap(the_colored_graph, restore_random_edge_to_fix_the_impasse, restore_color_one, restore_color_two)
+
+                    restore_random_edge_to_fix_the_impasse = (0, 0)
+                    restore_color_one = ""
+                    restore_color_two = ""
+
                 random_other_color_number = randint(0, 1)
                 random_edge_to_fix_the_impasse = the_colored_graph.random_edge(labels = False)
                 color_of_the_random_edge = get_edge_color(the_colored_graph, random_edge_to_fix_the_impasse)
                 other_color = get_the_other_colors(color_of_the_random_edge)[random_other_color_number]
                 kempe_chain_color_swap(the_colored_graph, random_edge_to_fix_the_impasse, color_of_the_random_edge, other_color)
-                if logger.isEnabledFor(logging.INFO): logger.info("random_edge: %s, Kempe color switch: (%s, %s)", random_edge_to_fix_the_impasse, color_of_the_random_edge, other_color)
+                logger.info("random_edge: %s, Kempe color switch: (%s, %s)", random_edge_to_fix_the_impasse, color_of_the_random_edge, other_color)
+
+                # Useful to try to verify if the number of switches may be limited
+                #
+                restore_random_edge_to_fix_the_impasse = random_edge_to_fix_the_impasse
+                restore_color_one = other_color
+                restore_color_two = color_of_the_random_edge
 
                 # Only for debug: which map is causing this impasse?
                 #
                 if i_attempt == 1000:
                     the_colored_graph.allow_multiple_edges(False)  # At this point there are no multiple edge
-                    the_colored_graph.export_to_file("debug_really_bad_case.edgelist", format = "edgelist")
+                    export_graph(the_colored_graph, "debug_really_bad_case")
 
         # END F5 has been restored
         #
-        if logger.isEnabledFor(logging.INFO): logger.info("END: restore an F5: %s", stats['RANDOM_KEMPE_SWITCHES'])
+        logger.info("END: restore an F5: %s", stats['RANDOM_KEMPE_SWITCHES'])
 
     # Separator
     #
-    if logger.isEnabledFor(logging.INFO): logger.info("")
+    logger.info("")
 
     # After all cases
     #
@@ -1932,10 +1988,10 @@ while is_the_end_of_the_rebuild_process is False:
 
 stats['time_ELABORATION_END'] = time.ctime()
 stats['time_ELABORATION'] = (datetime.now() - stats['time_ELABORATION']).seconds
-if logger.isEnabledFor(logging.INFO): logger.info("-------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("END: Reconstruction phase")
-if logger.isEnabledFor(logging.INFO): logger.info("-------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("")
+logger.info("-------------------------")
+logger.info("END: Reconstruction phase")
+logger.info("-------------------------")
+logger.info("")
 
 #######
 #######
@@ -1943,9 +1999,9 @@ if logger.isEnabledFor(logging.INFO): logger.info("")
 #######
 #######
 
-if logger.isEnabledFor(logging.INFO): logger.info("------------------------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Show the restored and 4 colored map")
-if logger.isEnabledFor(logging.INFO): logger.info("------------------------------------------")
+logger.info("------------------------------------------")
+logger.info("BEGIN: Show the restored and 4 colored map")
+logger.info("------------------------------------------")
 
 # Now I can restore the multiedge flag
 #
@@ -1957,52 +2013,28 @@ the_colored_graph.allow_multiple_edges(False)  # At this point there are no mult
 
 # Check if the recreated graph is isomorphic to the original
 #
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Check if isomorphic")
+logger.info("BEGIN: Check if isomorphic")
 is_isomorphic = the_graph.is_isomorphic(the_colored_graph)
-if logger.isEnabledFor(logging.INFO): logger.info("END: Check if isomorphic")
+logger.info("END: Check if isomorphic")
 
 if is_isomorphic is False:
     logger.error("Unexpected condition (recreated graph is different from the original). Mario you'd better go back to paper")
 
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: print_graph (Original)")
+logger.info("BEGIN: print_graph (Original)")
 print_graph(the_graph)
-if logger.isEnabledFor(logging.INFO): logger.info("END: print_graph (Original)")
-if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: print_graph (Colored)")
+logger.info("END: print_graph (Original)")
+logger.info("BEGIN: print_graph (Colored)")
 print_graph(the_colored_graph)
-if logger.isEnabledFor(logging.INFO): logger.info("END: print_graph (Colored)")
+logger.info("END: print_graph (Colored)")
 
-if logger.isEnabledFor(logging.INFO): logger.info("----------------------------------------")
-if logger.isEnabledFor(logging.INFO): logger.info("END: Show the restored and 4 colored map")
-if logger.isEnabledFor(logging.INFO): logger.info("----------------------------------------")
+logger.info("----------------------------------------")
+logger.info("END: Show the restored and 4 colored map")
+logger.info("----------------------------------------")
 
 # Save the output graph
 #
 if args.output is not None:
-
-    # Possibilities: adjlist, dot, edgelist, gexf, gml, graphml, multiline_adjlist, pajek, yaml
-    # Format chosen: edgelist
-    #
-    # Additional note (17/Oct/2016): I decided to save the graph also as a .dot file
-    # The problem with dot file is that you can write .dot files directly, but you cannot read them back if you don't install an additional package
-    #
-    if logger.isEnabledFor(logging.INFO): logger.info("------------------------------------------------")
-    if logger.isEnabledFor(logging.INFO): logger.info("BEGIN: Save the 4 colored map in edgelist format")
-    if logger.isEnabledFor(logging.INFO): logger.info("------------------------------------------------")
-
-    the_colored_graph.export_to_file(args.output + ".edgelist", format = "edgelist")
-    the_colored_graph.graphviz_to_file_named(args.output + ".dot", edge_labels=True, vertex_labels=False)
-    if logger.isEnabledFor(logging.INFO): logger.info("File saved: %s", args.output)
-
-    # Replace label with color
-    #
-    filedata = None
-    with open(args.output + ".dot", 'r') as file: filedata = file.read()
-    filedata = filedata.replace('label', 'color')
-    with open(args.output + ".dot", 'w') as file: file.write(filedata)
-
-    if logger.isEnabledFor(logging.INFO): logger.info("----------------------------------------------")
-    if logger.isEnabledFor(logging.INFO): logger.info("END: Save the 4 colored map in edgelist format")
-    if logger.isEnabledFor(logging.INFO): logger.info("----------------------------------------------")
+    export_graph(the_colored_graph, args.output)
 
 # Print statistics
 #
