@@ -929,9 +929,9 @@ parser = argparse.ArgumentParser(description = '4ct args')
 
 group_input = parser.add_mutually_exclusive_group(required = False)
 group_input.add_argument("-r", "--random", help = "Random graph: dual of a triangulation of N vertices", type = int, default = 100)
-group_input.add_argument("-i", "--input", help = "Load a .edgelist file (networkx)")
-group_input.add_argument("-p", "--planar", help = "Load a .serialized planar embedding of the graph G.faces() - Automatically saved at each run")
-parser.add_argument("-o", "--output", help = "Save a .edgelist file (networkx), plus a .dot file (networkx). Specify the file without extension", required = False)
+group_input.add_argument("-i", "--input", help = "Load an edgelist file (networkx): <input_planar_file>.edgeList")
+group_input.add_argument("-p", "--planar", help = "Load a planar embedding of the graph G.faces() - Automatically saved at each run: <input_planar_file>.serialized")
+parser.add_argument("-o", "--output", help = "Output edgelist filename (networkx)", required = False)
 
 args = parser.parse_args()
 
@@ -990,8 +990,8 @@ if args.random is not None:
     # I cannot use the output file because it has different ordering of edges and vertices, and the execution would run differently (I experimented it on my skin)
     # The export function saves the graph using a different order for the edges (even if the graph are exactly the same graph)
     #
-    the_graph.export_to_file("debug.temp.edgelist", format = "edgelist")
-    the_graph = Graph(networkx.read_edgelist("debug.temp.edgelist"))
+    the_graph.export_to_file("temp.edgelist", format = "edgelist")
+    the_graph = Graph(networkx.read_edgelist("temp.edgelist"))
     the_graph.relabel()  # The dual of a triangulation will have vertices represented by lists - triangles (v1, v2, v3) instead of a single value
     the_graph.allow_loops(False)  # At the beginning and during the process I'll avoid this situation anyway
     the_graph.allow_multiple_edges(True)  # During the reduction process the graph may have multiple edges - It is normal
@@ -1016,20 +1016,16 @@ if args.planar is not None:
 
     # Create the graph from the list of faces
     #
-    flattened_egdes = [edge for face in g_faces for edge in face]
-    for edge in flattened_egdes:
-        reverse_edge = (edge[1], edge[0])
-        if reverse_edge in flattened_egdes:
-            flattened_egdes.remove(reverse_edge)
+    flattened_egdes = set([edge for face in g_faces for edge in face])
+    filtered_egdes = [edge for edge in flattened_egdes if (edge[1], edge[0]) not in flattened_egdes]
 
     the_graph = Graph(sparse = True)
     the_graph.allow_loops(False)
     the_graph.allow_multiple_edges(True)
 
-    for edge_to_add in flattened_egdes:
+    for edge_to_add in filtered_egdes:
         the_graph.add_edge(edge_to_add)
 
-    print_graph(the_graph)
     logger.info("END: Load the planar embedding of a graph (output of the gfaces() function): %s", args.planar)
 
 stats['time_GRAPH_CREATION_END'] = time.ctime()
@@ -1083,7 +1079,7 @@ if args.planar is None:
 
     # Save the face representation for later executions (if needed)
     #
-    with open("debug.input_planar_g_faces.serialized", 'wb') as fp: pickle.dump(g_faces, fp)
+    with open("input_planar_g_faces.serialized", 'wb') as fp: pickle.dump(g_faces, fp)
     with open("debug.input_planar_g_faces.embedding_list", 'wb') as fp: fp.writelines(str(line) + '\n' for line in g_faces)
 
 # Override creation (mainly to debug previously elaborated maps)
@@ -1201,78 +1197,76 @@ while is_the_end_of_the_reduction_process is False:
     len_of_the_face_to_reduce = 0
     f1_plus_f2_temp = []  # It is used to speed up computation. At the beginning is used to see it the graph is_the_graph_one_edge_connected() and then reused
 
-    # Select a face < F6
-    # Since faces less then 6 always exist for any graph (Euler), I can take the first face that I find with that characteristics (<6)
+    # START XXX - NEW EDGE SELECTION METHOD
+    # [[(v1, v2), face_down size, face_up size, face_left size at v1, face_right size at v2], ...]
     #
-    # NOTE:
-    # - I tried to process F5 first but the problem is that you can risk to end up with particular cases like an F2 at the end
-    #   f1 = next((face for face in g_faces if len(face) == 5), next((face for face in g_faces if len(face) == 2), g_faces[0]))
+    # I should consider all edges of all faces (less than 5 and then 5), and for each edge I have to consider all fa
+    # list(set()) removes the duplicates. Because I'm cycling on faces, edges are counted twice
     #
-    if f2_exist is True:
-        if len(g_faces[0]) != 2:
-            f1 = next((f for f in g_faces if len(f) == 2), next((f for f in g_faces if len(f) == 3), next((f for f in g_faces if len(f) == 4), next((f for f in g_faces if len(f) == 5), g_faces[0]))))
+    all_e_of_all_f_less_than_5 = list(set([edge for face in g_faces for edge in face if len(face) < 5]))
+    all_e_of_all_f_equal_to_5 = list(set([edge for face in g_faces for edge in face if len(face) is 5]))
+
+    list_of_all_possibilities = []
+    for edge in all_e_of_all_f_less_than_5:
+
+        # Note: This check is done because in case of F2 the search returns two faces
+        #
+        temp_faces = [face for face in g_faces if edge in face]
+        if len(temp_faces) is 2:
+            if len(temp_faces[0]) is 2:
+                temp_face_down = temp_faces[0]
+                temp_face_up = temp_faces[1]
+            else:
+                temp_face_down = temp_faces[1]
+                temp_face_up = temp_faces[0]
+            logger.info("DEBUG: temp_face_down = %s, temp_face_up = %s", temp_face_down, temp_face_up)
         else:
-            f1 = g_faces[0]
-    else:
-        if len(g_faces[0]) != 3:
-            f1 = next((f for f in g_faces if len(f) == 3), next((f for f in g_faces if len(f) == 4), next((f for f in g_faces if len(f) == 5), g_faces[0])))
-        else:
-            f1 = g_faces[0]
+            temp_face_down = temp_faces[0]
+            rotated_edge_to_remove = rotate(edge, 1)
+            temp_face_up = next(face for face in g_faces if rotated_edge_to_remove in face)
 
-    len_of_the_face_to_reduce = len(f1)
+        logger.info("DEBUG: OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO: edge[0]: %s --- edge[1]: %s", edge[0], edge[1])
 
-    logger.info("BEGIN %s: Search the right edge to remove (case: %s)", i_global_counter, len_of_the_face_to_reduce)
+        # Get the left face at edge[0] (remove temp_face_down and temp_face_up)
+        #
+        temp_three_faces_left = [face for face in g_faces for edge_inner_loop in face if edge[0] in edge_inner_loop]
+        logger.info("DEBUG XXX: temp_three_faces_left: %s", temp_three_faces_left)
+        temp_three_faces_left.remove(temp_face_down)
+        temp_three_faces_left.remove(temp_face_up)
+        temp_face_left = temp_three_faces_left[0]
 
-    # Select an edge, that if removed doesn't have to leave the graph as 1-edge-connected
-    #
+        # Get the left face at edge[1] (remove temp_face_down and temp_face_up)
+        #
+        temp_three_faces_right = [face for face in g_faces for edge_inner_loop in face if edge[1] in edge_inner_loop]
+        logger.info("DEBUG XXX: temp_three_faces_right: %s", temp_three_faces_right)
+        temp_three_faces_right.remove(temp_face_down)
+        temp_three_faces_right.remove(temp_face_up)
+        temp_face_right = temp_three_faces_right[0]
+
+        # TODO: f_left and f_right can be the same f, in the case it goes around other faces
+        #
+        if temp_face_left == temp_face_right:
+            logger.info("DEBUG XXX: temp_face_left: %s", temp_face_left)
+            logger.info("DEBUG XXX: temp_face_right: %s", temp_face_right)
+            the_graph.graphviz_to_file_named("xxxxx.dot", edge_labels=True,vertex_labels=False)
+            exit(0)
+
+        # Store this one_possibility into the list_of_all_possibilities
+        #
+        one_possibility = [edge, temp_face_down, temp_face_up, temp_face_left, temp_face_right]
+        list_of_all_possibilities.append(one_possibility)
+
+    for possibility in list_of_all_possibilities:
+        logger.info("DEBUG: edge: %s, temp_face_down: %s, temp_face_up: %s, temp_face_left: %s, temp_face_right: %s", possibility[0], len(possibility[1]), len(possibility[2]), len(possibility[3]), len(possibility[4]))
+
     is_the_edge_to_remove_found = False
-    i_edge = 0
-    f1_edges_enumeration = range(0, len(f1) - 1)
-    while is_the_edge_to_remove_found is False and i_edge < len_of_the_face_to_reduce:
+    # while is_the_edge_to_remove_found is False:
+    #    possibility = next(possibility for possibility in list_of_all_possibilities if len(possibility[3]) )
 
-        if logger.isEnabledFor(logging.DEBUG): logger.debug("BEGIN %s: test the %s edge", i_global_counter, i_edge)
+    exit(-1)
 
-        # One edge separates two faces (pay attention to multiple edges == F2)
-        # The edge to remove can be found in the list of faces as (v1, v2) or (v2, v1)
-        # TODO: Instead of getting the edges in sequence, I should use a random selector (without repetitions)
-        #
-        i_edge = randint(0, len(f1) - 1)  # When stuck it you re-execute the program it should work
-        edge_to_remove = f1[i_edge]
-        rotated_edge_to_remove = rotate(edge_to_remove, 1)
-
-        if logger.isEnabledFor(logging.DEBUG): logger.debug("len_of_the_face_to_reduce: %s", len_of_the_face_to_reduce)
-        if logger.isEnabledFor(logging.DEBUG): logger.debug("edge_to_remove: %s", edge_to_remove)
-        if logger.isEnabledFor(logging.DEBUG): logger.debug("rotated_edge_to_remove: %s", rotated_edge_to_remove)
-
-        # If F2, the rotated edge appears twice in the list of faces
-        #
-        if len_of_the_face_to_reduce == 2:
-
-            # For F2 faces, edges will appear twice in all the edges lists of all faces
-            #
-            temp_f2 = [face for face in g_faces if rotated_edge_to_remove in face]
-            temp_f2.remove(f1)
-            f2 = temp_f2[0]
-            f1_plus_f2_temp = join_faces(f1, f2, edge_to_remove)
-        else:
-            f2 = next(face for face in g_faces if rotated_edge_to_remove in face)
-            f1_plus_f2_temp = join_faces(f1, f2, edge_to_remove)
-
-        # The resulting graph is 1-edge-connected if the new face has an edge that does not divide two countries, but separates a portion of the same land
-        #
-        if is_the_graph_one_edge_connected(f1_plus_f2_temp) is True:
-
-            # Skip the next edge, this is not good
-            #
-            i_edge += 1
-        else:
-            is_the_edge_to_remove_found = True
-            if logger.isEnabledFor(logging.DEBUG): logger.debug("Edge to remove found :-) %s", edge_to_remove)
-            if logger.isEnabledFor(logging.DEBUG): logger.debug("f1: %s", f1)
-            if logger.isEnabledFor(logging.DEBUG): logger.debug("f2: %s", f2)
-            if logger.isEnabledFor(logging.DEBUG): logger.debug("f1_plus_f2_temp: %s", f1_plus_f2_temp)
-
-        if logger.isEnabledFor(logging.DEBUG): logger.debug("END %s: test the %s edge", i_global_counter, i_edge)
+    # END XXX - NEW SELECTION METHOD
+    #
 
     # Check if math is right :-)
     #
@@ -1949,7 +1943,7 @@ while is_the_end_of_the_rebuild_process is False:
 
                     # Restore previous coloring, at the beginning of the loop to fix this impasse
                     #
-                    # OMG: I commented next line but it seems that this case (sage 4ct.py -p debug.input_planar_g_faces.serialized.400.bad_one_switch_is_not_enough) loops forever!!!??? :-(
+                    # OMG: I commented next line but it seems that this case (sage 4ct.py -p input_planar_g_faces.serialized.400.bad_one_switch_is_not_enough) loops forever!!!??? :-(
                     #      ariadne_step: [5, 12, 7, 32, 6, 15, 10]
                     #
                     # kempe_chain_color_swap(the_colored_graph, restore_random_edge_to_fix_the_impasse, restore_color_one, restore_color_two)
@@ -1957,6 +1951,8 @@ while is_the_end_of_the_rebuild_process is False:
                     restore_random_edge_to_fix_the_impasse = (0, 0)
                     restore_color_one = ""
                     restore_color_two = ""
+
+                    print ("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa i u t o")
 
                 random_other_color_number = randint(0, 1)
                 random_edge_to_fix_the_impasse = the_colored_graph.random_edge(labels = False)
@@ -1975,11 +1971,9 @@ while is_the_end_of_the_rebuild_process is False:
                 #
                 if i_attempt == 1000:
                     the_colored_graph.allow_multiple_edges(False)  # At this point there are no multiple edge
-                    export_graph(the_colored_graph, "debug.really_bad_case")
-                    logger.error("ERROR: Infinite loop. Chech the debug.really_bad_case.* files")
+                    export_graph(the_colored_graph, "debug_really_bad_case")
+                    logger.error("Infinite loop. Check the debug_really_bad_case.* files.")
 
-                    # This is used as a sentinel to use the runs.bash script
-                    #
                     open("error.txt", 'a').close()
                     exit(-1)
 
