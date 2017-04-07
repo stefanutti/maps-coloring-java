@@ -53,6 +53,9 @@
 #
 ###
 
+__author__ = "Mario Stefanutti <mario.stefanutti@gmail.com>"
+__credits__ = "Mario Stefanutti <mario.stefanutti@gmail.com>, someone_who_would_like_to_help@nowhere.com"
+
 #######
 #######
 #######
@@ -915,7 +918,7 @@ VALID_COLORS = ['red', 'green', 'blue']
 # Set logging facilities: LEVEL XXX
 #
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 logging_stream_handler = logging.StreamHandler(sys.stdout)
 logging_stream_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s --- %(message)s'))
 logger.addHandler(logging_stream_handler)
@@ -1203,11 +1206,11 @@ while is_the_end_of_the_reduction_process is False:
     # I should consider all edges of all faces (less than 5 and then 5), and for each edge I have to consider all fa
     # list(set()) removes the duplicates. Because I'm cycling on faces, edges are counted twice
     #
-    all_e_of_all_f_less_than_5 = list(set([edge for face in g_faces for edge in face if len(face) < 5]))
-    all_e_of_all_f_equal_to_5 = list(set([edge for face in g_faces for edge in face if len(face) is 5]))
+    all_e_of_all_f_less_than_6 = list(set([edge for face in g_faces for edge in face if len(face) < 5]))
+    # all_e_of_all_f_equal_to_5 = list(set([edge for face in g_faces for edge in face if len(face) is 5]))
 
     list_of_all_possibilities = []
-    for edge in all_e_of_all_f_less_than_5:
+    for edge in all_e_of_all_f_less_than_6:
 
         # Note: This check is done because in case of F2 the search returns two faces
         #
@@ -1219,45 +1222,46 @@ while is_the_end_of_the_reduction_process is False:
             else:
                 temp_face_down = temp_faces[1]
                 temp_face_up = temp_faces[0]
-            logger.info("DEBUG: temp_face_down = %s, temp_face_up = %s", temp_face_down, temp_face_up)
         else:
             temp_face_down = temp_faces[0]
             rotated_edge_to_remove = rotate(edge, 1)
             temp_face_up = next(face for face in g_faces if rotated_edge_to_remove in face)
 
-        logger.info("DEBUG: OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO: edge[0]: %s --- edge[1]: %s", edge[0], edge[1])
+        logger.debug("temp_face_up: %s", temp_face_up)
+        logger.debug("temp_face_down: %s", temp_face_down)
+        logger.debug("edge[0]: %s - edge[1]: %s", edge[0], edge[1])
 
         # Get the left face at edge[0] (remove temp_face_down and temp_face_up)
         #
-        temp_three_faces_left = [face for face in g_faces for edge_inner_loop in face if edge[0] in edge_inner_loop]
-        logger.info("DEBUG XXX: temp_three_faces_left: %s", temp_three_faces_left)
+        temp_three_faces_left = [face for face in g_faces for edge_inner_loop in face if edge[0] == edge_inner_loop[1]]
+        logger.debug("temp_three_faces_left: %s", temp_three_faces_left)
         temp_three_faces_left.remove(temp_face_down)
         temp_three_faces_left.remove(temp_face_up)
         temp_face_left = temp_three_faces_left[0]
 
         # Get the left face at edge[1] (remove temp_face_down and temp_face_up)
         #
-        temp_three_faces_right = [face for face in g_faces for edge_inner_loop in face if edge[1] in edge_inner_loop]
-        logger.info("DEBUG XXX: temp_three_faces_right: %s", temp_three_faces_right)
+        temp_three_faces_right = [face for face in g_faces for edge_inner_loop in face if edge[1] == edge_inner_loop[1]]
+        logger.debug("temp_three_faces_right: %s", temp_three_faces_right)
         temp_three_faces_right.remove(temp_face_down)
         temp_three_faces_right.remove(temp_face_up)
         temp_face_right = temp_three_faces_right[0]
 
-        # TODO: f_left and f_right can be the same f, in the case it goes around other faces
+        # TODO: Is it important when f_left and f_right can be the same f, in the case it goes around other faces in the map?
         #
-        if temp_face_left == temp_face_right:
-            logger.info("DEBUG XXX: temp_face_left: %s", temp_face_left)
-            logger.info("DEBUG XXX: temp_face_right: %s", temp_face_right)
-            the_graph.graphviz_to_file_named("xxxxx.dot", edge_labels=True,vertex_labels=False)
-            exit(0)
+        logger.debug("temp_face_left: %s", temp_face_left)
+        logger.debug("temp_face_right: %s", temp_face_right)
 
         # Store this one_possibility into the list_of_all_possibilities
         #
-        one_possibility = [edge, temp_face_down, temp_face_up, temp_face_left, temp_face_right]
+        one_possibility = [edge, temp_face_down, temp_face_up, temp_face_left, temp_face_right, temp_face_left == temp_face_right]
         list_of_all_possibilities.append(one_possibility)
 
     for possibility in list_of_all_possibilities:
-        logger.info("DEBUG: edge: %s, temp_face_down: %s, temp_face_up: %s, temp_face_left: %s, temp_face_right: %s", possibility[0], len(possibility[1]), len(possibility[2]), len(possibility[3]), len(possibility[4]))
+        logger.debug("DEBUG: edge: %s, temp_face_down: %s, temp_face_up: %s, temp_face_left: %s, temp_face_right: %s, (temp_face_left ==? temp_face_right) = %s", possibility[0], len(possibility[1]), len(possibility[2]), len(possibility[3]), len(possibility[4]), possibility[5])
+        if len(possibility[1]) == 5:
+            logger.debug("------------------------------------------")
+            exit(-1)
 
     is_the_edge_to_remove_found = False
     # while is_the_edge_to_remove_found is False:
