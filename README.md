@@ -6,11 +6,7 @@ The Homepage where you can read the whole story is here: https://4coloring.wordp
 
 An example of graph colored with the Python program:
 
-<p>
-  <a href="https://4coloring.files.wordpress.com/2016/10/test-1996-vertices-2994-edges.png">
-    <img src="https://4coloring.files.wordpress.com/2016/10/test-1996-vertices-2994-edges.png?w=1024">
-  </a>
-</p>
+[![Watch the video](https://4coloring.files.wordpress.com/2011/02/shapshot-01.png)](https://www.youtube.com/watch?v=YmYGFxtj2es)
 
 And some videos of the running Python and Java programs:
 
