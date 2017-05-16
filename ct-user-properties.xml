@@ -8,6 +8,7 @@
   <version>1.0</version>
 
   <properties>
-    <tac.project.ct.home>E:\Mario\Programming\ct\ct</tac.project.ct.home>
+    <!-- Change it to the home of the ct folder if you want to compile the Java code with mvn -->
+    <tac.project.ct.home>E:\Mario\Programming\ct\maps-coloring-java\ct</tac.project.ct.home>
   </properties>
 </project>

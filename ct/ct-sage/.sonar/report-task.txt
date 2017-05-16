@@ -1,5 +1,0 @@
-projectKey=org.sonarqube:4ct
-serverUrl=http://localhost:9000
-dashboardUrl=http://localhost:9000/dashboard/index/org.sonarqube:4ct
-ceTaskId=AVbYXPYnHEaBCaKd8bsx
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AVbYXPYnHEaBCaKd8bsx
