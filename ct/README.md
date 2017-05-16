@@ -21,9 +21,9 @@ Swixml:
 * G                   - 1.0      -         - To substitute with somethine else more recent and active (jgraph?)
 * jdom                - 1.0      -         - TBV
 * jnlp                - 1.6      -         - Maybe I don't need this
-* swixml              - 2.5      -         - Da sostituire con JavaFX
-* swixml-contrib      - 2.5      -         - Da sostituire con JavaFX
-* rsyntaxtextarea     - 1.4.1    -         - Forse non serve
+* swixml              - 2.5      -         - To change into ... JavaFX? Else?
+* swixml-contrib      - 2.5      -         - To change into ... JavaFX? Else?
+* rsyntaxtextarea     - 1.4.1    -         - Maybe I don't need this
 * ui                  - 1.2      -         - TBV
 * jgrapht-core        - 0.9.1    -         - See "core" module
 * jgrapht-ext         - 0.9.1    -         - See "core" module
