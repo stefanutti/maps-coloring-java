@@ -10,6 +10,9 @@ An example of graph colored with the Python program:
   <img src="https://4coloring.files.wordpress.com/2016/10/test-1996-vertices-2994-edges.png?w=1024"><br><br>
 </div>
 
+<a href="https://4coloring.files.wordpress.com/2016/10/test-1996-vertices-2994-edges.png?w=1024">https://4coloring.files.wordpress.com/2016/10/test-1996-vertices-2994-edges.png?</a>
+
+
 And some videos of the running Python and Java programs:
 
 https://www.youtube.com/user/mariostefanutti/videos
