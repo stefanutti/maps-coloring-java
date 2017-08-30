@@ -10,7 +10,7 @@ A video of the Java program to color maps, generalized as Circular and Rectangul
 
 ## YouTube videos
 
-And some videos of the running Python and Java programs:
+And some videos of the running Java and the new Python (see the other git project for details) programs:
 - https://www.youtube.com/user/mariostefanutti/videos
 
 Bye
