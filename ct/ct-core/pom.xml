@@ -12,7 +12,15 @@
 	<packaging>jar</packaging>
 	<version>1.0</version>
 
-	<dependencies>
+    <repositories>
+        <repository>
+          <id>Tac</id>
+          <name>local</name>
+          <url>file:${project.basedir}/../ct-maven/file_repository</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
         <!-- JGRAPHT used only by Graph4CT.java -->
         <!-- dependency>
             <groupId>it.tac.org.jgrapht</groupId>

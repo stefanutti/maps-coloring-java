@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<frame name="frame" size="1400,900" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" plaf="com.sun.java.swing.plaf.windows.WindowsLookAndFeel" id="mainframe">
+<frame name="frame" size="1400,900" title="4ct" defaultCloseOperation="JFrame.EXIT_ON_CLOSE" id="mainframe">
 	<menubar>
 		<menu text="File">
 			<menuitem text="Load skin (to be implemented)" />
@@ -10,7 +10,7 @@
 
 	<tabbedpane doubleBuffered="false">
 		<panel name="Map Generator" layout="BorderLayout">
-			<panel preferredSize="550" constraints="BorderLayout.WEST" layout="BorderLayout">
+			<panel preferredSize="600" constraints="BorderLayout.WEST" layout="BorderLayout">
 				<scrollpane>
 					<panel>
 						<layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
@@ -155,7 +155,7 @@
 			</panel>
 		</panel>
 		<panel name="Graph theory" layout="borderLayout">
-			<panel preferredSize="550" constraints="BorderLayout.WEST" layout="BorderLayout">
+			<panel preferredSize="600" constraints="BorderLayout.WEST" layout="BorderLayout">
 				<scrollpane>
 					<panel>
 						<layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />

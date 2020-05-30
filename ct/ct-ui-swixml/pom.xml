@@ -11,6 +11,14 @@
     <name>ct-ui-swixml</name>
     <packaging>jar</packaging>
     <version>2.3</version>
+    
+    <repositories>
+        <repository>
+          <id>Tac</id>
+          <name>local</name>
+          <url>file:${project.basedir}/../ct-maven/file_repository</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
