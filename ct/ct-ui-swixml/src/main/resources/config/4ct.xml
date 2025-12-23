@@ -10,10 +10,10 @@
 
 	<tabbedpane doubleBuffered="false">
 		<panel name="Map Generator" layout="BorderLayout">
-			<panel preferredSize="600" constraints="BorderLayout.WEST" layout="BorderLayout">
+			<panel preferredSize="750" constraints="BorderLayout.WEST" layout="BorderLayout">
 				<scrollpane>
 					<panel>
-						<layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
+						<layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, pref:grow" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
 
 						<titledseparator constraints="1,1,3,1" />
 						<label constraints="1,3" text="slowdownMillisec" />
@@ -57,11 +57,11 @@
 						<label constraints="1,19" text="createMap" />
 						<hbox constraints="3,19,1,1">
 							<textfield text="1b+, 2b+, 9b+, 8b-, 3b-, 5b-, 7b-, 4b-, 2e-, 3e-, 5e-, 6b-, 4e-, 8e-, 7e-, 9e+, 6e+, 1e+" id="mapTextRepresentationTextField" />
+						</hbox>
+						<hbox constraints="3,21,1,1">
 							<button toolTipText="Create a map from its text representation (see logging)" text="create" enabled="true" action="createMapFromTextRepresentationAction" id="createMapFromTextRepresentationButton" />
 							<button toolTipText="Get the text representation (see logging) of the current map" text="get" enabled="true" action="getTextRepresentationOfCurrentMapAction" id="getTextRepresentationOfCurrentMapButton" />
 							<button toolTipText="Load the map from a previously saved image (with metadata)" text="load" enabled="true" action="loadMapFromAPreviouslySavedImageAction" id="loadMapFromAPreviouslySavedImageButton" />
-						</hbox>
-						<hbox constraints="3,21,1,1">
 							<button text="save maps + todo" toolTipText="Save maps and todoList" enabled="true" action="saveAllMapsAndTodoListAction" />
 							<button text="load maps" toolTipText="Load maps" enabled="true" action="loadAllMapsAction" />
 							<button text="load todo" toolTipText="Load todoList" enabled="true" action="loadAllTodoListAction" />
@@ -155,10 +155,10 @@
 			</panel>
 		</panel>
 		<panel name="Graph theory" layout="borderLayout">
-			<panel preferredSize="600" constraints="BorderLayout.WEST" layout="BorderLayout">
+			<panel preferredSize="850" constraints="BorderLayout.WEST" layout="BorderLayout">
 				<scrollpane>
 					<panel>
-						<layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, 196dlu" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
+						<layout type="FormLayout" columns="right:max(60dlu;pref), 3dlu, pref:grow" rows="10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu, 3dlu, 10dlu" />
 
 						<titledseparator constraints="1,1,3,1" />
 						<checkbox constraints="3,3" toolTipText="Fit to window" text="fitToWindow" selected="false" id="fitToWindow" />

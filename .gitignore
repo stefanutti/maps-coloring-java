@@ -1,2 +1,4 @@
 target
 *.*~
+.ct-user-properties.xml.swp
+.DS_Store
